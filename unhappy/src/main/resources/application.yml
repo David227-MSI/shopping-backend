@@ -8,7 +8,6 @@ spring:
     ansi:
       enabled: always
 
-
   # 資料庫連線資訊
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -22,3 +21,16 @@ spring:
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
       ddl-auto: validate
+
+  # SMTP郵件管理
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jfpoie13@gmail.com
+    password: tsoorupzgdgwesse
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
