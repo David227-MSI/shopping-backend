@@ -11,7 +11,7 @@ spring:
   # 資料庫連線資訊
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://127.0.0.1:9433;DatabaseName=ProjectDB;trustServerCertificate=true;
+    url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=ProjectDB;trustServerCertificate=true;
     username: sa
     password: P@ssw0rd
 
