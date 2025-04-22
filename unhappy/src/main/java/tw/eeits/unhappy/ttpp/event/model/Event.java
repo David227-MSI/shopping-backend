@@ -2,7 +2,10 @@ package tw.eeits.unhappy.ttpp.event.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,11 +22,26 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
+import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
 @Entity
 @Table(name = "event")
 @Data
 public class Event {
+
+    
+    // mapped: fk_event_prize_event
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventPrize> eventPrize = new ArrayList<>();
+    
+    // mapped: fk_event_participant_event
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventParticipant> eventParticipants = new ArrayList<>();
+    
+    // mapped: fk_event_media_event
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventMedia> eventMedia = new ArrayList<>();
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,9 +90,6 @@ public class Event {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-
-
-    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -83,4 +99,35 @@ public class Event {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    // mapped: fk_event_prize_event
+    public void addEventPrize(EventPrize prize) {
+        eventPrize.add(prize);
+        prize.setEvent(this);
+    }
+    public void removeEventPrize(EventPrize prize) {
+        eventPrize.remove(prize);
+        prize.setEvent(null);
+    }
+
+    // mapped: fk_event_participant_event
+    public void addEventParticipant(EventParticipant participant) {
+        eventParticipants.add(participant);
+        participant.setEvent(this);
+    }
+    public void removeEventParticipant(EventParticipant participant) {
+        eventParticipants.remove(participant);
+        participant.setEvent(null);
+    }
+
+    // mapped: fk_event_media_event
+    public void addEventMedia(EventMedia media) {
+        eventMedia.add(media);
+        media.setEvent(this);
+    }
+    public void removeEventMedia(EventMedia media) {
+        eventMedia.remove(media);
+        media.setEvent(null);
+    }
+
 }

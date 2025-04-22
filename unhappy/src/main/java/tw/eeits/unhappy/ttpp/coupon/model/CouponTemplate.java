@@ -2,7 +2,10 @@ package tw.eeits.unhappy.ttpp.coupon.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,11 +24,22 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.enums.DiscountType;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
 @Entity
 @Table(name = "coupon_template")
 @Data
 public class CouponTemplate {
+
+    // mapped: fk_coupon_published_coupon_template
+    @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CouponPublished> couponPublished = new ArrayList<>();
+
+    // mapped: fk_coupon_media_coupon_template
+    @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CouponMedia> couponMedia = new ArrayList<>();
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,8 +88,6 @@ public class CouponTemplate {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -94,4 +107,26 @@ public class CouponTemplate {
             return maxDiscount == null;
         }
     }
+
+
+    // mapped: fk_coupon_published_coupon_template
+    public void addCouponPublished(CouponPublished published) {
+        couponPublished.add(published);
+        published.setCouponTemplate(this);
+    }
+    public void removeCouponPublished(CouponPublished published) {
+        couponPublished.remove(published);
+        published.setCouponTemplate(null);
+    }
+
+    // mapped: fk_coupon_media_coupon_template
+    public void addCouponMedia(CouponMedia media) {
+        couponMedia.add(media);
+        media.setCouponTemplate(this);
+    }
+    public void removeCouponMedia(CouponMedia media) {
+        couponMedia.remove(media);
+        media.setCouponTemplate(null);
+    }
+
 }

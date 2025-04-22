@@ -6,6 +6,8 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -19,19 +21,32 @@ import lombok.Data;
 @Data
 public class CouponPublished {
 
+
+    // fk_coupon_published_coupon_template
+    @ManyToOne
+    @JoinColumn(name = "coupon_id", nullable = false)
+    @NotNull(message = "couponTemplate 不可為空值")
+    private CouponTemplate couponTemplate;
+
+
+
+    // fk_coupon_published_user
+    // @ManyToOne
+    // @NotNull(message = "userMember 不可為空值")
+    // @JoinColumn(name = "user_id", nullable = false)
+    // private UserMember userMember;
+    // |||                |||
+    // vvv to be replaced vvv
+    @NotNull(message = "userId 不可為空值")
+    @Column(name = "user_id", nullable = false)
+    private Integer userId; // fk
+
+
     @Id
     @NotBlank(message = "id 不可為空值")
     @Size(min = 36, max = 36, message = "id 必須為 36 字元")
     @Column(name = "id", length = 36, columnDefinition = "CHAR(36)")
     private String id = UUID.randomUUID().toString();
-
-    @NotNull(message = "Coupon ID 不可為空值")
-    @Column(name = "coupon_id", nullable = false)
-    private Integer couponId;
-
-    @NotNull(message = "User ID 不可為空值")
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
 
     @NotNull(message = "isUsed 不可為空值")
     @Column(name = "is_used", nullable = false)

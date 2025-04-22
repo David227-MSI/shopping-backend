@@ -9,11 +9,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 
 @Entity
@@ -21,13 +24,16 @@ import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 @Data
 public class EventMedia {
 
+    // fk_event_media_event
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    @NotNull(message = "event 不可為空值")
+    private Event event;
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @NotNull(message = "eventId 不可為空值")
-    @Column(name = "event_id", nullable = false)
-    private Integer eventId;
 
     @NotNull(message = "mediaData 不可為空值")
     @Column(name = "media_data", nullable = false)
@@ -46,7 +52,7 @@ public class EventMedia {
 
 
 
-    
+
     @PrePersist
     protected void prePersist() {
         if (createdAt == null) {

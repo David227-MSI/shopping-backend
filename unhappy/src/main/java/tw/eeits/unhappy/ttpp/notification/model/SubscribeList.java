@@ -21,13 +21,24 @@ import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 @Data
 public class SubscribeList {
 
+
+
+    // fk_subscribe_list_user
+    // @ManyToOne
+    // @NotNull(message = "userMember 不可為空值")
+    // @JoinColumn(name = "user_id", nullable = false)
+    // private UserMember userMember;
+    // |||                |||
+    // vvv to be replaced vvv
+    @NotNull(message = "userId 不可為空值")
+    @Column(name = "user_id", nullable = false)
+    private Integer userId; // fk
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @NotNull(message = "userId 不可為空值")
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
 
     @NotNull(message = "itemId 不可為空值")
     @Column(name = "item_id", nullable = false)
@@ -59,4 +70,6 @@ public class SubscribeList {
     protected void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    
 }

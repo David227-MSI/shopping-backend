@@ -2,7 +2,10 @@ package tw.eeits.unhappy.ttpp.event.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +13,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -27,13 +33,19 @@ import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 @Data
 public class EventPrize {
 
+    // fk_event_prize_event
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    @NotNull(message = "event 不可為空值")
+    private Event event;
+
+    // mapped: fk_event_participant_event_prize
+    @OneToMany(mappedBy = "eventPrize", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventParticipant> eventParticipants = new ArrayList<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @NotNull(message = "eventId 不可為空值")
-    @Column(name = "event_id", nullable = false)
-    private Integer eventId;
 
     @NotNull(message = "itemId 不可為空值")
     @Column(name = "item_id", nullable = false)
@@ -75,9 +87,6 @@ public class EventPrize {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-
-
-    
     @PrePersist
     protected void prePersist() {
         if (createdAt == null) {
@@ -89,4 +98,15 @@ public class EventPrize {
     protected void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    // mapped: fk_event_participant_event_prize
+    public void addEventParticipant(EventParticipant participant) {
+        eventParticipants.add(participant);
+        participant.setEventPrize(this);
+    }
+    public void removeEventParticipant(EventParticipant participant) {
+        eventParticipants.remove(participant);
+        participant.setEventPrize(null);
+    }
+
 }
