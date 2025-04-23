@@ -26,7 +26,7 @@ public class NotificationTemplateTests {
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
-            .expiredAt(LocalDateTime.now().plusDays(7))
+            .expiredAt(LocalDateTime.now().plusDays(5))
             .build();
         
         NotificationTemplate savedEntry = notificationTemplateRepository.save(newEntry);
@@ -35,7 +35,6 @@ public class NotificationTemplateTests {
         assertEquals("Promotion Alert", savedEntry.getTitle());
         assertEquals("New promotion available!", savedEntry.getContent());
         assertEquals(NoticeType.PROMOTION, savedEntry.getNoticeType());
-        System.out.println(savedEntry);
     }
 
     @Test

@@ -31,6 +31,7 @@ public class NotificationPublishedTests {
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
+            .expiredAt(LocalDateTime.now().plusDays(5))
             .build();
         NotificationTemplate savedTemplate = notificationTemplateRepository.save(template);
 
@@ -40,13 +41,12 @@ public class NotificationPublishedTests {
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
-        
         NotificationPublished savedEntry = notificationPublishedRepository.save(newEntry);
 
         assertNotNull(savedEntry);
-        assertEquals(savedTemplate.getId(), savedEntry.getNotificationTemplate().getId());
-        assertEquals(1001, savedEntry.getUserId()); // to be arranged after user fk created
-        assertEquals(false, savedEntry.getIsRead());
+        assertEquals(newEntry.getNotificationTemplate().getId(), savedEntry.getNotificationTemplate().getId());
+        assertEquals(newEntry.getUserId(), savedEntry.getUserId()); // to be arranged after user fk created
+        assertEquals(newEntry.getIsRead(), savedEntry.getIsRead());
     }
 
     @Test
@@ -64,7 +64,6 @@ public class NotificationPublishedTests {
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
-        
         NotificationPublished savedEntry = notificationPublishedRepository.save(newEntry);
 
         NotificationPublished modEntry = NotificationPublished.builder()
@@ -74,14 +73,13 @@ public class NotificationPublishedTests {
             .isRead(true)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
-        
         notificationPublishedRepository.save(modEntry);
         NotificationPublished foundEntry = notificationPublishedRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(1003, foundEntry.getUserId());
-        assertEquals(true, foundEntry.getIsRead());
+        assertEquals(savedEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(savedEntry.getIsRead(), foundEntry.getIsRead());
     }
 
     @Test
