@@ -3,6 +3,7 @@ package tw.eeits.unhappy.ttpp.couponTests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 
@@ -84,7 +85,7 @@ public class CouponPublishedRepositoryTests {
             .userId(1002) // to be arranged after user fk created
             .build();
 
-        savedEntry = couponPublishedRepository.save(modEntry);
+        couponPublishedRepository.save(modEntry);
         CouponPublished foundEntry = couponPublishedRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(foundEntry);
@@ -115,6 +116,10 @@ public class CouponPublishedRepositoryTests {
 
         CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
         couponPublishedRepository.deleteById(savedEntry.getId());
+
+        CouponPublished foundEntry = couponPublishedRepository.findById(savedEntry.getId()).orElse(null);
+
+        assertNull(foundEntry);
     }
 
 }
