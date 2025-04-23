@@ -36,9 +36,6 @@ public class CouponMedia {
     @JoinColumn(name = "coupon_id", nullable = false)
     private CouponTemplate couponTemplate;
     
-
-
-
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,8 +55,6 @@ public class CouponMedia {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-
 
 
     @PrePersist

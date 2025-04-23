@@ -33,8 +33,8 @@ public class CouponTemplateRepositoryTests {
             .discountValue(new BigDecimal("0.15"))
             .maxDiscount(new BigDecimal("20.00"))
             .tradeable(false)
-            .startTime(LocalDateTime.now())
-            .endTime(LocalDateTime.now().plusDays(30))
+            .startTime(LocalDateTime.parse("2025-05-21T15:00:00"))
+            .endTime(LocalDateTime.parse("2025-05-21T15:00:00").plusDays(30))
             .build();
 
         CouponTemplate savedEntry = couponTemplateRepository.save(newEntry);
@@ -43,15 +43,15 @@ public class CouponTemplateRepositoryTests {
         CouponTemplate foundEntry = couponTemplateRepository.findById(savedEntry.getId()).orElse(null);
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(ApplicableType.BRAND, foundEntry.getApplicableType());
-        assertEquals(2, foundEntry.getApplicableId());
-        assertEquals(new BigDecimal("50.00"), foundEntry.getMinSpend());
-        assertEquals(DiscountType.PERCENTAGE, foundEntry.getDiscountType());
-        assertEquals(new BigDecimal("0.15"), foundEntry.getDiscountValue());
-        assertEquals(new BigDecimal("20.00"), foundEntry.getMaxDiscount());
-        assertFalse(foundEntry.getTradeable());
-        assertNotNull(foundEntry.getStartTime());
-        assertNotNull(foundEntry.getEndTime());
+        assertEquals(newEntry.getApplicableType(), foundEntry.getApplicableType());
+        assertEquals(newEntry.getApplicableId(), foundEntry.getApplicableId());
+        assertEquals(newEntry.getMinSpend(), foundEntry.getMinSpend());
+        assertEquals(newEntry.getDiscountType(), foundEntry.getDiscountType());
+        assertEquals(newEntry.getDiscountValue(), foundEntry.getDiscountValue());
+        assertEquals(newEntry.getMaxDiscount(), foundEntry.getMaxDiscount());
+        assertEquals(newEntry.getTradeable(), foundEntry.getTradeable());
+        assertEquals(newEntry.getStartTime(), foundEntry.getStartTime());
+        assertEquals(newEntry.getEndTime(), foundEntry.getEndTime());
         assertNotNull(foundEntry.getCreatedAt());
         assertNull(foundEntry.getUpdatedAt());
     }
@@ -60,28 +60,47 @@ public class CouponTemplateRepositoryTests {
     public void testUpdateById() {
 
         CouponTemplate newEntry = CouponTemplate.builder()
-            .id(9)
-            .applicableType(ApplicableType.PRODUCT)
-            .applicableId(1)
-            .minSpend(new BigDecimal("100.00"))
+            .applicableType(ApplicableType.BRAND)
+            .applicableId(2)
+            .minSpend(new BigDecimal("50.00"))
             .discountType(DiscountType.PERCENTAGE)
-            .discountValue(new BigDecimal("0.085"))
-            .maxDiscount(new BigDecimal("30.00"))
-            .tradeable(true)
-            .startTime(LocalDateTime.now())
-            .endTime(LocalDateTime.now().plusDays(30))
+            .discountValue(new BigDecimal("0.15"))
+            .maxDiscount(new BigDecimal("20.00"))
+            .tradeable(false)
+            .startTime(LocalDateTime.parse("2000-05-21T15:00:00"))
+            .endTime(LocalDateTime.parse("2000-05-21T15:00:00").plusDays(30))
             .build();
-
         CouponTemplate savedEntry = couponTemplateRepository.save(newEntry);
+
+        CouponTemplate modEntry = CouponTemplate.builder()
+            .id(savedEntry.getId())
+            .applicableType(ApplicableType.PRODUCT)
+            .applicableId(3)
+            .minSpend(new BigDecimal("500.00"))
+            .discountType(DiscountType.VALUE)
+            .discountValue(new BigDecimal("0.15"))
+            .tradeable(false)
+            .startTime(LocalDateTime.parse("2023-05-01T15:00:00"))
+            .endTime(LocalDateTime.parse("2023-05-01T15:00:00").plusDays(30))
+            .build();
+        couponTemplateRepository.save(modEntry);
 
         CouponTemplate foundEntry = couponTemplateRepository.findById(savedEntry.getId()).orElse(null);
         assertNotNull(foundEntry);
-        System.out.println(foundEntry.getId());
-        // assertEquals(9, foundEntry.getId());
+        assertEquals(modEntry.getId(), foundEntry.getId());
+        assertEquals(modEntry.getApplicableType(), foundEntry.getApplicableType());
+        assertEquals(modEntry.getApplicableId(), foundEntry.getApplicableId());
+        assertEquals(modEntry.getMinSpend(), foundEntry.getMinSpend());
+        assertEquals(modEntry.getDiscountType(), foundEntry.getDiscountType());
+        assertEquals(modEntry.getDiscountValue(), foundEntry.getDiscountValue());
+        assertEquals(modEntry.getTradeable(), foundEntry.getTradeable());
+        assertEquals(modEntry.getStartTime(), foundEntry.getStartTime());
+        assertEquals(modEntry.getEndTime(), foundEntry.getEndTime());
     }
 
     @Test
     public void testDeleteById() {
+
         CouponTemplate newEntry = CouponTemplate.builder()
             .applicableType(ApplicableType.PRODUCT)
             .applicableId(1)
@@ -89,15 +108,13 @@ public class CouponTemplateRepositoryTests {
             .discountType(DiscountType.VALUE)
             .discountValue(new BigDecimal("200"))
             .tradeable(true)
-            .startTime(LocalDateTime.now())
-            .endTime(LocalDateTime.now().plusDays(30))
+            .startTime(LocalDateTime.parse("2001-05-21T15:00:00"))
+            .endTime(LocalDateTime.parse("2001-05-21T15:00:00").plusDays(30))
             .build();
-
         CouponTemplate savedEntry = couponTemplateRepository.save(newEntry);
-        Integer savedEntryId = savedEntry.getId();
 
-        couponTemplateRepository.deleteById(savedEntryId);
-        savedEntry = couponTemplateRepository.findById(savedEntryId).orElse(null);
+        couponTemplateRepository.deleteById(savedEntry.getId());
+        savedEntry = couponTemplateRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNull(savedEntry);
     }

@@ -1,5 +1,6 @@
-package tw.eeits.unhappy.ttpp.couponTests;
+package tw.eeits.unhappy.ttpp.media;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -12,19 +13,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.enums.DiscountType;
-import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
+import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
 
 @SpringBootTest
-public class CouponPublishedRepositoryTests {
-    @Autowired
-    private CouponPublishedRepository couponPublishedRepository;
-
+public class CouponMediaRepositoryTests {
     @Autowired
     private CouponTemplateRepository couponTemplateRepository;
 
+    @Autowired
+    private CouponMediaRepository couponMediaRepository;
 
     @Test
     public void testSaveAndFindById() {
@@ -38,24 +39,21 @@ public class CouponPublishedRepositoryTests {
             .tradeable(false)
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
-
-        CouponPublished newEntry = CouponPublished.builder()
+        
+        CouponMedia newEntry = CouponMedia.builder()
             .couponTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
-            .isUsed(false)
+            .mediaData("test_video".getBytes())
+            .mediaType(MediaType.VIDEO)
             .build();
-        CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
-
-        CouponPublished foundEntry = couponPublishedRepository.findById(newEntry.getId()).orElse(null);
-
+        CouponMedia savedEntry = couponMediaRepository.save(newEntry);
+        CouponMedia foundEntry = couponMediaRepository.findById(savedEntry.getId()).orElse(null);
+        
         assertNotNull(foundEntry);
-        assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(savedTemplate.getId(), foundEntry.getCouponTemplate().getId());
-        assertEquals(newEntry.getUserId(), foundEntry.getUserId()); // to be arranged after user fk created
-        assertEquals(newEntry.getIsUsed(), foundEntry.getIsUsed());
+        assertEquals(newEntry.getCouponTemplate().getId(), foundEntry.getCouponTemplate().getId());
+        assertArrayEquals(newEntry.getMediaData(), foundEntry.getMediaData());
+        assertEquals(newEntry.getMediaType(), foundEntry.getMediaType());
         assertNotNull(foundEntry.getCreatedAt());
     }
-
 
     @Test
     public void testUpdateById() {
@@ -69,29 +67,29 @@ public class CouponPublishedRepositoryTests {
             .tradeable(false)
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
-
-        CouponPublished newEntry = CouponPublished.builder()
-            .couponTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
-            .isUsed(false)
-            .build();
-        CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
         
-        CouponPublished modEntry = CouponPublished.builder()
+        CouponMedia newEntry = CouponMedia.builder()
+            .couponTemplate(savedTemplate)
+            .mediaData("test_video".getBytes())
+            .mediaType(MediaType.VIDEO)
+            .build();
+        CouponMedia savedEntry = couponMediaRepository.save(newEntry);
+
+        CouponMedia modEntry = CouponMedia.builder()
             .id(savedEntry.getId())
             .couponTemplate(savedTemplate)
-            .userId(1002) // to be arranged after user fk created
+            .mediaData("test_image".getBytes())
+            .mediaType(MediaType.IMAGE)
             .build();
-        couponPublishedRepository.save(modEntry);
+        couponMediaRepository.save(modEntry);
 
-        CouponPublished foundEntry = couponPublishedRepository.findById(savedEntry.getId()).orElse(null);
+        CouponMedia foundEntry = couponMediaRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(foundEntry);
-        assertEquals(modEntry.getId(), foundEntry.getId());
+        assertEquals(savedEntry.getId(), foundEntry.getId());
         assertEquals(modEntry.getCouponTemplate().getId(), foundEntry.getCouponTemplate().getId());
-        assertEquals(modEntry.getUserId(), foundEntry.getUserId()); // to be arranged after user fk created
-        assertEquals(modEntry.getIsUsed(), foundEntry.getIsUsed());
-        assertNotNull(foundEntry.getCreatedAt());
+        assertArrayEquals(modEntry.getMediaData(), foundEntry.getMediaData());
+        assertEquals(modEntry.getMediaType(), foundEntry.getMediaType());
     }
 
     @Test
@@ -106,18 +104,22 @@ public class CouponPublishedRepositoryTests {
             .tradeable(false)
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
-
-        CouponPublished newEntry = CouponPublished.builder()
+        
+        CouponMedia newEntry = CouponMedia.builder()
             .couponTemplate(savedTemplate)
-            .userId(1003) // to be arranged after user fk created
-            .isUsed(false)
+            .mediaData("test_video".getBytes())
+            .mediaType(MediaType.VIDEO)
             .build();
-        CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
-        couponPublishedRepository.deleteById(savedEntry.getId());
+        CouponMedia savedEntry = couponMediaRepository.save(newEntry);
 
-        CouponPublished foundEntry = couponPublishedRepository.findById(savedEntry.getId()).orElse(null);
+        couponMediaRepository.deleteById(savedEntry.getId());
+        CouponMedia foundEntry = couponMediaRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNull(foundEntry);
     }
+
+
+
+
 
 }

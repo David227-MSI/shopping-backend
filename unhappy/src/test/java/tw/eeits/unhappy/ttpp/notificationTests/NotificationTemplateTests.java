@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,30 +20,28 @@ public class NotificationTemplateTests {
 
     @Test
     public void testSaveAndFindById() {
+
         NotificationTemplate newEntry = NotificationTemplate.builder()
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
-            .expiredAt(LocalDateTime.now().plusDays(5))
             .build();
-        
         NotificationTemplate savedEntry = notificationTemplateRepository.save(newEntry);
 
         assertNotNull(savedEntry);
-        assertEquals("Promotion Alert", savedEntry.getTitle());
-        assertEquals("New promotion available!", savedEntry.getContent());
-        assertEquals(NoticeType.PROMOTION, savedEntry.getNoticeType());
+        assertEquals(newEntry.getTitle(), savedEntry.getTitle());
+        assertEquals(newEntry.getContent(), savedEntry.getContent());
+        assertEquals(newEntry.getNoticeType(), savedEntry.getNoticeType());
     }
 
     @Test
     public void testUpdateById() {
+
         NotificationTemplate newEntry = NotificationTemplate.builder()
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
-            .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
-        
         NotificationTemplate savedEntry = notificationTemplateRepository.save(newEntry);
 
         NotificationTemplate modEntry = NotificationTemplate.builder()
@@ -53,28 +49,26 @@ public class NotificationTemplateTests {
             .title("Order Inform")
             .content("Order created!")
             .noticeType(NoticeType.ORDER)
-            .expiredAt(LocalDateTime.now().plusDays(10))
             .build();
-
         notificationTemplateRepository.save(modEntry);
+
         NotificationTemplate foundEntry = notificationTemplateRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals("Order Inform", foundEntry.getTitle());
-        assertEquals("Order created!", foundEntry.getContent());
-        assertEquals(NoticeType.ORDER, foundEntry.getNoticeType());
+        assertEquals(modEntry.getTitle(), foundEntry.getTitle());
+        assertEquals(modEntry.getContent(), foundEntry.getContent());
+        assertEquals(modEntry.getNoticeType(), foundEntry.getNoticeType());
     }
 
     @Test
     public void testDeleteById() {
+        
         NotificationTemplate newEntry = NotificationTemplate.builder()
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
-            .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
-        
         NotificationTemplate savedEntry = notificationTemplateRepository.save(newEntry);
         notificationTemplateRepository.deleteById(savedEntry.getId());
 

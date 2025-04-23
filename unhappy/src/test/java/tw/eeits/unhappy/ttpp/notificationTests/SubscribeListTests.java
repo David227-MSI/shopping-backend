@@ -19,13 +19,13 @@ public class SubscribeListTests {
 
     @Test
     public void testSaveAndFindById() {
+
         SubscribeList newEntry = SubscribeList.builder()
             .userId(1001)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)
             .build();
-        
         SubscribeList savedEntry = subscribeListRepository.save(newEntry);
 
         assertNotNull(savedEntry);
@@ -37,13 +37,13 @@ public class SubscribeListTests {
 
     @Test
     public void testUpdateById() {
+
         SubscribeList newEntry = SubscribeList.builder()
             .userId(1001)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)
             .build();
-        
         SubscribeList savedEntry = subscribeListRepository.save(newEntry);
 
         SubscribeList modEntry = SubscribeList.builder()
@@ -53,7 +53,6 @@ public class SubscribeListTests {
             .itemType(ItemType.PRODUCT)
             .isSubscribing(true)
             .build();
-        
         subscribeListRepository.save(modEntry);
 
         SubscribeList foundEntry = subscribeListRepository.findById(savedEntry.getId()).orElse(null);
@@ -68,13 +67,13 @@ public class SubscribeListTests {
 
     @Test
     public void testDeleteById() {
+
         SubscribeList newEntry = SubscribeList.builder()
             .userId(1001)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)
             .build();
-        
         SubscribeList savedEntry = subscribeListRepository.save(newEntry);
 
         subscribeListRepository.deleteById(savedEntry.getId());

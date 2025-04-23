@@ -31,7 +31,6 @@ public class NotificationPublishedTests {
             .title("Promotion Alert")
             .content("New promotion available!")
             .noticeType(NoticeType.PROMOTION)
-            .expiredAt(LocalDateTime.now().plusDays(5))
             .build();
         NotificationTemplate savedTemplate = notificationTemplateRepository.save(template);
 
@@ -77,9 +76,9 @@ public class NotificationPublishedTests {
         NotificationPublished foundEntry = notificationPublishedRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(foundEntry);
-        assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(savedEntry.getUserId(), foundEntry.getUserId());
-        assertEquals(savedEntry.getIsRead(), foundEntry.getIsRead());
+        assertEquals(modEntry.getId(), foundEntry.getId());
+        assertEquals(modEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(modEntry.getIsRead(), foundEntry.getIsRead());
     }
 
     @Test
