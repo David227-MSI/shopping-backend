@@ -1,19 +1,12 @@
 package tw.eeits.unhappy.ra.review.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -32,44 +25,65 @@ public class ProductReview {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "user_id")
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "user_id", nullable = false)
+    // @NotNull(message = "userMember 不可為空值")
+    // private UserMember userMember;
+    @NotNull(message = "User id 不可為空值")
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @Column(name = "order_item_id")
+    // @OneToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "order_item_id", nullable = false)
+    // @NotNull(message = "Order item 不可為空值")
+    // private OrderItem orderItem;
+    @NotNull(message = "orderItemId 不可為空值")
+    @Column(name = "order_item_id", nullable = false)
     private Integer orderItemId;
 
     @Size(max = 1000)
-    @Column(name = "review_text")
+    @Column(name = "review_text", length = 1000)
     private String reviewText;
 
-    @Column(name = "review_images")
+    @Size(max = 1000)
+    @Column(name = "review_images", length = 1000)
     private String reviewImages;
 
     @NotNull(message = "Score quality 不可為空值")
+    @Min(1)
+    @Max(5)
     @Column(name = "score_quality", nullable = false)
     private Integer scoreQuality;
 
     @NotNull(message = "Score description 不可為空值")
+    @Min(1)
+    @Max(5)
     @Column(name = "score_description", nullable = false)
     private Integer scoreDescription;
 
     @NotNull(message = "Score delivery 不可為空值")
+    @Min(1)
+    @Max(5)
     @Column(name = "score_delivery", nullable = false)
     private Integer scoreDelivery;
 
     @NotNull(message = "Is verified purchase 不可為空值")
     @Column(name = "is_verified_purchase", nullable = false)
-    private Boolean isVerifiedPurchase;
+    private Boolean isVerifiedPurchase = true;
 
-    @NotNull(message = "is visible 不可為空值")
+    @NotNull(message = "Is visible 不可為空值")
     @Column(name = "is_visible", nullable = false)
-    private Boolean isVisible;
+    private Boolean isVisible = true;
 
-    @Column(name = "helpful_count")
-    private Integer helpfulCount;
+    @NotNull(message = "Helpful count 不可為空值")
+    @Column(name = "helpful_count", nullable = false)
+    private Integer helpfulCount = 0;
 
-    @Column(name = "tag_name")
-    private String tagName;
+    @Size(max = 200)
+    @Convert(converter = ReviewTagConverter.class)
+    @NotNull(message = "Tag name 不可為空值")
+    @Column(name = "tag_name", nullable = false, length = 200)
+    private Set<ReviewTag> tagName;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -77,7 +91,8 @@ public class ProductReview {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    
+    @OneToMany(mappedBy = "productReview", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> reviewLikes;
 
     @PrePersist
     public void onCreate() {
