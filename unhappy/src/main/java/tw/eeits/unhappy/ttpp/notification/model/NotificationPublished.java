@@ -12,11 +12,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "notification_published")
-@Data
 public class NotificationPublished {
 
 
@@ -47,8 +53,9 @@ public class NotificationPublished {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "is_read", nullable = false)
     @NotNull(message = "isRead 不可為空值")
+    @Builder.Default
+    @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -20,25 +20,34 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "event")
-@Data
 public class Event {
 
     
     // mapped: fk_event_prize_event
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventPrize> eventPrize = new ArrayList<>();
     
     // mapped: fk_event_participant_event
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventParticipant> eventParticipants = new ArrayList<>();
     
     // mapped: fk_event_media_event
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventMedia> eventMedia = new ArrayList<>();
 
@@ -54,11 +63,13 @@ public class Event {
 
     @NotNull(message = "Min spend 不可為空值")
     @Min(value = 0, message = "Min spend 必須 >= 0")
+    @Builder.Default
     @Column(name = "min_spend", nullable = false, precision = 15, scale = 2)
     private BigDecimal minSpend = BigDecimal.ZERO;
 
     @NotNull(message = "Max entries 不可為空值")
     @Min(value = 0, message = "Max entries 必須 >= 0")
+    @Builder.Default
     @Column(name = "max_entries", nullable = false)
     private Integer maxEntries = 1;
 
@@ -76,6 +87,7 @@ public class Event {
 
     @NotNull(message = "Event status 不可為空值")
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     @Column(name = "event_status", nullable = false, length = 10)
     private EventStatus eventStatus = EventStatus.ANNOUNCED;
 

@@ -25,21 +25,28 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "event_prize")
-@Data
 public class EventPrize {
 
     // fk_event_prize_event
+    @NotNull(message = "event 不可為空值")
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
-    @NotNull(message = "event 不可為空值")
     private Event event;
 
     // mapped: fk_event_participant_event_prize
+    @Builder.Default
     @OneToMany(mappedBy = "eventPrize", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventParticipant> eventParticipants = new ArrayList<>();
 
@@ -58,12 +65,14 @@ public class EventPrize {
 
     @NotNull(message = "quantity 不可為空值")
     @PositiveOrZero(message = "quantity 必須 >= 0")
+    @Builder.Default
     @Column(name = "quantity", nullable = false)
     private Integer quantity = 1;
 
     @NotNull(message = "winRate 不可為空值")
     @DecimalMin(value = "0.0", inclusive = true, message = "winRate 必須 >= 0")
     @DecimalMax(value = "1.0", inclusive = true, message = "winRate 必須 <= 1")
+    @Builder.Default
     @Column(name = "win_rate", nullable = false, precision = 18, scale = 4)
     private BigDecimal winRate = new BigDecimal("0.2000");
 

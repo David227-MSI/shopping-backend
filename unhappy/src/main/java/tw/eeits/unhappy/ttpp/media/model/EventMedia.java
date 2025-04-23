@@ -15,13 +15,19 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "event_media")
-@Data
 public class EventMedia {
 
     // fk_event_media_event

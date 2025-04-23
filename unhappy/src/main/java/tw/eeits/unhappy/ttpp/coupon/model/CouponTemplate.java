@@ -21,21 +21,29 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.enums.DiscountType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "coupon_template")
-@Data
 public class CouponTemplate {
 
     // mapped: fk_coupon_published_coupon_template
+    @Builder.Default
     @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CouponPublished> couponPublished = new ArrayList<>();
 
     // mapped: fk_coupon_media_coupon_template
+    @Builder.Default
     @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CouponMedia> couponMedia = new ArrayList<>();
 
@@ -53,8 +61,10 @@ public class CouponTemplate {
     @Column(name = "applicable_type", nullable = false, length = 10)
     private ApplicableType applicableType;
 
+
     @NotNull(message = "Min spend 不可為空值")
     @Min(value = 0, message = "Minimum spend 必須 >= 0")
+    @Builder.Default
     @Column(name = "min_spend", nullable = false, precision = 15, scale = 2)
     private BigDecimal minSpend = BigDecimal.ZERO;
 
@@ -73,6 +83,7 @@ public class CouponTemplate {
     private BigDecimal maxDiscount;
 
     @NotNull(message = "Tradeable 不可為空值")
+    @Builder.Default
     @Column(name = "tradeable", nullable = false)
     private Boolean tradeable = false;
 

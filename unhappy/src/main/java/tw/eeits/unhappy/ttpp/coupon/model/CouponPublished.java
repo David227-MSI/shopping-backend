@@ -14,11 +14,17 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "coupon_published")
-@Data
 public class CouponPublished {
 
 
@@ -46,10 +52,12 @@ public class CouponPublished {
     @NotBlank(message = "id 不可為空值")
     @Size(min = 36, max = 36, message = "id 必須為 36 字元")
     @Column(name = "id", length = 36, columnDefinition = "CHAR(36)")
+    @Builder.Default
     private String id = UUID.randomUUID().toString();
 
     @NotNull(message = "isUsed 不可為空值")
     @Column(name = "is_used", nullable = false)
+    @Builder.Default
     private Boolean isUsed = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)

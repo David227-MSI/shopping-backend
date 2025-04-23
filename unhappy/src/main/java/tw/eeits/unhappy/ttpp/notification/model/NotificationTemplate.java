@@ -17,16 +17,23 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.notification.enums.NoticeType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "notification_template")
-@Data
 public class NotificationTemplate {
 
     
     // mapped: fk_notification_published_notification_template
+    @Builder.Default
     @OneToMany(mappedBy = "notificationTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationPublished> notificationPublished = new ArrayList<>();
 

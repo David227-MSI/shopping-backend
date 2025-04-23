@@ -15,19 +15,25 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "event_participant")
-@Data
 public class EventParticipant {
 
     
     // fk_event_participant_user
+    // @NotNull(message = "userMember不可為空值")
     // @ManyToOne
     // @JoinColumn(name = "user_id", nullable = false)
-    // @NotNull(message = "userMember不可為空值")
     // private UserMember userMember;
     // |||                |||
     // vvv to be replaced vvv
@@ -36,15 +42,15 @@ public class EventParticipant {
     private Integer userId; // fk
 
     // fk_event_participant_event_prize
+    @NotNull(message = "eventPrize 不可為空值")
     @ManyToOne
     @JoinColumn(name = "event_prize_id", nullable = false)
-    @NotNull(message = "eventPrize 不可為空值")
     private EventPrize eventPrize;
     
     // fk_event_participant_event
+    @NotNull(message = "event 不可為空值")
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
-    @NotNull(message = "event 不可為空值")
     private Event event;
 
 
@@ -53,8 +59,9 @@ public class EventParticipant {
     private Integer id;
 
     @NotNull(message = "Participate status 不可為空值")
-    @Column(name = "participate_status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(name = "participate_status", length = 20, nullable = false)
     private ParticipateStatus participateStatus = ParticipateStatus.REGISTERED;
 
     @Column(name = "created_at", nullable = false, updatable = false)

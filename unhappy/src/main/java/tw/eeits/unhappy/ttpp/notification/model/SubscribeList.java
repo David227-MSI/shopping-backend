@@ -13,12 +13,18 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "subscribe_list")
-@Data
 public class SubscribeList {
 
 
@@ -50,6 +56,7 @@ public class SubscribeList {
     private ItemType itemType;
 
     @NotNull(message = "isSubscribing 不可為空值")
+    @Builder.Default
     @Column(name = "is_subscribing", nullable = false)
     private Boolean isSubscribing = true;
 

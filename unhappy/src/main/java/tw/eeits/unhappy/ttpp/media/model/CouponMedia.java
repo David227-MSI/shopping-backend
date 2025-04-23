@@ -15,13 +15,19 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "coupon_media")
-@Data
 public class CouponMedia {
     
     // fk_coupon_media_coupon_template
