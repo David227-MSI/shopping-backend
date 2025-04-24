@@ -61,7 +61,6 @@ public class CouponTemplate {
     @Column(name = "applicable_type", nullable = false, length = 10)
     private ApplicableType applicableType;
 
-
     @NotNull(message = "Min spend 不可為空值")
     @Min(value = 0, message = "Minimum spend 必須 >= 0")
     @Builder.Default
@@ -116,6 +115,15 @@ public class CouponTemplate {
             return maxDiscount != null && maxDiscount.compareTo(BigDecimal.ZERO) > 0;
         } else {
             return maxDiscount == null;
+        }
+    }
+
+    @AssertTrue(message = "當applicableType為ALL時, 不可指定applicableId")
+    private boolean isApplicableIdValid() {
+        if (applicableType == ApplicableType.ALL) {
+            return applicableId == null;
+        } else {
+            return true;
         }
     }
 

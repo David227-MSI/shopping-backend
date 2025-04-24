@@ -23,10 +23,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationTemplate createTemplate(NotificationTemplate template) {
+        
+        
         if(template == null) {
             return null;
         }
 
+        // verify datatype
         Set<ConstraintViolation<NotificationTemplate>> violations = validator.validate(template);
         if(!violations.isEmpty()) {
             return null;
