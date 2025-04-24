@@ -24,7 +24,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationTemplate createTemplate(NotificationTemplate template) {
         
-        
         if(template == null) {
             return null;
         }

@@ -19,7 +19,6 @@ import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
 public class CouponServiceImpl implements CouponService {
     private final CouponTemplateRepository templateRepository;
     private final CouponPublishedRepository publishedRepository;
-
     private final Validator validator;
 
     @Override
@@ -69,6 +68,11 @@ public class CouponServiceImpl implements CouponService {
             System.out.println("發送優惠券發生錯誤: " + e);
             return null;
         }
+    }
+
+    @Override
+    public CouponTemplate findTemplateById(Integer id) {
+        return templateRepository.findById(id).orElse(null);
     }
 
 }

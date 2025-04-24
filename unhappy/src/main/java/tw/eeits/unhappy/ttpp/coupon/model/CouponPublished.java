@@ -3,6 +3,8 @@ package tw.eeits.unhappy.ttpp.coupon.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -30,6 +32,7 @@ public class CouponPublished {
 
     // fk_coupon_published_coupon_template
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "coupon_id", nullable = false)
     @NotNull(message = "couponTemplate 不可為空值")
     private CouponTemplate couponTemplate;

@@ -49,4 +49,23 @@ public class CouponTemplateRequest {
             return maxDiscount == null;
         }
     }
+
+    @AssertTrue(message = "當applicableType為ALL時, 不可指定applicableId")
+    private boolean isApplicableIdValid1() {
+        if (applicableType == ApplicableType.ALL) {
+            return applicableId == null;
+        } else {
+            return true;
+        }
+    }
+
+    @AssertTrue(message = "需要指定applicableId")
+    private boolean isApplicableIdValid2() {
+        return (
+            applicableType == ApplicableType.BRAND || 
+            applicableType == ApplicableType.PRODUCT
+        ) && 
+            applicableId != null;
+    }
+
 }

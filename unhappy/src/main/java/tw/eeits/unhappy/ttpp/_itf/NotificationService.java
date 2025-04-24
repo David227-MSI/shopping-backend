@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp._itf;
 
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
+import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 
 public interface NotificationService {
 
@@ -20,6 +21,10 @@ public interface NotificationService {
      */
     NotificationPublished publishNotification(NotificationPublished notificationPublished);
     // 建立通知相關======================================================
+
+    
+
+
 
     // 基本查詢相關======================================================
     /**

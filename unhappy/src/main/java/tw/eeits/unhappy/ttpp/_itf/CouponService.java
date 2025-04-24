@@ -21,4 +21,20 @@ public interface CouponService {
     CouponPublished publishCoupon(CouponPublished couponPublished);
     // 建立優惠相關======================================================
     
+
+    // 基本查詢相關======================================================
+    /**
+     * @brief    以ID查詢優惠券的模板
+     * @param id 模板 ID
+     * @return   查詢成功: 模板 / 查詢失敗: Null
+     */
+    CouponTemplate findTemplateById(Integer id);
+    // 基本查詢相關======================================================
+
+
+
+
+
+
+
 }
