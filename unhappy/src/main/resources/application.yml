@@ -34,3 +34,8 @@ spring:
           auth: true
           starttls:
             enable: true
+
+azure:
+  storage:
+    connection-string: ${AZURE_STORAGE_CONN}
+    container: unhappy-media

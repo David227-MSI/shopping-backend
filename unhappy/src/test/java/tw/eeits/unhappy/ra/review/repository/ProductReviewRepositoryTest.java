@@ -21,7 +21,7 @@ public class ProductReviewRepositoryTest {
     void testSaveAndFindProductReview() {
         ProductReview review = new ProductReview();
         review.setUserId(1001);        // 確保 user_id 中有此 ID
-        review.setOrderItemId(3);      // 確保 order_item_id 中有此 ID
+        review.setOrderItemId(1);      // 確保 order_item_id 中有此 ID
         review.setScoreQuality(5);
         review.setScoreDescription(5);
         review.setScoreDelivery(5);

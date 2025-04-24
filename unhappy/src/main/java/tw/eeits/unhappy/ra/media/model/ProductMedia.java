@@ -10,7 +10,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product_media")
+@Table(
+    name = "product_media",
+    // 同商品 + mediaOrder 唯一（防重複）
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_prod_media_order",
+        columnNames = {"product_id","media_order"}
+    ),
+    // 幫查詢加入索引（加速抓主圖 / 排序）
+    indexes = {
+        @Index(name = "idx_prod_main", columnList = "product_id,is_main"),
+        @Index(name = "idx_prod_order", columnList = "product_id,media_order")
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,9 +42,9 @@ public class ProductMedia {
     private Integer productId;
 
     @NotNull(message = "Media type 不可為空值")
-    @Size(max = 10)
-    @Column(name = "media_type", nullable = false, length = 10)
-    private String mediaType;
+    @Convert(converter = MediaTypeConverter.class)
+    @Column(name="media_type", nullable=false, length=10)
+    private MediaType mediaType;
 
     @NotNull(message = "Media url 不可為空值")
     @Size(max = 500)

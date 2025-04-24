@@ -14,16 +14,16 @@ public class ReviewTagConverter implements AttributeConverter<Set<ReviewTag>, St
     public String convertToDatabaseColumn(Set<ReviewTag> attribute) {
         if (attribute == null || attribute.isEmpty()) return "";
         return attribute.stream()
-                .map(ReviewTag::getLabel)  // 存中文
-                .collect(Collectors.joining(","));
+                        .map(ReviewTag::getLabel)  // 存中文
+                        .collect(Collectors.joining(","));
     }
 
     @Override
     public Set<ReviewTag> convertToEntityAttribute(String dbData) {
         if (dbData == null || dbData.isEmpty()) return Set.of();
         return Arrays.stream(dbData.split(","))
-                .map(String::trim)
-                .map(ReviewTag::fromLabel)  // 從中文找回 Enum
-                .collect(Collectors.toSet());
-    }
+                    .map(String::trim)
+                    .map(ReviewTag::fromLabel)  // 從中文找回 Enum
+                    .collect(Collectors.toSet());
+    }      
 }
