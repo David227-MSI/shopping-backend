@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,6 +36,7 @@ public class NotificationTemplate {
     
     // mapped: fk_notification_published_notification_template
     @Builder.Default
+    @JsonIgnore
     @OneToMany(mappedBy = "notificationTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationPublished> notificationPublished = new ArrayList<>();
 
