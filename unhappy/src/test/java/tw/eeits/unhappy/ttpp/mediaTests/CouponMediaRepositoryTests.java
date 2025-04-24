@@ -1,4 +1,4 @@
-package tw.eeits.unhappy.ttpp.media;
+package tw.eeits.unhappy.ttpp.mediaTests;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

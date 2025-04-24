@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
+import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
 
 @Data
 @NoArgsConstructor
@@ -61,7 +61,7 @@ public class EventPrize {
     @NotNull(message = "itemType 不可為空值")
     @Column(name = "item_type", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    private ItemType itemType;
+    private PrizeType itemType;
 
     @NotNull(message = "quantity 不可為空值")
     @PositiveOrZero(message = "quantity 必須 >= 0")

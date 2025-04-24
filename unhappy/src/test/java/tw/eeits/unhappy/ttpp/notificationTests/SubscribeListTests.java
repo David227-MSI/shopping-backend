@@ -27,12 +27,13 @@ public class SubscribeListTests {
             .isSubscribing(false)
             .build();
         SubscribeList savedEntry = subscribeListRepository.save(newEntry);
+        SubscribeList foundEntry = subscribeListRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(savedEntry);
-        assertEquals(newEntry.getUserId(), savedEntry.getUserId());
-        assertEquals(newEntry.getItemId(), savedEntry.getItemId());
-        assertEquals(newEntry.getItemType(), savedEntry.getItemType());
-        assertEquals(newEntry.getIsSubscribing(), savedEntry.getIsSubscribing());
+        assertEquals(savedEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(newEntry.getItemId(), foundEntry.getItemId());
+        assertEquals(newEntry.getItemType(), foundEntry.getItemType());
+        assertEquals(newEntry.getIsSubscribing(), foundEntry.getIsSubscribing());
     }
 
     @Test
