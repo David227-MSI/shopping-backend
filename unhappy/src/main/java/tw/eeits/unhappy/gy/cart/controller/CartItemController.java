@@ -48,7 +48,7 @@ public class CartItemController {
     //移除購物車全部商品
     @DeleteMapping("/clear/{userId}")
     public ResponseEntity<String> clearCart(@PathVariable Integer userId) {
-        cartItemService.clearCart(userId); // 你可以自行實作一個方法 deleteAllByUserIdAndCheckedOutFalse
+        cartItemService.clearCart(userId);
         return ResponseEntity.ok("購物車已清空");
     }
 
