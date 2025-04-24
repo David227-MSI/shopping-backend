@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.eeits.unhappy.gy.cart.repository.CartItemRepository;
 import tw.eeits.unhappy.gy.domain.*;
+import tw.eeits.unhappy.gy.dto.OrderDetailResponseDTO;
+import tw.eeits.unhappy.gy.dto.OrderItemResponseDTO;
 import tw.eeits.unhappy.gy.dto.OrderRequestDTO;
 import tw.eeits.unhappy.gy.dto.OrderResponseDTO;
 import tw.eeits.unhappy.gy.enums.OrderStatus;
 import tw.eeits.unhappy.gy.enums.PaymentStatus;
 import tw.eeits.unhappy.gy.exception.EmptyCartException;
 import tw.eeits.unhappy.gy.exception.InvalidCouponUsageException;
+import tw.eeits.unhappy.gy.exception.OrderNotFoundException;
 import tw.eeits.unhappy.gy.exception.UserNotFoundException;
 import tw.eeits.unhappy.gy.order.repository.OrderItemRepository;
 import tw.eeits.unhappy.gy.order.repository.OrderRepository;
@@ -19,7 +22,6 @@ import tw.eeits.unhappy.gy.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.gy.repository.UserRepository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,6 +43,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private CouponPublishedRepository couponPublishedRepository;
+
+    // 提出重複計算方法
+    private BigDecimal calculateFinalAmount(BigDecimal total, BigDecimal discount) {
+        total = Optional.ofNullable(total).orElse(BigDecimal.ZERO);
+        discount = Optional.ofNullable(discount).orElse(BigDecimal.ZERO);
+        return total.subtract(discount);
+    }
+
+    // 建立DTO(提出方法)
+    private OrderResponseDTO convertToOrderResponseDTO(Order order) {
+        return OrderResponseDTO.builder()
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .discountAmount(order.getDiscountAmount())
+                .finalAmount(calculateFinalAmount(order.getTotalAmount(), order.getDiscountAmount()))
+                .status(order.getStatus().name())
+                .statusText(order.getStatus().getDisplayText())
+                .paymentStatus(order.getPaymentStatus().name())
+                .paymentStatusText(order.getPaymentStatus().getDisplayText())
+                .paymentMethod(order.getPaymentMethod())
+                .transactionNumber(order.getTransactionNumber())
+                .paidAt(order.getPaidAt())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
 
     @Transactional
     @Override
@@ -106,7 +133,6 @@ public class OrderServiceImpl implements OrderService {
                 .discountAmount(discountAmount)
                 .status(OrderStatus.PENDING)
                 .paymentStatus(PaymentStatus.UNPAID)
-                .createdAt(LocalDateTime.now())
                 .build();
         orderRepository.save(order);
 
@@ -128,14 +154,48 @@ public class OrderServiceImpl implements OrderService {
         cartItemRepository.saveAll(cartItemList);
 
         // 回傳DTO
-        return OrderResponseDTO.builder()
-                .orderId(order.getId())
-                .totalAmount(totalAmount)
-                .discountAmount(discountAmount)
-                .finalAmount(totalAmount.subtract(discountAmount))
-                .status(order.getStatus().name())
-                .paymentStatus(order.getPaymentStatus().name())
-                .createdAt(order.getCreatedAt())
+        return convertToOrderResponseDTO(order);
+    }
+
+    // 查某會員所有訂單
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponseDTO> getOrdersByUser(Integer userId) {
+
+        UserMember user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        List<Order> orders = orderRepository.findByUserMember_IdOrderByCreatedAtDesc(user.getId());
+
+        return orders.stream()
+                .map(this::convertToOrderResponseDTO)
+                .toList();
+    }
+
+    // 查詢訂單明細
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDetailResponseDTO getOrderDetail(Integer orderId) {
+
+        // 從資料庫撈訂單
+        Order order = orderRepository.findWithItemsById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("訂單不存在"));
+
+        // 撈訂單明細
+        List<OrderItemResponseDTO> itemDTOList = order.getOrderItems().stream()
+                .map(item -> OrderItemResponseDTO.builder()
+                        .productId(item.getProduct().getId())
+                        .productName(item.getProduct().getName())
+                        .quantity(item.getQuantity())
+                        .unitPrice(item.getPriceAtTheTime())
+                        .subtotal(item.getPriceAtTheTime().multiply(BigDecimal.valueOf(item.getQuantity())))
+                        .build())
+                .toList();
+
+        // 組合 OrderDetailResponseDTO
+        return OrderDetailResponseDTO.builder()
+                .order(convertToOrderResponseDTO(order))
+                .orderDetails(itemDTOList)
                 .build();
     }
 }
