@@ -1,6 +1,5 @@
 package tw.eeits.unhappy.ttpp._itf;
 
-import java.util.List;
 
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
@@ -34,7 +33,7 @@ public interface EventService {
     // 建立活動相關======================================================
 
 
-    
+
 
     // 基本查詢相關======================================================
     /**
@@ -43,6 +42,13 @@ public interface EventService {
      * @return   查詢成功: 活動物件 / 查詢失敗: Null
      */
     Event findEventById(Integer id);
+
+    /**
+     * @brief    用ID查詢活動獎品
+     * @param id 活動獎品 ID
+     * @return   查詢成功: 活動獎品物件 / 查詢失敗: Null
+     */
+    EventPrize findPrizeById(Integer id);
     // 基本查詢相關======================================================
 
 
@@ -64,12 +70,6 @@ public interface EventService {
     //  */
     // Integer getRemainingSlot(EventPrize prize);
 
-    // /**
-    //  * @brief        用戶查詢已登記參加的活動
-    //  * @param userId 用戶
-    //  * @return       登記參加的活動清單
-    //  */
-    // List<Event> findRegisteredEvent(Integer userId);
     // 用戶查詢相關======================================================
 
 

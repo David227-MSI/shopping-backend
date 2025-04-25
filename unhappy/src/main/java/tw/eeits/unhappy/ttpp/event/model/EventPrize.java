@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,12 +44,14 @@ public class EventPrize {
     // fk_event_prize_event
     @NotNull(message = "event 不可為空值")
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     // mapped: fk_event_participant_event_prize
     @Builder.Default
     @OneToMany(mappedBy = "eventPrize", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<EventParticipant> eventParticipants = new ArrayList<>();
 
     @Id

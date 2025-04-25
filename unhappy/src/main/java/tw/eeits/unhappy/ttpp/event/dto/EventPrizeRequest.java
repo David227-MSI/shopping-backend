@@ -1,9 +1,5 @@
 package tw.eeits.unhappy.ttpp.event.dto;
 
-import java.math.BigDecimal;
-
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,7 +10,9 @@ import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
 @Data
 public class EventPrizeRequest {
 
+    @NotNull(message = "eventId 不可為空值")
     private Integer eventId;
+
     private Integer itemId;
 
     @NotNull(message = "itemType 不可為空值")
@@ -24,9 +22,9 @@ public class EventPrizeRequest {
     @PositiveOrZero(message = "quantity 必須 >= 0")
     private Integer quantity;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "winRate 必須 >= 0")
-    @DecimalMax(value = "1.0", inclusive = true, message = "winRate 必須 <= 1")
-    private BigDecimal winRate;
+    // @DecimalMin(value = "0.0", inclusive = true, message = "winRate 必須 >= 0")
+    // @DecimalMax(value = "1.0", inclusive = true, message = "winRate 必須 <= 1")
+    private String winRate;
 
     @NotNull(message = "Total slots 不可為空值")
     @Positive(message = "Total slots 必須 > 0")

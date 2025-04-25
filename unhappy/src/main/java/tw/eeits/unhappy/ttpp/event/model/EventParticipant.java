@@ -2,6 +2,8 @@ package tw.eeits.unhappy.ttpp.event.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -44,12 +46,14 @@ public class EventParticipant {
     // fk_event_participant_event_prize
     @NotNull(message = "eventPrize 不可為空值")
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_prize_id", nullable = false)
     private EventPrize eventPrize;
     
     // fk_event_participant_event
     @NotNull(message = "event 不可為空值")
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 

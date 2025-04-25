@@ -59,13 +59,13 @@ public class CouponTemplateRequest {
         }
     }
 
-    @AssertTrue(message = "需要指定applicableId")
-    private boolean isApplicableIdValid2() {
-        return (
-            applicableType == ApplicableType.BRAND || 
-            applicableType == ApplicableType.PRODUCT
-        ) && 
-            applicableId != null;
-    }
+    // @AssertTrue(message = "需要指定applicableId")
+    // private boolean isApplicableIdValid2() {
+    //     return (
+    //         applicableType == ApplicableType.BRAND || 
+    //         applicableType == ApplicableType.PRODUCT
+    //     ) && 
+    //         applicableId != null;
+    // }
 
 }
