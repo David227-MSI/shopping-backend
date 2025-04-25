@@ -11,9 +11,9 @@ public class SubscribeListRequest {
     
     private Integer userId; // fk
 
-    @NotNull(message = "itemId 不可為空值")
+    @NotNull(message = "訂閱目標ID 不可為空值")
     private Integer itemId;
 
-    @NotNull(message = "itemType 不可為空值")
+    @NotNull(message = "訂閱目標種類 不可為空值")
     private ItemType itemType;
 }

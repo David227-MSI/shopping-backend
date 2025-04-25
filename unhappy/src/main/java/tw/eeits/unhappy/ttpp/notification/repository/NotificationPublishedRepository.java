@@ -20,7 +20,7 @@ public interface NotificationPublishedRepository extends JpaRepository<Notificat
             List<Predicate> predicates = new ArrayList<>();
 
             // UserId (required)
-            predicates.add(criteriaBuilder.equal(root.get("userId"), query.getUserId()));
+            predicates.add(criteriaBuilder.equal(root.get("userMember").get("id"), query.getUserId()));
 
             // IsRead
             if (query.getIsRead() != null) {

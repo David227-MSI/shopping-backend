@@ -7,12 +7,12 @@ import tw.eeits.unhappy.ttpp.notification.enums.NoticeType;
 
 @Data
 public class NotificationTemplateRequest {
-    @NotBlank(message = "Title 不可為空值")
+    @NotBlank(message = "訊息標題 不可為空值")
     private String title;
 
     private String content;
 
-    @NotNull(message = "Notice type 不可為空值")
+    @NotNull(message = "通知類型 不可為空值")
     private NoticeType noticeType;
 }
 

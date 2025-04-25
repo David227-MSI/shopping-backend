@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.enums.DiscountType;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
@@ -25,6 +27,9 @@ public class CouponPublishedRepositoryTests {
     @Autowired
     private CouponTemplateRepository couponTemplateRepository;
 
+    @Autowired
+    private UserMemberRepository userMemberRepository;
+
 
     @Test
     public void testSaveAndFindById() {
@@ -39,9 +44,11 @@ public class CouponPublishedRepositoryTests {
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         CouponPublished newEntry = CouponPublished.builder()
             .couponTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
+            .userMember(foundUser)
             .isUsed(false)
             .build();
         CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
@@ -51,7 +58,7 @@ public class CouponPublishedRepositoryTests {
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
         assertEquals(savedTemplate.getId(), foundEntry.getCouponTemplate().getId());
-        assertEquals(newEntry.getUserId(), foundEntry.getUserId()); // to be arranged after user fk created
+        assertEquals(newEntry.getUserMember(), foundEntry.getUserMember()); // to be arranged after user fk created
         assertEquals(newEntry.getIsUsed(), foundEntry.getIsUsed());
         assertNotNull(foundEntry.getCreatedAt());
     }
@@ -70,9 +77,11 @@ public class CouponPublishedRepositoryTests {
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         CouponPublished newEntry = CouponPublished.builder()
             .couponTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isUsed(false)
             .build();
         CouponPublished savedEntry = couponPublishedRepository.save(newEntry);
@@ -80,7 +89,7 @@ public class CouponPublishedRepositoryTests {
         CouponPublished modEntry = CouponPublished.builder()
             .id(savedEntry.getId())
             .couponTemplate(savedTemplate)
-            .userId(1002) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .build();
         couponPublishedRepository.save(modEntry);
 
@@ -89,7 +98,7 @@ public class CouponPublishedRepositoryTests {
         assertNotNull(foundEntry);
         assertEquals(modEntry.getId(), foundEntry.getId());
         assertEquals(modEntry.getCouponTemplate().getId(), foundEntry.getCouponTemplate().getId());
-        assertEquals(modEntry.getUserId(), foundEntry.getUserId()); // to be arranged after user fk created
+        assertEquals(modEntry.getUserMember(), foundEntry.getUserMember()); // to be arranged after user fk created
         assertEquals(modEntry.getIsUsed(), foundEntry.getIsUsed());
         assertNotNull(foundEntry.getCreatedAt());
     }
@@ -107,9 +116,11 @@ public class CouponPublishedRepositoryTests {
             .build();
         CouponTemplate savedTemplate = couponTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         CouponPublished newEntry = CouponPublished.builder()
             .couponTemplate(savedTemplate)
-            .userId(1003) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isUsed(false)
             .build();
         CouponPublished savedEntry = couponPublishedRepository.save(newEntry);

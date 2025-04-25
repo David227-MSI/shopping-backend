@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
 
 @Data
 @NoArgsConstructor
@@ -33,15 +34,15 @@ public class NotificationPublished {
     private NotificationTemplate notificationTemplate;
 
     // fk_notification_published_user
-    // @ManyToOne
-    // @NotNull(message = "userMember 不可為空值")
-    // @JoinColumn(name = "user_id", nullable = false)
-    // private UserMember userMember;
+    @ManyToOne
+    @NotNull(message = "userMember 不可為空值")
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserMember userMember;
     // |||                |||
     // vvv to be replaced vvv
-    @Column(name = "user_id", nullable = false)
-    @NotNull(message = "userId 不可為空值")
-    private Integer userId; // fk
+    // @Column(name = "user_id", nullable = false)
+    // @NotNull(message = "userId 不可為空值")
+    // private Integer userId; // fk
 
 
 

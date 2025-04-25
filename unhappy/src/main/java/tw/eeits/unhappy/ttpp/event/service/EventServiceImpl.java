@@ -122,9 +122,19 @@ public class EventServiceImpl implements EventService {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
+    // @Override
+    // public Integer countUserEntries(Event event) {
+    //     return eventRepository.count(event.getUserId());
+    // }
+
+
+
     @Override
     public EventParticipant attendEvent(EventParticipant participant) {
-        if(participant == null) {
+        if(participant == null ||
+            participant.getEvent() == null || 
+            participant.getEventPrize() == null
+        ) {
             return null;
         }
 
@@ -134,6 +144,9 @@ public class EventServiceImpl implements EventService {
             return null;
         }
 
+        // check event maxEntries
+        // Integer maxEntries = participant.getEvent().getMaxEntries();
+
         // create event participant
         try {
             return participantRepository.save(participant);
@@ -142,6 +155,8 @@ public class EventServiceImpl implements EventService {
             return null;
         }
     }
+
+
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
@@ -28,7 +31,9 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 @RequestMapping("/app/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
+
     private final NotificationService notificationService;
+    private final UserMemberService userMemberService;
     private final Validator validator;
 
     // =================================================================
@@ -46,7 +51,7 @@ public class NotificationController {
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .collect(Collectors.joining("; "));
             
-            return ResponseEntity.badRequest().body(ResponseFactory.fail(errorMessages));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(errorMessages));
         }
 
 
@@ -71,18 +76,18 @@ public class NotificationController {
         // verify data
         NotificationTemplate foundTemplate = notificationService.findTemplateById(request.getTemplateId());
         if(foundTemplate == null) {
-            return ResponseEntity.badRequest().body(ResponseFactory.fail("找不到套用的訊息模板"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到套用的訊息模板"));
         }
 
-        // UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        // if(foundUser == null) {
-        //     return ResponseEntity.badRequest().body(ResponseFactory.fail("找不到目標用戶"));
-        // }
-
+        // check user
+        UserMember foundUser = userMemberService.findUserById(request.getUserId());
+        if(foundUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標用戶"));
+        }
 
         // transfer data from DTO to Entity
         NotificationPublished notification = NotificationPublished.builder()
-            .userId(request.getUserId())
+            .userMember(foundUser)
             .notificationTemplate(foundTemplate)
             .isRead(false)
             .expiredAt(request.getExpiredAt())
@@ -100,7 +105,7 @@ public class NotificationController {
     // 基本查詢相關======================================================
     // =================================================================
     @GetMapping("/templates/{id}")
-    public ResponseEntity<ApiRes<NotificationTemplate>> getMethodName(@PathVariable Integer id) {
+    public ResponseEntity<ApiRes<NotificationTemplate>> findTemplateById(@PathVariable Integer id) {
         NotificationTemplate foundEntry = notificationService.findTemplateById(id);
         return ResponseEntity.ok(ResponseFactory.success(foundEntry));
     }

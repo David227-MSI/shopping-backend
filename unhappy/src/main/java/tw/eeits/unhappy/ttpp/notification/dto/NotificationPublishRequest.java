@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 public class NotificationPublishRequest {
-    @NotNull(message = "userId 不可為空值")
+    @NotNull(message = "用戶ID 不可為空值")
     private Integer userId;
-    @NotNull(message = "templateId 不可為空值")
+    @NotNull(message = "通知訊息模板ID 不可為空值")
     private Integer templateId;
     private LocalDateTime expiredAt;
 }

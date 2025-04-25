@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.notification.enums.NoticeType;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -25,6 +27,9 @@ public class NotificationPublishedTests {
     @Autowired
     private NotificationPublishedRepository notificationPublishedRepository;
 
+    @Autowired
+    private UserMemberRepository userMemberRepository;
+
     @Test
     public void testSaveAndFindById() {
         NotificationTemplate template = NotificationTemplate.builder()
@@ -34,9 +39,11 @@ public class NotificationPublishedTests {
             .build();
         NotificationTemplate savedTemplate = notificationTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         NotificationPublished newEntry = NotificationPublished.builder()
             .notificationTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
@@ -44,7 +51,7 @@ public class NotificationPublishedTests {
 
         assertNotNull(savedEntry);
         assertEquals(newEntry.getNotificationTemplate().getId(), savedEntry.getNotificationTemplate().getId());
-        assertEquals(newEntry.getUserId(), savedEntry.getUserId()); // to be arranged after user fk created
+        assertEquals(newEntry.getUserMember(), savedEntry.getUserMember()); // to be arranged after user fk created
         assertEquals(newEntry.getIsRead(), savedEntry.getIsRead());
     }
 
@@ -57,9 +64,11 @@ public class NotificationPublishedTests {
             .build();
         NotificationTemplate savedTemplate = notificationTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         NotificationPublished newEntry = NotificationPublished.builder()
             .notificationTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
@@ -68,7 +77,7 @@ public class NotificationPublishedTests {
         NotificationPublished modEntry = NotificationPublished.builder()
             .id(savedEntry.getId())
             .notificationTemplate(savedTemplate)
-            .userId(1003) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isRead(true)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();
@@ -77,7 +86,7 @@ public class NotificationPublishedTests {
 
         assertNotNull(foundEntry);
         assertEquals(modEntry.getId(), foundEntry.getId());
-        assertEquals(modEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(modEntry.getUserMember(), foundEntry.getUserMember());
         assertEquals(modEntry.getIsRead(), foundEntry.getIsRead());
     }
 
@@ -90,9 +99,11 @@ public class NotificationPublishedTests {
             .build();
         NotificationTemplate savedTemplate = notificationTemplateRepository.save(template);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         NotificationPublished newEntry = NotificationPublished.builder()
             .notificationTemplate(savedTemplate)
-            .userId(1001) // to be arranged after user fk created
+            .userMember(foundUser) // to be arranged after user fk created
             .isRead(false)
             .expiredAt(LocalDateTime.now().plusDays(7))
             .build();

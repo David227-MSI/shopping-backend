@@ -18,14 +18,14 @@ public interface EventService {
     Event createEvent(Event event);
 
     /**
-     * @brief       為活動建立圖片/影片媒材
+     * @brief       建立活動用圖片/影片媒材
      * @param media 插入的媒體
      * @return      建立成功: 媒體物件 / 建立失敗: Null
      */
     EventMedia addMediaToEvent(EventMedia media);
 
     /**
-     * @brief       為活動建立需要的獎品
+     * @brief       建立活動用的獎品
      * @param prize 活動需要的獎品
      * @return      建立成功: 獎品物件 / 建立失敗: Null
      */
@@ -37,14 +37,14 @@ public interface EventService {
 
     // 基本查詢相關======================================================
     /**
-     * @brief    用ID查詢活動
+     * @brief    用活動ID查詢活動
      * @param id 活動 ID
      * @return   查詢成功: 活動物件 / 查詢失敗: Null
      */
     Event findEventById(Integer id);
 
     /**
-     * @brief    用ID查詢活動獎品
+     * @brief    用獎品ID查詢活動獎品
      * @param id 活動獎品 ID
      * @return   查詢成功: 活動獎品物件 / 查詢失敗: Null
      */
@@ -75,6 +75,13 @@ public interface EventService {
 
 
     // 用戶操作相關======================================================
+    // /**
+    //  * @brief       查詢用戶已參加特定活動的次數
+    //  * @param event 活動物件
+    //  * @return      查詢成功: 已參加次數 / 查詢失敗: Null
+    //  */
+    // Integer countUserEntries(Event event);
+
     /**
      * @brief             建立活動參加者
      * @param participant 登記的活動參加者

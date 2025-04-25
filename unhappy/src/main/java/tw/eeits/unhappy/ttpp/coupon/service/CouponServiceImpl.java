@@ -54,7 +54,7 @@ public class CouponServiceImpl implements CouponService {
     public CouponPublished publishCoupon(CouponPublished couponPublished) {
         // check input parameter
         if (couponPublished == null || 
-            couponPublished.getUserId() == null || 
+            couponPublished.getUserMember() == null || 
             couponPublished.getCouponTemplate() == null
         ) {
             return null;

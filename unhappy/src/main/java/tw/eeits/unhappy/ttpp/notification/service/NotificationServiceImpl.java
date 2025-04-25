@@ -52,7 +52,7 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationPublished publishNotification(NotificationPublished notificationPublished) {
         // check input parameter
         if (notificationPublished == null || 
-            notificationPublished.getUserId() == null || 
+            notificationPublished.getUserMember() == null || 
             notificationPublished.getNotificationTemplate() == null
         ) {
             return null;

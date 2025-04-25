@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
@@ -33,6 +36,9 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 @RequiredArgsConstructor
 public class CouponController {
     private final CouponService couponService;
+    private final UserMemberService userMemberService;
+    // private final ProductService productService;
+    // private final BrandService brandService;
     private final Validator validator;
 
 
@@ -50,12 +56,22 @@ public class CouponController {
             String errorMessages = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ResponseFactory.fail(errorMessages));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(errorMessages));
         }
 
-        // check product
 
-        // check brand
+        // check product and brand
+        // if(request.getApplicableType() == ApplicableType.PRODUCT) {
+        //     Product foundProduct = productService.findProductById(request.getApplicableId());
+        //     if(foundProduct == null) {
+        //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標商品"));
+        //     }
+        // } else if(request.getApplicableType() == ApplicableType.BRAND) {
+        //     Brand foundBrand = brandService.findBrandById(request.getApplicableId());
+        //     if(foundBrand == null) {
+        //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標廠商"));
+        //     }
+        // }
 
         // transfer data from DTO to Entity
         CouponTemplate newEntry = CouponTemplate.builder()
@@ -86,17 +102,24 @@ public class CouponController {
             String errorMessages = violations.stream()
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ResponseFactory.fail(errorMessages));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(errorMessages));
         }
 
         // check couponTemplate
         CouponTemplate foundTemplate = couponService.findTemplateById(request.getCouponTemplateId());
+        if(foundTemplate == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到套用的優惠券模板"));
+        }
         
         // check User
+        UserMember foundUser = userMemberService.findUserById(request.getUserId());
+        if(foundUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標用戶"));
+        }
 
         // transfer data from DTO to Entity
         CouponPublished newEntry = CouponPublished.builder()
-                .userId(request.getUserId())
+                .userMember(foundUser)
                 .couponTemplate(foundTemplate)
                 .isUsed(false)
                 .build();
@@ -107,6 +130,14 @@ public class CouponController {
     // =================================================================
     // 建立優惠相關======================================================
     // =================================================================
+
+
+
+
+
+
+
+
 
 
 
@@ -131,6 +162,11 @@ public class CouponController {
     // 基本查詢相關======================================================
     // =================================================================
     
+
+
+
+
+
 
 
 
