@@ -2,6 +2,8 @@ package tw.eeits.unhappy.ttpp.media.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +34,7 @@ public class EventMedia {
 
     // fk_event_media_event
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "event_id", nullable = false)
     @NotNull(message = "event 不可為空值")
     private Event event;
