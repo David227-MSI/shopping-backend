@@ -2,6 +2,8 @@ package tw.eeits.unhappy.ttpp.media.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +34,7 @@ public class CouponMedia {
     
     // fk_coupon_media_coupon_template
     @ManyToOne
+    @JsonBackReference
     @NotNull(message = "couponId 不可為空值")
     @JoinColumn(name = "coupon_id", nullable = false)
     private CouponTemplate couponTemplate;

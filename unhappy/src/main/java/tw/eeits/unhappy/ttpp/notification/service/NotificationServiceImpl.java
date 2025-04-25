@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ttpp.notification.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
+import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 import tw.eeits.unhappy.ttpp.notification.repository.NotificationPublishedRepository;
@@ -21,6 +23,10 @@ public class NotificationServiceImpl implements NotificationService {
     private final Validator validator;
 
 
+
+    // =================================================================
+    // 建立通知相關======================================================
+    // =================================================================
     @Override
     public NotificationTemplate createTemplate(NotificationTemplate template) {
         
@@ -66,6 +72,45 @@ public class NotificationServiceImpl implements NotificationService {
             return null;
         }
     }
+    // =================================================================
+    // 建立通知相關======================================================
+    // =================================================================
+
+
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
+    @Override
+    public NotificationTemplate findTemplateById(Integer id) {
+        return templateRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<NotificationTemplate> findTemplatesByCriteria(NotificationQuery query) {
+        return templateRepository.findAll(NotificationTemplateRepository.byTemplatesCriteria(query));
+    }
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
+
+
+
+
+
+
+
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
+    @Override
+    public List<NotificationPublished> findNotificationsByCriteria(NotificationQuery query) {
+        return publishedRepository.findAll(NotificationPublishedRepository.byNotificationsCriteria(query));
+    }
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
+
+
 
     // @Override
     // public List<NotificationPublished> findNotificationsByUser(Integer userId) {
@@ -77,10 +122,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 
 
-    @Override
-    public NotificationTemplate findTemplateById(Integer id) {
-        return templateRepository.findById(id).orElse(null);
-    }
+
 
 
 

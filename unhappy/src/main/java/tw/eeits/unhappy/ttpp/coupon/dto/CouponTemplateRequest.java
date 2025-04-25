@@ -41,7 +41,7 @@ public class CouponTemplateRequest {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    @AssertTrue(message = "Max discount must be non-null and greater than 0 for PERCENTAGE discount type, or null for VALUE discount type")
+    @AssertTrue(message = "使用百分比折扣時, 需要指定Max discount")
     private boolean isMaxDiscountValid() {
         if (discountType == DiscountType.PERCENTAGE) {
             return maxDiscount != null && maxDiscount.compareTo(BigDecimal.ZERO) > 0;

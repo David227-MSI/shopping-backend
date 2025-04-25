@@ -1,5 +1,8 @@
 package tw.eeits.unhappy.ttpp._itf;
 
+import java.util.List;
+
+import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
@@ -29,10 +32,38 @@ public interface CouponService {
      * @return   查詢成功: 模板 / 查詢失敗: Null
      */
     CouponTemplate findTemplateById(Integer id);
+
+    /**
+     * @brief  查詢所有模板
+     * @return 查詢成功: 所有模板List
+     */
+    List<CouponTemplate> findAllTemplates();
+
+    /**
+     * @brief  用戶查詢擁有的優惠券
+     * @return 查詢成功: 用戶的優惠券List
+     */
+    List<CouponPublished> findCouponsByUserId();
+
+    /**
+     * @brief       根據條件查詢優惠券模板
+     * @param query 查詢條件
+     * @return      符合條件的優惠券模板
+     */
+    public List<CouponTemplate> findTemplatesByCriteria(CouponQuery query);
+
     // 基本查詢相關======================================================
 
 
+    // 用戶操作相關======================================================
+    /**
+     * @brief       根據條件查詢用戶的優惠券
+     * @param query 查詢條件
+     * @return      符合條件的優惠券清單
+     */
+    public List<CouponPublished> findCouponsByCriteria(CouponQuery query);
 
+    // 用戶操作相關======================================================
 
 
 

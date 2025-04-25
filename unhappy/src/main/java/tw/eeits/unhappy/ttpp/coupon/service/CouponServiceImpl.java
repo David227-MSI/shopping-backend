@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ttpp.coupon.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
+import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
@@ -21,6 +23,9 @@ public class CouponServiceImpl implements CouponService {
     private final CouponPublishedRepository publishedRepository;
     private final Validator validator;
 
+    // =================================================================
+    // 建立優惠相關======================================================
+    // =================================================================
     @Override
     public CouponTemplate createTemplate(CouponTemplate template) {
         
@@ -69,10 +74,52 @@ public class CouponServiceImpl implements CouponService {
             return null;
         }
     }
+    // =================================================================
+    // 建立優惠相關======================================================
+    // =================================================================
 
+
+
+
+
+
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
     @Override
     public CouponTemplate findTemplateById(Integer id) {
         return templateRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public List<CouponTemplate> findAllTemplates() {
+        return templateRepository.findAll();
+    }
+
+    @Override
+    public List<CouponPublished> findCouponsByUserId() {
+        // TO BE IMPLEMENTED
+        return null;
+    }
+
+    @Override
+    public List<CouponTemplate> findTemplatesByCriteria(CouponQuery query) {
+        return templateRepository.findAll(CouponTemplateRepository.byTemplatesCriteria(query));
+    }
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
+
+
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
+    @Override
+    public List<CouponPublished> findCouponsByCriteria(CouponQuery query) {
+        return publishedRepository.findAll(CouponPublishedRepository.byCouponsCriteria(query));
+    }
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
 
 }

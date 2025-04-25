@@ -2,10 +2,13 @@ package tw.eeits.unhappy.ttpp.coupon.controller;
 
 
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +20,13 @@ import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
+import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponPublishedRequest;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+
+
 
 @RestController
 @RequestMapping("/app/coupons")
@@ -29,6 +35,10 @@ public class CouponController {
     private final CouponService couponService;
     private final Validator validator;
 
+
+    // =================================================================
+    // 建立優惠相關======================================================
+    // =================================================================
     @PostMapping("/template")
     public ResponseEntity<ApiRes<CouponTemplate>> createTemplate(
         @RequestBody CouponTemplateRequest request
@@ -84,8 +94,6 @@ public class CouponController {
         
         // check User
 
-
-
         // transfer data from DTO to Entity
         CouponPublished newEntry = CouponPublished.builder()
                 .userId(request.getUserId())
@@ -96,16 +104,49 @@ public class CouponController {
 
         return ResponseEntity.ok(ResponseFactory.success(savedEntry));
     }
+    // =================================================================
+    // 建立優惠相關======================================================
+    // =================================================================
+
+
+
+
+
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
     
+    @GetMapping("/templates/{id}")
+    public ResponseEntity<ApiRes<CouponTemplate>> getMethodName(@PathVariable Integer id) {
+        CouponTemplate foundEntry = couponService.findTemplateById(id);
+        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    }
+
+    @PostMapping("/templates/findAll")
+    public ResponseEntity<ApiRes<List<CouponTemplate>>> findAllTemplates(@RequestBody CouponQuery query) {
+        List<CouponTemplate> foundEntry = couponService.findTemplatesByCriteria(query);
+        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    }
+    // =================================================================
+    // 基本查詢相關======================================================
+    // =================================================================
     
+
+
+
     
-
-
-
-
-
-
-
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
+    @PostMapping("/user/query")
+    public ResponseEntity<ApiRes<List<CouponPublished>>> findUserCoupons(@RequestBody CouponQuery query) {
+        List<CouponPublished> foundEntry = couponService.findCouponsByCriteria(query);
+        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    }
+    // =================================================================
+    // 用戶操作相關======================================================
+    // =================================================================
+    
 
 
 }

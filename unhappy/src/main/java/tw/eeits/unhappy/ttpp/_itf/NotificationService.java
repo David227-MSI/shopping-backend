@@ -1,8 +1,10 @@
 package tw.eeits.unhappy.ttpp._itf;
 
+import java.util.List;
+
+import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
-import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 
 public interface NotificationService {
 
@@ -28,12 +30,30 @@ public interface NotificationService {
 
     // 基本查詢相關======================================================
     /**
-     * @brief    以ID查詢訊息通知的模板
+     * @brief    以ID查詢通知訊息的模板
      * @param id 模板 ID
      * @return   查詢成功: 模板 / 查詢失敗: Null
      */
     NotificationTemplate findTemplateById(Integer id);
+
+
+
+    /**
+     * @brief       根據條件查詢通知訊息模板
+     * @param query 查詢條件
+     * @return      符合條件的通知訊息模板
+     */
+    public List<NotificationTemplate> findTemplatesByCriteria(NotificationQuery query);
     // 基本查詢相關======================================================
+
+    // 用戶查詢相關======================================================
+    /**
+     * @brief       根據條件查詢用戶的通知訊息
+     * @param query 查詢條件
+     * @return      符合條件的通知訊息清單
+     */
+    public List<NotificationPublished> findNotificationsByCriteria(NotificationQuery query);
+    // 用戶查詢相關======================================================
 
 
 

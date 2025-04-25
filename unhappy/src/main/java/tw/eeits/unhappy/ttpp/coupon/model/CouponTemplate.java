@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -41,7 +42,7 @@ public class CouponTemplate {
 
     // mapped: fk_coupon_published_coupon_template
     @Builder.Default
-    @JsonIgnore
+    @JsonBackReference
     @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CouponPublished> couponPublished = new ArrayList<>();
 

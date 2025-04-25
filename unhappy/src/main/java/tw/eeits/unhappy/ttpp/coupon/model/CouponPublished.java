@@ -32,7 +32,7 @@ public class CouponPublished {
 
     // fk_coupon_published_coupon_template
     @ManyToOne
-    @JsonBackReference
+    // @JsonBackReference
     @JoinColumn(name = "coupon_id", nullable = false)
     @NotNull(message = "couponTemplate 不可為空值")
     private CouponTemplate couponTemplate;
