@@ -3,15 +3,17 @@ package tw.eeits.unhappy.ra.review.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.transaction.annotation.Transactional;
+
 import tw.eeits.unhappy.ra.review.model.*;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-//@Transactional  // 測試跑完自動回滾，保持 DB 乾淨
+@SpringBootTest(properties = {
+    "azure.storage.connection-string=UseDevelopmentStorage=true",
+    "azure.storage.container=unit-test"
+})
 class ReviewLikeRepositoryTest {
 
     @Autowired
@@ -25,7 +27,7 @@ class ReviewLikeRepositoryTest {
 
         /* ---------- 1. 先建立一筆全新的 ProductReview ---------- */
         ProductReview review = new ProductReview();
-        review.setUserId(1002);        // 確保 user_member 有此人
+        review.setUserId(1003);        // 確保 user_member 有此人
         review.setOrderItemId(5);      // 確保 order_items 有此筆
         review.setScoreQuality(5);
         review.setScoreDescription(5);
