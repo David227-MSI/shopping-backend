@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
+import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
 @Repository
 public interface NotificationPublishedRepository extends JpaRepository<NotificationPublished, Integer>, JpaSpecificationExecutor<NotificationPublished> {
@@ -19,8 +22,12 @@ public interface NotificationPublishedRepository extends JpaRepository<Notificat
         return (root, queryBuilder, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // UserId (required)
-            predicates.add(criteriaBuilder.equal(root.get("userMember").get("id"), query.getUserId()));
+            Join<NotificationPublished, UserMember> userJoin =  root.join("userMember");
+            Join<NotificationPublished, NotificationTemplate> templateJoin = root.join("notificationTemplate");
+
+
+            // UserMember (required)
+            predicates.add(criteriaBuilder.equal(userJoin.get("id"), query.getUserId()));
 
             // IsRead
             if (query.getIsRead() != null) {
@@ -36,20 +43,17 @@ public interface NotificationPublishedRepository extends JpaRepository<Notificat
             // Title
             if (query.getTitle() != null && !query.getTitle().trim().isEmpty()) {
                 predicates.add(criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("notificationTemplate").get("title")), 
+                        criteriaBuilder.lower(templateJoin.get("title")), 
                         "%" + query.getTitle().toLowerCase().trim() + "%"));
             }
 
             // NoticeType
             if(query.getNoticeType() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("notificationTemplate").get("noticeType"), 
+                predicates.add(criteriaBuilder.equal(templateJoin.get("noticeType"), 
                 query.getNoticeType()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
-
-
-
 }

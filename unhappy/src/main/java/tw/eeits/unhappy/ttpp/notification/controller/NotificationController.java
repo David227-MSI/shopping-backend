@@ -3,6 +3,7 @@ package tw.eeits.unhappy.ttpp.notification.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,9 +139,32 @@ public class NotificationController {
     }
 
     @PostMapping("/templates/findAll")
-    public ResponseEntity<ApiRes<List<NotificationTemplate>>> findAllTemplates(@RequestBody NotificationQuery query) {
-        List<NotificationTemplate> foundEntry = notificationService.findTemplatesByCriteria(query);
-        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    public ResponseEntity<ApiRes<Map<String, Object>>> findAllTemplates(
+        @RequestBody NotificationQuery query) {
+
+        // call service
+        ServiceResponse<List<NotificationTemplate>> res = notificationService.findTemplatesByCriteria(query);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        List<NotificationTemplate> foundData = res.getData();
+        List<Map<String, Object>> templateList = foundData.stream().map(template -> {
+            Map<String, Object> mp = new HashMap<>();
+            mp.put("id", template.getId());
+            mp.put("title", template.getTitle());
+            mp.put("content", template.getContent());
+            mp.put("noticeType", template.getNoticeType());
+            return mp;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("templateList", templateList);
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
     // 基本查詢相關======================================================
@@ -155,9 +179,32 @@ public class NotificationController {
     // 用戶操作相關======================================================
     // =================================================================
     @PostMapping("/user/query")
-    public ResponseEntity<ApiRes<List<NotificationPublished>>> findUserNotifications(@RequestBody NotificationQuery query) {
-        List<NotificationPublished> foundEntry = notificationService.findNotificationsByCriteria(query);
-        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    public ResponseEntity<ApiRes<Map<String, Object>>> findUserNotifications(
+        @RequestBody NotificationQuery query) {
+        
+        // call service
+        ServiceResponse<List<NotificationPublished>> res = notificationService.findNotificationsByCriteria(query);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        List<NotificationPublished> foundData = res.getData();
+        List<Map<String, Object>> notificationList = foundData.stream().map(notification -> {
+            Map<String, Object> mp = new HashMap<>();
+            mp.put("id", notification.getId());
+            mp.put("isUsed", notification.getIsRead());
+            mp.put("title", notification.getNotificationTemplate().getTitle());
+            mp.put("content", notification.getNotificationTemplate().getContent());
+            return mp;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("notificationList", notificationList);
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
     // 用戶操作相關======================================================

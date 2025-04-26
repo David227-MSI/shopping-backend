@@ -168,8 +168,15 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public List<CouponTemplate> findTemplatesByCriteria(CouponQuery query) {
-        return templateRepository.findAll(CouponTemplateRepository.byTemplatesCriteria(query));
+    public ServiceResponse<List<CouponTemplate>> findTemplatesByCriteria(CouponQuery query) {
+
+        // service operation
+        try {
+            List<CouponTemplate> res = templateRepository.findAll(CouponTemplateRepository.byTemplatesCriteria(query));
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
+        }
     }
     // =================================================================
     // 基本查詢相關======================================================
@@ -180,8 +187,15 @@ public class CouponServiceImpl implements CouponService {
     // 用戶操作相關======================================================
     // =================================================================
     @Override
-    public List<CouponPublished> findCouponsByCriteria(CouponQuery query) {
-        return publishedRepository.findAll(CouponPublishedRepository.byCouponsCriteria(query));
+    public ServiceResponse<List<CouponPublished>> findCouponsByCriteria(CouponQuery query) {
+        
+        // service operation
+        try {
+            List<CouponPublished> res = publishedRepository.findAll(CouponPublishedRepository.byCouponsCriteria(query));
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
+        }
     }
     // =================================================================
     // 用戶操作相關======================================================

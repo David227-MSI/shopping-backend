@@ -9,7 +9,7 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
 public interface NotificationService {
 
-    // 建立通知相關======================================================
+    // 建立相關==========================================================
     /**
      * @brief          建立通知訊息的模板
      * @param template 模板物件
@@ -23,7 +23,20 @@ public interface NotificationService {
      * @return                       ServiceResponse封包
      */
     ServiceResponse<NotificationPublished> publishNotification(NotificationPublished notificationPublished);
-    // 建立通知相關======================================================
+    // 建立相關==========================================================
+
+
+
+
+    // 修改相關==========================================================
+    /**
+     * @brief    將用戶通知訊息標記已讀
+     * @param id 通知訊息ID
+     * @return   ServiceResponse封包
+     */
+    ServiceResponse<NotificationPublished> markNotificationAsRead(Integer id);
+    // 修改相關==========================================================
+    
 
     
 
@@ -36,16 +49,23 @@ public interface NotificationService {
      * @return   查詢成功: 模板 / 查詢失敗: Null
      */
     NotificationTemplate findTemplateById(Integer id);
-
-
-
+    // 基本查詢相關======================================================
+    
+    
+    
+    // 條件查詢相關======================================================
     /**
      * @brief       根據條件查詢通知訊息模板
      * @param query 查詢條件
      * @return      符合條件的通知訊息模板
      */
-    public List<NotificationTemplate> findTemplatesByCriteria(NotificationQuery query);
-    // 基本查詢相關======================================================
+    ServiceResponse<List<NotificationTemplate>> findTemplatesByCriteria(NotificationQuery query);
+    // 條件查詢相關======================================================
+
+
+
+
+
 
     // 用戶查詢相關======================================================
     /**
@@ -53,7 +73,7 @@ public interface NotificationService {
      * @param query 查詢條件
      * @return      符合條件的通知訊息清單
      */
-    public List<NotificationPublished> findNotificationsByCriteria(NotificationQuery query);
+    ServiceResponse<List<NotificationPublished>> findNotificationsByCriteria(NotificationQuery query);
     // 用戶查詢相關======================================================
 
 

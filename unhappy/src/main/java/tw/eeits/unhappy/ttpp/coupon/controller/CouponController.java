@@ -5,6 +5,7 @@ package tw.eeits.unhappy.ttpp.coupon.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,6 +139,7 @@ public class CouponController {
                 .body(ResponseFactory.fail(res.getMessage()));
         }
 
+        // pick up response data
         CouponPublished savedEntry = res.getData();
         Map<String, Object> data = new HashMap<>();
         data.put("id", savedEntry.getId());
@@ -174,9 +176,34 @@ public class CouponController {
     }
 
     @PostMapping("/templates/findAll")
-    public ResponseEntity<ApiRes<List<CouponTemplate>>> findAllTemplates(@RequestBody CouponQuery query) {
-        List<CouponTemplate> foundEntry = couponService.findTemplatesByCriteria(query);
-        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    public ResponseEntity<ApiRes<Map<String, Object>>> findAllTemplates(
+        @RequestBody CouponQuery query) {
+
+        // call service
+        ServiceResponse<List<CouponTemplate>> res = couponService.findTemplatesByCriteria(query);
+        
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        List<CouponTemplate> foundData = res.getData();
+        List<Map<String, Object>> templateList = foundData.stream().map(template -> {
+            Map<String, Object> mp = new HashMap<>();
+            mp.put("id", template.getId());
+            mp.put("applicableId", template.getApplicableId());
+            mp.put("applicableType", template.getApplicableType());
+            mp.put("discountValue", template.getDiscountValue());
+            mp.put("startTime", template.getStartTime());
+            mp.put("endTime", template.getEndTime());
+            return mp;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("templateList", templateList);
+        
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
     // 基本查詢相關======================================================
@@ -195,9 +222,37 @@ public class CouponController {
     // 用戶操作相關======================================================
     // =================================================================
     @PostMapping("/user/query")
-    public ResponseEntity<ApiRes<List<CouponPublished>>> findUserCoupons(@RequestBody CouponQuery query) {
-        List<CouponPublished> foundEntry = couponService.findCouponsByCriteria(query);
-        return ResponseEntity.ok(ResponseFactory.success(foundEntry));
+    public ResponseEntity<ApiRes<Map<String, Object>>> findUserCoupons(
+        @RequestBody CouponQuery query) {
+        
+        // call service
+        ServiceResponse<List<CouponPublished>> res = couponService.findCouponsByCriteria(query);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        List<CouponPublished> foundData = res.getData();
+        List<Map<String, Object>> couponList = foundData.stream().map(coupon -> {
+            Map<String, Object> mp = new HashMap<>();
+            mp.put("id", coupon.getId());
+            mp.put("isUsed", coupon.getIsUsed());
+            mp.put("applicableId", coupon.getCouponTemplate().getApplicableId());
+            mp.put("applicableType", coupon.getCouponTemplate().getApplicableType());
+            mp.put("discountValue", coupon.getCouponTemplate().getDiscountValue());
+            mp.put("startTime", coupon.getCouponTemplate().getStartTime());
+            mp.put("endTime", coupon.getCouponTemplate().getEndTime());
+            return mp;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("couponList", couponList);
+
+
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
     // 用戶操作相關======================================================

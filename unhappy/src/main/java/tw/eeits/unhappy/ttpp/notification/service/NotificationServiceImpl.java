@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -106,6 +107,53 @@ public class NotificationServiceImpl implements NotificationService {
     // =================================================================
 
 
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<NotificationPublished> markNotificationAsRead(Integer id) {
+        
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
+        if(id == null) {ec.add("請輸入通知訊息ID");}
+
+        // service logic
+        NotificationPublished foundNotification = publishedRepository.findById(id).orElse(null);        
+
+        if(foundNotification == null) {
+            ec.add("找不到該通知訊息");
+        } else {
+            if(foundNotification.getIsRead()) {ec.add("通知訊息已讀過");}  
+        } 
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+
+            foundNotification.setIsRead(true);
+
+            NotificationPublished savedEntry = publishedRepository.save(foundNotification);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("修改通知訊息發生錯誤: " + e.getMessage());
+        }
+    }
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+
+
+
+
+
+
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
@@ -113,16 +161,32 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationTemplate findTemplateById(Integer id) {
         return templateRepository.findById(id).orElse(null);
     }
-
-    @Override
-    public List<NotificationTemplate> findTemplatesByCriteria(NotificationQuery query) {
-        return templateRepository.findAll(NotificationTemplateRepository.byTemplatesCriteria(query));
-    }
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
 
 
+
+
+
+
+    // =================================================================
+    // 條件查詢相關======================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<List<NotificationTemplate>> findTemplatesByCriteria(NotificationQuery query) {
+
+        // service operation
+        try {
+            List<NotificationTemplate> res = templateRepository.findAll(NotificationTemplateRepository.byTemplatesCriteria(query));
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
+        }
+    }
+    // =================================================================
+    // 條件查詢相關======================================================
+    // =================================================================
 
 
 
@@ -132,8 +196,15 @@ public class NotificationServiceImpl implements NotificationService {
     // 用戶操作相關======================================================
     // =================================================================
     @Override
-    public List<NotificationPublished> findNotificationsByCriteria(NotificationQuery query) {
-        return publishedRepository.findAll(NotificationPublishedRepository.byNotificationsCriteria(query));
+    public ServiceResponse<List<NotificationPublished>> findNotificationsByCriteria(NotificationQuery query) {
+        
+        // service operation
+        try {
+            List<NotificationPublished> res = publishedRepository.findAll(NotificationPublishedRepository.byNotificationsCriteria(query));
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
+        }
     }
     // =================================================================
     // 用戶操作相關======================================================

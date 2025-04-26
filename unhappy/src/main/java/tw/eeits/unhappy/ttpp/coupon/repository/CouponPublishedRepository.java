@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
 @Repository
 public interface CouponPublishedRepository extends JpaRepository<CouponPublished, String>, JpaSpecificationExecutor<CouponPublished> {
@@ -19,8 +22,12 @@ public interface CouponPublishedRepository extends JpaRepository<CouponPublished
         return (root, queryBuilder, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // UserID (required)
-            predicates.add(criteriaBuilder.equal(root.get("userId"), query.getUserId()));
+            // join tables
+            Join<CouponPublished, UserMember> userMember = root.join("userMember");
+            Join<CouponPublished, CouponTemplate> template = root.join("couponTemplate");
+
+            // UserMember (required)
+            predicates.add(criteriaBuilder.equal(userMember.get("id"), query.getUserId()));
 
             // IsUsed
             if (query.getIsUsed() != null) {
@@ -30,37 +37,37 @@ public interface CouponPublishedRepository extends JpaRepository<CouponPublished
             // StartTime
             if (query.getStartTime() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
-                        root.get("couponTemplate").get("startTime"), query.getStartTime()));
+                        template.get("startTime"), query.getStartTime()));
             }
 
             // EndTime
             if (query.getEndTime() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
-                        root.get("couponTemplate").get("endTime"), query.getEndTime()));
+                        template.get("endTime"), query.getEndTime()));
             }
 
             // Min Discount Value
             if (query.getMinDiscountValue() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
-                        root.get("couponTemplate").get("discountValue"), query.getMinDiscountValue()));
+                        template.get("discountValue"), query.getMinDiscountValue()));
             }
 
             // Max Discount Value
             if (query.getMaxDiscountValue() != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(
-                        root.get("couponTemplate").get("discountValue"), query.getMaxDiscountValue()));
+                        template.get("discountValue"), query.getMaxDiscountValue()));
             }
 
             // Discount Type
             if (query.getDiscountType() != null) {
                 predicates.add(criteriaBuilder.equal(
-                        root.get("couponTemplate").get("discountType"), query.getDiscountType()));
+                        template.get("discountType"), query.getDiscountType()));
             }
 
             // Applicable Type
             if (query.getApplicableType() != null) {
                 predicates.add(criteriaBuilder.equal(
-                        root.get("couponTemplate").get("applicableType"), query.getApplicableType()));
+                        template.get("applicableType"), query.getApplicableType()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

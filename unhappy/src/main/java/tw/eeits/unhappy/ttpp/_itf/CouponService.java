@@ -30,7 +30,7 @@ public interface CouponService {
 
     // 修改相關==========================================================
     /**
-     * @brief    將優惠券修改為已使用
+     * @brief    將優惠券標記為已使用
      * @param id 優惠券ID (String UUID)
      * @return   ServiceResponse封包
      */
@@ -72,7 +72,7 @@ public interface CouponService {
      * @param query 查詢條件
      * @return      符合條件的優惠券模板
      */
-    public List<CouponTemplate> findTemplatesByCriteria(CouponQuery query);
+    ServiceResponse<List<CouponTemplate>> findTemplatesByCriteria(CouponQuery query);
     // 條件查詢相關======================================================
 
 
@@ -87,8 +87,7 @@ public interface CouponService {
      * @param query 查詢條件
      * @return      符合條件的優惠券清單
      */
-    public List<CouponPublished> findCouponsByCriteria(CouponQuery query);
-
+    ServiceResponse<List<CouponPublished>> findCouponsByCriteria(CouponQuery query);
     // 用戶操作相關======================================================
 
 
