@@ -79,7 +79,7 @@ public class ProductReview {
     @Column(name = "helpful_count", nullable = false)
     private Integer helpfulCount = 0;
 
-    @Size(max = 200)
+    @Size(max = 3)
     @Convert(converter = ReviewTagConverter.class)
     @NotNull(message = "Tag name 不可為空值")
     @Column(name = "tag_name", nullable = false, length = 200)

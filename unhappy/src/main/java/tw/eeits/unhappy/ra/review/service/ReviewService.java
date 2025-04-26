@@ -107,6 +107,15 @@ public class ReviewService {
         pr.setIsVisible(false);
     }
 
+    /* ---------- 後台審核隱藏評論 ---------- */
+
+    @Transactional
+    public void adminSetVisible(Integer reviewId, boolean visible) {
+        ProductReview r = reviewRepo.findById(reviewId)
+                                    .orElseThrow(() -> new IllegalArgumentException("評論不存在"));
+        r.setIsVisible(visible);
+    }
+
     /* ---------- Like / Unlike ---------- */
 
     @Transactional

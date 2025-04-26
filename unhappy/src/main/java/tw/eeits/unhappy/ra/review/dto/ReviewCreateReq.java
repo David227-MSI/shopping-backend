@@ -10,7 +10,7 @@ public record ReviewCreateReq(
         @NotNull @Min(1) @Max(5) Integer scoreQuality,
         @NotNull @Min(1) @Max(5) Integer scoreDescription,
         @NotNull @Min(1) @Max(5) Integer scoreDelivery,
-        @NotNull              Set<ReviewTag> tags
+        @Size(max = 3) @NotNull  Set<ReviewTag> tags
 ) {
-    
+
 }
