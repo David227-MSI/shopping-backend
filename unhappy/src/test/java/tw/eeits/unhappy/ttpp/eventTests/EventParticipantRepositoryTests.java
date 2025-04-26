@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
@@ -31,6 +33,9 @@ public class EventParticipantRepositoryTests {
 
     @Autowired
     private EventParticipantRepository eventParticipantRepository;
+
+    @Autowired
+    private UserMemberRepository userMemberRepository;
 
     @Test
     public void testSaveAndFindById() {
@@ -58,8 +63,10 @@ public class EventParticipantRepositoryTests {
                 .build();
         EventPrize savedPrize = eventPrizeRepository.save(prize);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         EventParticipant newEntry = EventParticipant.builder()
-                .userId(1001) // to be arranged after user fk created
+                .userMember(foundUser) // to be arranged after user fk created
                 .event(savedEvent)
                 .eventPrize(savedPrize)
                 .participateStatus(ParticipateStatus.REGISTERED)
@@ -69,7 +76,7 @@ public class EventParticipantRepositoryTests {
 
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(newEntry.getUserId(), foundEntry.getUserId()); // to be arranged after user fk created
+        assertEquals(1001, foundEntry.getUserMember().getId()); // to be arranged after user fk created
         assertEquals(newEntry.getEvent().getId(), foundEntry.getEvent().getId());
         assertEquals(newEntry.getEventPrize().getId(), foundEntry.getEventPrize().getId());
         assertEquals(newEntry.getParticipateStatus(), foundEntry.getParticipateStatus());
@@ -102,8 +109,10 @@ public class EventParticipantRepositoryTests {
                 .build();
         EventPrize savedPrize = eventPrizeRepository.save(prize);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         EventParticipant newEntry = EventParticipant.builder()
-                .userId(1001) // to be arranged after user fk created
+                .userMember(foundUser) // to be arranged after user fk created
                 .event(savedEvent)
                 .eventPrize(savedPrize)
                 .participateStatus(ParticipateStatus.REGISTERED)
@@ -112,7 +121,7 @@ public class EventParticipantRepositoryTests {
 
         EventParticipant modEntry = EventParticipant.builder()
                 .id(savedEntry.getId())
-                .userId(1002) // to be arranged after user fk created
+                .userMember(foundUser) // to be arranged after user fk created
                 .event(savedEvent)
                 .eventPrize(savedPrize)
                 .participateStatus(ParticipateStatus.LOST)
@@ -123,7 +132,7 @@ public class EventParticipantRepositoryTests {
 
         assertNotNull(foundEntry);
         assertEquals(savedEntry.getId(), foundEntry.getId());
-        assertEquals(modEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(modEntry.getUserMember().getId(), foundEntry.getUserMember().getId());
         assertEquals(modEntry.getEvent().getId(), foundEntry.getEvent().getId());
         assertEquals(modEntry.getEventPrize().getId(), foundEntry.getEventPrize().getId());
         assertEquals(modEntry.getParticipateStatus(), foundEntry.getParticipateStatus());
@@ -157,8 +166,10 @@ public class EventParticipantRepositoryTests {
                 .build();
         EventPrize savedPrize = eventPrizeRepository.save(prize);
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         EventParticipant newEntry = EventParticipant.builder()
-                .userId(1001) // to be arranged after user fk created
+                .userMember(foundUser) // to be arranged after user fk created
                 .event(savedEvent)
                 .eventPrize(savedPrize)
                 .participateStatus(ParticipateStatus.REGISTERED)

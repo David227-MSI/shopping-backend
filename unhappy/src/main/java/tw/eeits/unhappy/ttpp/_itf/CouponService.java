@@ -9,22 +9,37 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
 public interface CouponService {
 
-    // 建立優惠相關======================================================
+    // 建立相關==========================================================
     /**
      * @brief          建立優惠券的模板
      * @param template 優惠券物件
-     * @return         建立成功: 優惠券物件 / 建立失敗: Null
+     * @return         ServiceResponse封包
      */
     ServiceResponse<CouponTemplate> createTemplate(CouponTemplate template);
 
     /**
      * @brief                 發送優惠券給用戶
      * @param couponPublished 預計要發送的優惠券
-     * @return                建立成功: 優惠券物件 / 建立失敗: Null
+     * @return                ServiceResponse封包
      */
     ServiceResponse<CouponPublished> publishCoupon(CouponPublished couponPublished);
-    // 建立優惠相關======================================================
+    // 建立相關==========================================================
     
+
+
+
+    // 修改相關==========================================================
+    /**
+     * @brief    將優惠券修改為已使用
+     * @param id 優惠券ID (String UUID)
+     * @return   ServiceResponse封包
+     */
+    ServiceResponse<CouponPublished> markCouponAsUsed(String id); 
+    // 修改相關==========================================================
+
+
+
+
 
     // 基本查詢相關======================================================
     /**
@@ -44,16 +59,26 @@ public interface CouponService {
      * @brief  用戶查詢擁有的優惠券
      * @return 查詢成功: 用戶的優惠券List
      */
-    List<CouponPublished> findCouponsByUserId();
+    List<CouponPublished> findCouponsByUserId();  
+    // 基本查詢相關======================================================
 
+
+
+
+
+    // 條件查詢相關======================================================
     /**
      * @brief       根據條件查詢優惠券模板
      * @param query 查詢條件
      * @return      符合條件的優惠券模板
      */
     public List<CouponTemplate> findTemplatesByCriteria(CouponQuery query);
+    // 條件查詢相關======================================================
 
-    // 基本查詢相關======================================================
+
+
+
+
 
 
     // 用戶操作相關======================================================

@@ -14,6 +14,10 @@ public class ServiceResponse<T> {
         return new ServiceResponse<>(true, "操作成功", data);
     }
 
+    public static <T> ServiceResponse<T> success(String message, T data) {
+        return new ServiceResponse<>(true, message, data);
+    }
+
     public static <T> ServiceResponse<T> fail(String message) {
         return new ServiceResponse<>(false, message, null);
     }

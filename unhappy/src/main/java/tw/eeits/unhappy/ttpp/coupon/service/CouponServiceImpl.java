@@ -24,7 +24,7 @@ public class CouponServiceImpl implements CouponService {
     private final Validator validator;
 
     // =================================================================
-    // 建立優惠相關======================================================
+    // 建立相關==========================================================
     // =================================================================
     @Override
     public ServiceResponse<CouponTemplate> createTemplate(CouponTemplate template) {
@@ -92,8 +92,56 @@ public class CouponServiceImpl implements CouponService {
         }
     }
     // =================================================================
-    // 建立優惠相關======================================================
+    // 建立相關==========================================================
     // =================================================================
+
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+    public ServiceResponse<CouponPublished> markCouponAsUsed(String id) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
+        if(id == null) {ec.add("請輸入優惠券ID");}
+
+        // service logic
+        CouponPublished foundCoupon = publishedRepository.findById(id).orElse(null);        
+
+        if(foundCoupon == null) {
+            ec.add("找不到該優惠券");
+        } else {
+            if(foundCoupon.getIsUsed()) {ec.add("優惠券已使用過");}  
+        } 
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+
+            foundCoupon.setIsUsed(true);
+
+            CouponPublished savedEntry = publishedRepository.save(foundCoupon);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("修改優惠券發生錯誤: " + e.getMessage());
+        }
+    }
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+
+
+
+
+
 
 
 

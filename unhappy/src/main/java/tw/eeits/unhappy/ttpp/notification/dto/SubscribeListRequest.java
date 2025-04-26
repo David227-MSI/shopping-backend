@@ -7,8 +7,7 @@ import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 @Data
 public class SubscribeListRequest {
     
-    private Integer id;
-    
+    @NotNull(message = "用戶ID 不可為空值")
     private Integer userId; // fk
 
     @NotNull(message = "訂閱目標ID 不可為空值")

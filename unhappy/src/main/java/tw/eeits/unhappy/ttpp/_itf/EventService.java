@@ -21,14 +21,14 @@ public interface EventService {
     /**
      * @brief       建立活動用圖片/影片媒材
      * @param media 插入的媒體
-     * @return      建立成功: 媒體物件 / 建立失敗: Null
+     * @return      ServiceResponse封包
      */
     ServiceResponse<EventMedia> addMediaToEvent(EventMedia media);
 
     /**
      * @brief       建立活動用的獎品
      * @param prize 活動需要的獎品
-     * @return      建立成功: 獎品物件 / 建立失敗: Null
+     * @return      ServiceResponse封包
      */
     ServiceResponse<EventPrize> addEventPrize(EventPrize prize);
     // 建立活動相關======================================================
@@ -86,7 +86,7 @@ public interface EventService {
     /**
      * @brief             建立活動參加者
      * @param participant 登記的活動參加者
-     * @return            登記成功: 參加者物件 / 登記失敗: Null
+     * @return            ServiceResponse封包
      */
     ServiceResponse<EventParticipant> attendEvent(EventParticipant participant);
     // 用戶操作相關======================================================

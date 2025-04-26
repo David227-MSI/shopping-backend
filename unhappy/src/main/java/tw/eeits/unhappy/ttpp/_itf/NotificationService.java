@@ -13,14 +13,14 @@ public interface NotificationService {
     /**
      * @brief          建立通知訊息的模板
      * @param template 模板物件
-     * @return         建立成功: 模板物件 / 建立失敗: Null
+     * @return         ServiceResponse封包
      */
     ServiceResponse<NotificationTemplate> createTemplate(NotificationTemplate template);
 
     /**
      * @brief                        發送通知訊息給用戶
      * @param notificationPublished  預計要發送的訊息
-     * @return                       建立成功: 通知訊息 / 建立失敗: Null
+     * @return                       ServiceResponse封包
      */
     ServiceResponse<NotificationPublished> publishNotification(NotificationPublished notificationPublished);
     // 建立通知相關======================================================
