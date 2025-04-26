@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ttpp._fake.UserMember;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 
 @Data
@@ -33,15 +34,16 @@ public class EventParticipant {
 
     
     // fk_event_participant_user
-    // @NotNull(message = "userMember不可為空值")
-    // @ManyToOne
-    // @JoinColumn(name = "user_id", nullable = false)
-    // private UserMember userMember;
+    @NotNull(message = "userMember 不可為空值")
+    @ManyToOne
+    @JsonBackReference
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserMember userMember;
     // |||                |||
     // vvv to be replaced vvv
-    @NotNull(message = "userId 不可為空值")
-    @Column(name = "user_id", nullable = false)
-    private Integer userId; // fk
+    // @NotNull(message = "userId 不可為空值")
+    // @Column(name = "user_id", nullable = false)
+    // private Integer userId; // fk
 
     // fk_event_participant_event_prize
     @NotNull(message = "eventPrize 不可為空值")

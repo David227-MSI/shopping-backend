@@ -1,14 +1,14 @@
 package tw.eeits.unhappy.ttpp.coupon.service;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
+import tw.eeits.unhappy.ttpp._response.ErrorCollector;
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
@@ -27,51 +27,68 @@ public class CouponServiceImpl implements CouponService {
     // 建立優惠相關======================================================
     // =================================================================
     @Override
-    public CouponTemplate createTemplate(CouponTemplate template) {
+    public ServiceResponse<CouponTemplate> createTemplate(CouponTemplate template) {
         
-        // check input parameter
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
         if(template == null) {
-            return null;
+            ec.add("輸入資料為 null");
+        } else {
+            ec.validate(template, validator);
         }
 
-        // verify datatype
-        Set<ConstraintViolation<CouponTemplate>> violations = validator.validate(template);
-        if(!violations.isEmpty()) {
-            System.out.println(violations);
-            return null;
+
+        // service logic
+
+
+        
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
         }
 
+        // service operation
         try {
-            return templateRepository.save(template);
+            CouponTemplate savedEntry = templateRepository.save(template);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("建立優惠券模板發生異常: " + e);
-            return null;
+            return ServiceResponse.fail("建立優惠券模板發生異常: " + e.getMessage());
         }
-
     }
 
     @Override
-    public CouponPublished publishCoupon(CouponPublished couponPublished) {
-        // check input parameter
-        if (couponPublished == null || 
-            couponPublished.getUserMember() == null || 
-            couponPublished.getCouponTemplate() == null
-        ) {
-            return null;
+    public ServiceResponse<CouponPublished> publishCoupon(CouponPublished coupon) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
+        if (coupon == null) {
+            ec.add("輸入資料為 null");
+        } else {
+            if(coupon.getUserMember() == null) {
+                ec.add("輸入用戶為 null");
+            } 
+            if(coupon.getCouponTemplate() == null) {
+                ec.add("輸入優惠券模板為 null");
+            }
+            ec.validate(coupon, validator);
         }
 
-        // verify datatype
-        Set<ConstraintViolation<CouponPublished>> violations = validator.validate(couponPublished);
-        if (!violations.isEmpty()) {
-            System.out.println(violations);
-            return null;
+        // service logic
+
+
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
         }
 
+
+        // service operation
         try {
-            return publishedRepository.save(couponPublished);
+            CouponPublished savedEntry = publishedRepository.save(coupon);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("發送優惠券發生錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("發送優惠券發生錯誤: " + e.getMessage());
         }
     }
     // =================================================================

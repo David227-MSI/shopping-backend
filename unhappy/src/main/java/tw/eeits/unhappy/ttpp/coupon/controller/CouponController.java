@@ -2,9 +2,9 @@ package tw.eeits.unhappy.ttpp.coupon.controller;
 
 
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,20 +15,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._fake.UserMember;
 import tw.eeits.unhappy.ttpp._fake.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
+import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponPublishedRequest;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-
 
 
 @RestController
@@ -46,32 +46,27 @@ public class CouponController {
     // 建立優惠相關======================================================
     // =================================================================
     @PostMapping("/template")
-    public ResponseEntity<ApiRes<CouponTemplate>> createTemplate(
+    public ResponseEntity<ApiRes<Map<String, Object>>> createTemplate(
         @RequestBody CouponTemplateRequest request
     ) {
+        ErrorCollector ec = new ErrorCollector();
 
         // verify data type
-        Set<ConstraintViolation<CouponTemplateRequest>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            String errorMessages = violations.stream()
-                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.joining("; "));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(errorMessages));
-        }
-
-
-        // check product and brand
+        ec.validate(request, validator);
+        
+        // verify foreign key (Brand, Product)
         // if(request.getApplicableType() == ApplicableType.PRODUCT) {
         //     Product foundProduct = productService.findProductById(request.getApplicableId());
-        //     if(foundProduct == null) {
-        //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標商品"));
-        //     }
+        //     if(foundProduct == null) {ec.add("找不到目標商品");}
         // } else if(request.getApplicableType() == ApplicableType.BRAND) {
         //     Brand foundBrand = brandService.findBrandById(request.getApplicableId());
-        //     if(foundBrand == null) {
-        //         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標廠商"));
-        //     }
+        //     if(foundBrand == null) {ec.add("找不到目標廠商");}
         // }
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
 
         // transfer data from DTO to Entity
         CouponTemplate newEntry = CouponTemplate.builder()
@@ -85,36 +80,46 @@ public class CouponController {
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
                 .build();
-            CouponTemplate savedEntry = couponService.createTemplate(newEntry);
 
-        // create template
-        return ResponseEntity.ok(ResponseFactory.success(savedEntry));
+        // call service
+        ServiceResponse<CouponTemplate> res = couponService.createTemplate(newEntry);
+
+        if (!res.isSuccess()) {
+            ec.add(res.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        CouponTemplate savedEntry = res.getData();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", savedEntry.getId());
+        data.put("applicableType", savedEntry.getApplicableType());
+        data.put("discountType", savedEntry.getDiscountType());
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
 
     @PostMapping("/publish")
-    public ResponseEntity<ApiRes<CouponPublished>> publish(
+    public ResponseEntity<ApiRes<Map<String, Object>>> publish(
         @RequestBody CouponPublishedRequest request
     ) {
-        
-        // verify data type
-        Set<ConstraintViolation<CouponPublishedRequest>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            String errorMessages = violations.stream()
-                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.joining("; "));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(errorMessages));
-        }
 
-        // check couponTemplate
-        CouponTemplate foundTemplate = couponService.findTemplateById(request.getCouponTemplateId());
-        if(foundTemplate == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到套用的優惠券模板"));
-        }
+        ErrorCollector ec = new ErrorCollector();
+
+        // verify data type
+        ec.validate(request, validator);
         
-        // check User
+        // check foreign key
+        CouponTemplate foundTemplate = couponService.findTemplateById(request.getCouponTemplateId());
         UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        if(foundUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("找不到目標用戶"));
+
+        if(foundTemplate == null) {ec.add("找不到套用的優惠券模板");}
+        if(foundUser == null) {ec.add("找不到目標用戶");}
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
         }
 
         // transfer data from DTO to Entity
@@ -123,9 +128,24 @@ public class CouponController {
                 .couponTemplate(foundTemplate)
                 .isUsed(false)
                 .build();
-        CouponPublished savedEntry = couponService.publishCoupon(newEntry);
 
-        return ResponseEntity.ok(ResponseFactory.success(savedEntry));
+        // call service
+        ServiceResponse<CouponPublished> res = couponService.publishCoupon(newEntry);
+
+        if (!res.isSuccess()) {
+            ec.add(res.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        CouponPublished savedEntry = res.getData();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", savedEntry.getId());
+        data.put("userId", savedEntry.getUserMember().getId());
+        data.put("applicableType", savedEntry.getCouponTemplate().getApplicableType());
+        data.put("discountType", savedEntry.getCouponTemplate().getDiscountType());
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
     // 建立優惠相關======================================================

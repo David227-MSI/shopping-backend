@@ -1,13 +1,15 @@
 package tw.eeits.unhappy.ttpp.event.service;
 
-import java.util.Set;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.EventService;
+import tw.eeits.unhappy.ttpp._response.ErrorCollector;
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
@@ -31,69 +33,107 @@ public class EventServiceImpl implements EventService {
     // 建立活動相關======================================================
     // =================================================================
     @Override
-    public Event createEvent(Event event) {
+    public ServiceResponse<Event> createEvent(Event event) {
 
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
         if(event == null) {
-            return null;
+            ec.add("輸入活動為null");
+        } else {
+            ec.validate(event, validator);
         }
 
-        // verify datatype
-        Set<ConstraintViolation<Event>> violations = validator.validate(event);
-        if (!violations.isEmpty()) {
-            return null;
+        // service logic
+
+        if(event.getStartTime().isBefore(LocalDateTime.now())) {
+            ec.add("活動開始時間不能早於現在時間");
+        } 
+        if(event.getAnnounceTime().isBefore(LocalDateTime.now())) {
+            ec.add("活動宣告時間不能早於現在時間");
         }
-        System.out.println(3);
-        // create event
+        if(event.getAnnounceTime().isAfter(event.getStartTime())) {
+            ec.add("活動宣告時間不能晚於活動開始時間");
+        }
+
+
+
+
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
         try {
-            return eventRepository.save(event);
+            Event savedEntry = eventRepository.save(event);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("建立活動錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("建立活動錯誤: " + e.getMessage());
         }
     }
 
     @Override
-    public EventMedia addMediaToEvent(EventMedia media) {
+    public ServiceResponse<EventMedia> addMediaToEvent(EventMedia media) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
         if(media == null) {
-            return null;
+            ec.add("輸入媒體為 null");;
+        } else {
+            ec.validate(media, validator);
         }
 
-        // verify datatype
-        Set<ConstraintViolation<EventMedia>> violations = validator.validate(media);
-        if (!violations.isEmpty()) {
-            return null;
+        // service logic
+
+
+
+
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
         }
 
-        // create event media
+        // service operation
         try {
-            return mediaRepository.save(media);
+            EventMedia savedEntry = mediaRepository.save(media);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("建立活動媒體錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("建立活動媒體錯誤: " + e.getMessage());
         }
-
     }
 
     @Override
-    public EventPrize addEventPrize(EventPrize prize) {
+    public ServiceResponse<EventPrize> addEventPrize(EventPrize prize) {
+
+        ErrorCollector ec = new ErrorCollector();
+
         if(prize == null) {
-            return null;
+            ec.add("輸入獎品為 null");
+        } else {
+            ec.validate(prize, validator);
         }
 
-        // verify datatype
-        Set<ConstraintViolation<EventPrize>> violations = validator.validate(prize);
-        if (!violations.isEmpty()) {
-            return null;
+        // service logic
+        BigDecimal winRate = prize.getWinRate();
+        if (winRate.compareTo(BigDecimal.ZERO) < 0 || winRate.compareTo(BigDecimal.ONE) > 0) {
+            ec.add("winRate: winRate 必須在 0.0 到 1.0 之間");
         }
 
-        // create event prize
+
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
         try {
-            return prizeRepository.save(prize);
+            EventPrize savedEntry = prizeRepository.save(prize);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("建立獎品錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("建立獎品錯誤: " + e);
         }
-
     }
     // =================================================================
     // 建立活動相關======================================================
@@ -130,29 +170,32 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public EventParticipant attendEvent(EventParticipant participant) {
-        if(participant == null ||
-            participant.getEvent() == null || 
-            participant.getEventPrize() == null
-        ) {
-            return null;
-        }
+    public ServiceResponse<EventParticipant> attendEvent(EventParticipant participant) {
+        
+        ErrorCollector ec = new ErrorCollector();
 
-        // verify datatype
-        Set<ConstraintViolation<EventParticipant>> violations = validator.validate(participant);
-        if (!violations.isEmpty()) {
-            return null;
+        // check input and verify datatype
+        if(participant == null) {
+            ec.add("輸入參加者為null");
+        } else {
+            if(participant.getEvent() == null) {ec.add("輸入活動為 null");} 
+            if(participant.getEventPrize() == null) {ec.add("輸入獎品為 null");}
+            ec.validate(participant, validator);
         }
+        
 
         // check event maxEntries
         // Integer maxEntries = participant.getEvent().getMaxEntries();
 
-        // create event participant
+
+
+
+        // service operation
         try {
-            return participantRepository.save(participant);
+            EventParticipant savedEntry = participantRepository.save(participant);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            System.out.println("建立活動參加者錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("建立活動參加者錯誤: " + e.getMessage());
         }
     }
 

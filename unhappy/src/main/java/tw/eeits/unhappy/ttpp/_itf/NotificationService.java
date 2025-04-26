@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp._itf;
 
 import java.util.List;
 
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -14,14 +15,14 @@ public interface NotificationService {
      * @param template 模板物件
      * @return         建立成功: 模板物件 / 建立失敗: Null
      */
-    NotificationTemplate createTemplate(NotificationTemplate template);
+    ServiceResponse<NotificationTemplate> createTemplate(NotificationTemplate template);
 
     /**
      * @brief                        發送通知訊息給用戶
      * @param notificationPublished  預計要發送的訊息
      * @return                       建立成功: 通知訊息 / 建立失敗: Null
      */
-    NotificationPublished publishNotification(NotificationPublished notificationPublished);
+    ServiceResponse<NotificationPublished> publishNotification(NotificationPublished notificationPublished);
     // 建立通知相關======================================================
 
     

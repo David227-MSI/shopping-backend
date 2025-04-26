@@ -1,6 +1,7 @@
 package tw.eeits.unhappy.ttpp._itf;
 
 
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
@@ -15,21 +16,21 @@ public interface EventService {
      * @param event 活動物件
      * @return      建立成功: 活動物件 / 建立失敗: Null
      */
-    Event createEvent(Event event);
+    ServiceResponse<Event> createEvent(Event event);
 
     /**
      * @brief       建立活動用圖片/影片媒材
      * @param media 插入的媒體
      * @return      建立成功: 媒體物件 / 建立失敗: Null
      */
-    EventMedia addMediaToEvent(EventMedia media);
+    ServiceResponse<EventMedia> addMediaToEvent(EventMedia media);
 
     /**
      * @brief       建立活動用的獎品
      * @param prize 活動需要的獎品
      * @return      建立成功: 獎品物件 / 建立失敗: Null
      */
-    EventPrize addEventPrize(EventPrize prize);
+    ServiceResponse<EventPrize> addEventPrize(EventPrize prize);
     // 建立活動相關======================================================
 
 
@@ -87,7 +88,7 @@ public interface EventService {
      * @param participant 登記的活動參加者
      * @return            登記成功: 參加者物件 / 登記失敗: Null
      */
-    EventParticipant attendEvent(EventParticipant participant);
+    ServiceResponse<EventParticipant> attendEvent(EventParticipant participant);
     // 用戶操作相關======================================================
 
 

@@ -1,14 +1,17 @@
 package tw.eeits.unhappy.ttpp.notification.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
+import tw.eeits.unhappy.ttpp._response.ErrorCollector;
+import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -28,48 +31,74 @@ public class NotificationServiceImpl implements NotificationService {
     // 建立通知相關======================================================
     // =================================================================
     @Override
-    public NotificationTemplate createTemplate(NotificationTemplate template) {
+    public ServiceResponse<NotificationTemplate> createTemplate(NotificationTemplate template) {
+        ErrorCollector ec = new ErrorCollector();
+
+        // check input and verify datatype
+        if (template == null) {
+            ec.add("輸入資料為 null");
+        } else {
+            ec.validate(template, validator);
+        }
+
+        // service logic
+
+
+
+
         
-        if(template == null) {
-            return null;
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
         }
 
-        // verify datatype
-        Set<ConstraintViolation<NotificationTemplate>> violations = validator.validate(template);
-        if(!violations.isEmpty()) {
-            return null;
-        }
-
+        // service operation
         try {
-            return templateRepository.save(template);
+            NotificationTemplate savedEntry = templateRepository.save(template);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
             System.out.println("建立訊息模板錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("建立失敗: " + e.getMessage());
         }
     }
         
     @Override
-    public NotificationPublished publishNotification(NotificationPublished notificationPublished) {
-        // check input parameter
-        if (notificationPublished == null || 
-            notificationPublished.getUserMember() == null || 
-            notificationPublished.getNotificationTemplate() == null
-        ) {
-            return null;
+    public ServiceResponse<NotificationPublished> publishNotification(NotificationPublished notification) {
+        Set<String> errors = new HashSet<>();
+
+        // check input and verify datatype
+        if (notification == null) {
+            errors.add("輸入資料為 null");
+        } else {
+            if (notification.getUserMember() == null) {
+                errors.add("輸入用戶為 null");
+            }
+            if (notification.getNotificationTemplate() == null) {
+                errors.add("輸入訊息模板為 null");
+            }
+            // validator
+            errors.addAll(
+                validator.validate(notification)
+                    .stream()
+                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                    .collect(Collectors.toSet())
+            );
+        }
+        // service logic
+
+
+
+
+
+        if (!errors.isEmpty()) {
+            return ServiceResponse.fail(String.join("; ", errors));
         }
 
-        // verify datatype
-        Set<ConstraintViolation<NotificationPublished>> violations = validator.validate(notificationPublished);
-        if (!violations.isEmpty()) {
-            return null;
-        }
-
+        // service operation
         try {
-            return publishedRepository.save(notificationPublished);
+            NotificationPublished savedEntry = publishedRepository.save(notification);
+            return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            // 資料庫異常等，統一返回 null
-            System.out.println("通知訊息發送錯誤: " + e);
-            return null;
+            return ServiceResponse.fail("通知訊息推送失敗: " + e.getMessage());
         }
     }
     // =================================================================
