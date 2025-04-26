@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ra.review.StringListJsonConverter;
 
 @Entity
 @Table(name = "product_review", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "order_item_id" }))
@@ -46,8 +47,9 @@ public class ProductReview {
     private String reviewText;
 
     @Size(max = 1000)
+    @Convert(converter = StringListJsonConverter.class)
     @Column(name = "review_images", length = 1000)
-    private String reviewImages;
+    private List<String> reviewImages = List.of();  // ← String → List<String>
 
     @NotNull(message = "Score quality 不可為空值")
     @Min(1)

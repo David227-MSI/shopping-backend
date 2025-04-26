@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ra.review.dto;
 
 import tw.eeits.unhappy.ra.review.model.ReviewTag;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 public record ReviewResp(
@@ -9,7 +10,7 @@ public record ReviewResp(
         Integer userId,
         Integer orderItemId,
         String  reviewText,
-        String  reviewImages,
+        List<String> reviewImages,
         Integer scoreQuality,
         Integer scoreDescription,
         Integer scoreDelivery,
@@ -18,5 +19,5 @@ public record ReviewResp(
         Integer likeCount,
         LocalDateTime createdAt
 ) {
-    
+
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -49,8 +50,8 @@ class ReviewServiceTest {
         // Arrange ------------------------------------------------------
         ReviewCreateReq req = new ReviewCreateReq(
                 "很好用！",                // reviewText
-                null,                      // reviewImages
-                5, 5, 5,                   // 3 scores
+                List.of("u1","u2"),                      // reviewImages
+                5, 5, 5,  // 3 scores
                 Set.of(ReviewTag.FAST, ReviewTag.QUALITY) // 2 tags
         );
 

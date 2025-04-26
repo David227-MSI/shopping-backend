@@ -2,6 +2,10 @@ spring:
   # 專案名
   application:
     name: unhappy
+  
+  # # 部署環境
+  # profiles:
+  #   active: dev
 
   # 編碼格式
   output:
@@ -37,5 +41,5 @@ spring:
 
 azure:
   storage:
-    connection-string: ${AZURE_STORAGE_CONN}
-    container: unhappy-media
+    connection-string: DefaultEndpointsProtocol=https;AccountName=unhappyproductmedia;AccountKey=SmVnSwDVTv4ihzV2PdozNsjg6WzTTZT4fawbW1Mx2hou1bByMZCqOGsOPUe73HyUxZ74es+qVrsc+ASt58xp/g==;EndpointSuffix=core.windows.net
+    container: product-media

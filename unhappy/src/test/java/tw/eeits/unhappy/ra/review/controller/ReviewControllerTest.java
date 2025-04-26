@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
 import tw.eeits.unhappy.ra.review.dto.ReviewResp;
 import tw.eeits.unhappy.ra.review.model.ReviewTag;
 import tw.eeits.unhappy.ra.review.model.ReviewSortOption;
+import tw.eeits.unhappy.ra.review.service.ReviewMediaService;
 import tw.eeits.unhappy.ra.review.service.ReviewService;
 
 @WebMvcTest(ReviewController.class)
@@ -32,14 +34,15 @@ class ReviewControllerTest {
         @Autowired MockMvc mvc;
         @Autowired ObjectMapper mapper;
 
-        @MockBean ReviewService reviewService;   // Service 層打 stub
+        @MockBean ReviewService reviewService;
+        @MockBean ReviewMediaService reviewMediaService;
 
 
     /* ---------- GET /product/{productId} ---------- */
         @Test @DisplayName("查詢評論 (LATEST) 成功")
         void list_ok() throws Exception {
 
-                ReviewResp r1 = new ReviewResp(1, 1, 9, "A", null,
+                ReviewResp r1 = new ReviewResp(1, 1, 9, "A", List.of("http://x/img.jpg"),
                         5,5,5,true, Set.of(), 2, null);
 
                 given(reviewService.listByProduct(9, ReviewSortOption.LATEST, 0, 5))
@@ -51,7 +54,8 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))   // ApiRes 的 success 欄位
                 .andExpect(jsonPath("$.data.totalElements").value(1))
                 .andExpect(jsonPath("$.data.content[0].id").value(1))
-                .andExpect(jsonPath("$.data.content[0].reviewText").value("A"));
+                .andExpect(jsonPath("$.data.content[0].reviewText").value("A"))
+                .andExpect(jsonPath("$.data.content[0].reviewImages[0]").value("http://x/img.jpg"));
                 }
 
 
@@ -64,7 +68,7 @@ class ReviewControllerTest {
                         Set.of(ReviewTag.FAST, ReviewTag.QUALITY));
 
                 ReviewResp stubResp = new ReviewResp(
-                        1, 1001, 9, req.reviewText(), null,
+                        1, 1001, 9, req.reviewText(), List.of(),
                         5, 5, 5, true, req.tags(),
                         0, null);
 
@@ -80,6 +84,23 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.data.scoreQuality").value(5));
         }
 
+        /* ---------- POST /upload ---------- */
+        @Test @DisplayName("上傳評論圖片成功")
+        void uploadImg_ok() throws Exception {
+
+        MockMultipartFile f = new MockMultipartFile(
+                "file","p.png",MediaType.IMAGE_PNG_VALUE,"hi".getBytes());
+
+                given(reviewMediaService.upload(eq(1001), any()))
+                        .willReturn("https://cdn/reviews/p.png");
+
+                mvc.perform(multipart("/app/reviews/upload")
+                        .file(f)
+                        .param("userId","1001"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").value("https://cdn/reviews/p.png"));
+        }
 
         /* ---------- POST /{reviewId}/like ---------- */
         @Test @DisplayName("按 / 取消讚成功，回新總數")

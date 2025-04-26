@@ -1,10 +1,15 @@
 package tw.eeits.unhappy.ra.review.controller;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+
+import java.io.IOException;
 
 import org.springframework.data.domain.Page;
 
@@ -14,6 +19,7 @@ import tw.eeits.unhappy.ra.review.dto.PageDto;
 import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
 import tw.eeits.unhappy.ra.review.dto.ReviewResp;
 import tw.eeits.unhappy.ra.review.model.ReviewSortOption;
+import tw.eeits.unhappy.ra.review.service.ReviewMediaService;
 import tw.eeits.unhappy.ra.review.service.ReviewService;
 
 @RestController
@@ -22,6 +28,7 @@ import tw.eeits.unhappy.ra.review.service.ReviewService;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewMediaService reviewMediaService;
 
     /* ---------- 前台：商品評論列表 ---------- */
     @GetMapping("/product/{pid}")
@@ -48,6 +55,18 @@ public class ReviewController {
 
         ReviewResp resp = reviewService.addReview(userId, orderItemId, req);
         return ResponseEntity.ok(ResponseFactory.success(resp));
+    }
+
+    /* ---------- 前台：新增評論圖片 ---------- */
+    @PostMapping(
+    value = "/upload",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiRes<String>> uploadImg(
+            @RequestParam Integer userId,
+            @RequestPart  MultipartFile file) throws IOException {
+
+        String url = reviewMediaService.upload(userId, file);
+        return ResponseEntity.ok(ResponseFactory.success(url));
     }
 
     /* ---------- 前台：按/收回讚 ---------- */
