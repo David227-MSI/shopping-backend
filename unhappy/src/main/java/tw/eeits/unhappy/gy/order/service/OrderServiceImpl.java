@@ -1,6 +1,10 @@
 package tw.eeits.unhappy.gy.order.service;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,100 +48,99 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private CouponPublishedRepository couponPublishedRepository;
 
-    // 提出重複計算方法
-    private BigDecimal calculateFinalAmount(BigDecimal total, BigDecimal discount) {
-        total = Optional.ofNullable(total).orElse(BigDecimal.ZERO);
-        discount = Optional.ofNullable(discount).orElse(BigDecimal.ZERO);
-        return total.subtract(discount);
-    }
-
-    // 建立DTO(提出方法)
-    private OrderResponseDTO convertToOrderResponseDTO(Order order) {
-        return OrderResponseDTO.builder()
-                .orderId(order.getId())
-                .totalAmount(order.getTotalAmount())
-                .discountAmount(order.getDiscountAmount())
-                .finalAmount(calculateFinalAmount(order.getTotalAmount(), order.getDiscountAmount()))
-                .status(order.getStatus().name())
-                .statusText(order.getStatus().getDisplayText())
-                .paymentStatus(order.getPaymentStatus().name())
-                .paymentStatusText(order.getPaymentStatus().getDisplayText())
-                .paymentMethod(order.getPaymentMethod())
-                .transactionNumber(order.getTransactionNumber())
-                .paidAt(order.getPaidAt())
-                .createdAt(order.getCreatedAt())
-                .build();
-    }
-
+    // 訂單建立
     @Transactional
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO dto) {
+        UserMember user = findUser(dto.getUserId());
+        List<CartItem> cartItems = getCartItems(user.getId());
+        BigDecimal totalAmount = calculateTotalAmount(cartItems);
+        CouponUsageResult couponResult = applyCouponIfNeeded(dto, totalAmount);
+        Order order = saveOrder(user, couponResult, totalAmount, dto);
+        createOrderItems(order, cartItems);
+        checkoutCartItems(cartItems);
+        return convertToOrderResponseDTO(order);
+    }
 
-        // 找使用者
-        UserMember user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(dto.getUserId())); //範例 : 找不到使用者ID : userId
+    // 小方法區
 
-        // 抓取未結帳購物車資料
-        List<CartItem> cartItemList = cartItemRepository.findByUserMember_IdAndCheckedOutFalse(user.getId());
-        if (cartItemList.isEmpty()) {
-            throw new EmptyCartException(dto.getUserId());
+    // 查詢會員
+    private UserMember findUser(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    // 查詢購物車內商品
+    private List<CartItem> getCartItems(Integer userId) {
+        List<CartItem> cartItems = cartItemRepository.findByUserMember_IdAndCheckedOutFalse(userId);
+        if (cartItems.isEmpty()) {
+            throw new EmptyCartException(userId);
         }
+        return cartItems;
+    }
 
-        // 計算總金額
-        BigDecimal totalAmount = cartItemList.stream()
+    // 計算總金額
+    private BigDecimal calculateTotalAmount(List<CartItem> cartItems) {
+        return cartItems.stream()
                 .map(item -> item.getProduct().getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
-        // 處理優惠券
-        CouponPublished coupon = null;
-        BigDecimal discountAmount = BigDecimal.ZERO;
-
-        if (dto.getCouponPublishedId() != null) {
-            coupon = couponPublishedRepository.findByIdAndUserMember_Id(dto.getCouponPublishedId(), dto.getUserId())
-                    .orElseThrow(() -> new InvalidCouponUsageException("無法使用此優惠券"));
-
-            if (Boolean.TRUE.equals(coupon.getIsUsed())) {
-                throw new InvalidCouponUsageException("此優惠券已使用");
-            }
-
-            CouponTemplate template = coupon.getCouponTemplate();
-            if (template == null) {
-                throw new InvalidCouponUsageException("優惠券模板資料錯誤");
-            }
-
-            // 確認是否達最低消費門檻
-            BigDecimal minSpend = Optional.ofNullable(template.getMinSpend()).orElse(BigDecimal.ZERO);
-            if (totalAmount.compareTo(minSpend) < 0) {
-                throw new InvalidCouponUsageException("未達最低消費金額");
-            }
-
-            // 取得折扣金額
-            discountAmount = Optional.ofNullable(template.getDiscountValue()).orElse(BigDecimal.ZERO);
-            BigDecimal maxDiscount = Optional.ofNullable(template.getMaxDiscount()).orElse(discountAmount);
-
-            // 若超過最大折扣則調整
-            if (discountAmount.compareTo(maxDiscount) > 0) {
-                discountAmount = maxDiscount;
-            }
-
-            // 優惠券標記為已使用
-            coupon.setIsUsed(true);
-            couponPublishedRepository.save(coupon);
+    // 套用優惠券
+    private CouponUsageResult applyCouponIfNeeded(OrderRequestDTO dto, BigDecimal totalAmount) {
+        if (dto.getCouponPublishedId() == null) {
+            return new CouponUsageResult(null, BigDecimal.ZERO);
         }
 
-        // 建立訂單
+        CouponPublished coupon = couponPublishedRepository.findByIdAndUserMember_Id(dto.getCouponPublishedId(), dto.getUserId())
+                .orElseThrow(() -> new InvalidCouponUsageException("無法使用此優惠券"));
+
+        if (Boolean.TRUE.equals(coupon.getIsUsed())) {
+            throw new InvalidCouponUsageException("此優惠券已使用");
+        }
+
+        CouponTemplate template = Optional.ofNullable(coupon.getCouponTemplate())
+                .orElseThrow(() -> new InvalidCouponUsageException("優惠券模板資料錯誤"));
+
+        BigDecimal minSpend = Optional.ofNullable(template.getMinSpend()).orElse(BigDecimal.ZERO);
+        if (totalAmount.compareTo(minSpend) < 0) {
+            throw new InvalidCouponUsageException("未達最低消費金額");
+        }
+
+        // 計算折扣金額
+        BigDecimal discountAmount = Optional.ofNullable(template.getDiscountValue()).orElse(BigDecimal.ZERO);
+        BigDecimal maxDiscount = Optional.ofNullable(template.getMaxDiscount()).orElse(discountAmount);
+
+        // 如果折扣金額大於最大折扣金額，則使用最大折扣金額
+        if (discountAmount.compareTo(maxDiscount) > 0) {
+            discountAmount = maxDiscount;
+        }
+
+        coupon.setIsUsed(true);
+        couponPublishedRepository.save(coupon);
+
+        return new CouponUsageResult(coupon, discountAmount);
+    }
+
+    // 儲存訂單(訂單)
+    private Order saveOrder(UserMember user, CouponUsageResult couponResult, BigDecimal totalAmount, OrderRequestDTO dto) {
         Order order = Order.builder()
                 .userMember(user)
-                .couponPublished(coupon)
+                .couponPublished(couponResult.getCoupon())
                 .totalAmount(totalAmount)
-                .discountAmount(discountAmount)
+                .discountAmount(couponResult.getDiscountAmount())
                 .status(OrderStatus.PENDING)
                 .paymentStatus(PaymentStatus.UNPAID)
+                .recipientName(dto.getRecipientName())
+                .recipientPhone(dto.getRecipientPhone())
+                .recipientAddress(dto.getRecipientAddress())
                 .build();
-        orderRepository.save(order);
+        return orderRepository.save(order);
+    }
 
-        // 產生訂單明細
-        List<OrderItem> orderItems = cartItemList.stream()
+    // 儲存訂單明細(商品)
+    private void createOrderItems(Order order, List<CartItem> cartItems) {
+        List<OrderItem> orderItems = cartItems.stream()
                 .map(cartItem -> OrderItem.builder()
                         .order(order)
                         .product(cartItem.getProduct())
@@ -146,15 +149,46 @@ public class OrderServiceImpl implements OrderService {
                         .productNameAtTheTime(cartItem.getProduct().getName())
                         .build())
                 .collect(Collectors.toList());
-        // 多筆資料用saveAll
         orderItemRepository.saveAll(orderItems);
+    }
 
-        // 更新購物車狀態
-        cartItemList.forEach(cartItem -> cartItem.setCheckedOut(true));
-        cartItemRepository.saveAll(cartItemList);
+    // 結帳購物車商品(標記為已結帳)
+    private void checkoutCartItems(List<CartItem> cartItems) {
+        cartItems.forEach(cartItem -> cartItem.setCheckedOut(true));
+        cartItemRepository.saveAll(cartItems);
+    }
 
-        // 回傳DTO
-        return convertToOrderResponseDTO(order);
+    // DTO轉換方法
+
+    private OrderResponseDTO convertToOrderResponseDTO(Order order) {
+        return OrderResponseDTO.builder()
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .discountAmount(order.getDiscountAmount())
+                .finalAmount(order.getTotalAmount().subtract(Optional.ofNullable(order.getDiscountAmount()).orElse(BigDecimal.ZERO)))
+                .status(order.getStatus().name())
+                .statusText(order.getStatus().getDisplayText())
+                .paymentStatus(order.getPaymentStatus().name())
+                .paymentStatusText(order.getPaymentStatus().getDisplayText())
+                .paymentMethod(order.getPaymentMethod())
+                .transactionNumber(order.getTransactionNumber())
+                .paidAt(order.getPaidAt())
+                .createdAt(order.getCreatedAt())
+                .recipientName(order.getRecipientName())
+                .recipientPhone(order.getRecipientPhone())
+                .recipientAddress(order.getRecipientAddress())
+                .build();
+    }
+
+    // 內部使用 處理套用優惠券結果的小類別
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    private static class CouponUsageResult {
+        private CouponPublished coupon;
+        private BigDecimal discountAmount;
     }
 
     // 查某會員所有訂單
