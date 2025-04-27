@@ -31,7 +31,7 @@ public class CartItemController {
         return ResponseEntity.ok(cartItems);
     }
 
-    // 修改
+    // 更新
     @PutMapping
     public ResponseEntity<String> updateCartItem(@RequestBody CartItemRequestDTO dto) {
         cartItemService.updateItemQuantity(dto);
