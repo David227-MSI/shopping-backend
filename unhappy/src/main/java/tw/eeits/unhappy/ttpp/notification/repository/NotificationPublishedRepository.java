@@ -25,7 +25,6 @@ public interface NotificationPublishedRepository extends JpaRepository<Notificat
             Join<NotificationPublished, UserMember> userJoin =  root.join("userMember");
             Join<NotificationPublished, NotificationTemplate> templateJoin = root.join("notificationTemplate");
 
-
             // UserMember (required)
             predicates.add(criteriaBuilder.equal(userJoin.get("id"), query.getUserId()));
 

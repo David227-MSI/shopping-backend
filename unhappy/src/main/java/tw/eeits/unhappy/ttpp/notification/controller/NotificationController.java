@@ -30,7 +30,7 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
 @RestController
-@RequestMapping("/app/notifications")
+@RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
@@ -178,6 +178,8 @@ public class NotificationController {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
+    
+
     @PostMapping("/user/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findUserNotifications(
         @RequestBody NotificationQuery query) {
@@ -197,6 +199,8 @@ public class NotificationController {
             mp.put("id", notification.getId());
             mp.put("isUsed", notification.getIsRead());
             mp.put("title", notification.getNotificationTemplate().getTitle());
+            mp.put("noticeType", notification.getNotificationTemplate().getNoticeType());
+            mp.put("createdAt", notification.getCreatedAt());
             mp.put("content", notification.getNotificationTemplate().getContent());
             return mp;
         }).collect(Collectors.toList());

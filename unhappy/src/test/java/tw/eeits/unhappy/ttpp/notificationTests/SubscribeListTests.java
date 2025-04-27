@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 import tw.eeits.unhappy.ttpp.notification.repository.SubscribeListRepository;
@@ -17,11 +19,16 @@ public class SubscribeListTests {
     @Autowired
     private SubscribeListRepository subscribeListRepository;
 
+    @Autowired
+    private UserMemberRepository userMemberRepository;
+
     @Test
     public void testSaveAndFindById() {
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         SubscribeList newEntry = SubscribeList.builder()
-            .userId(1001)
+            .userMember(foundUser)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)
@@ -30,7 +37,7 @@ public class SubscribeListTests {
         SubscribeList foundEntry = subscribeListRepository.findById(savedEntry.getId()).orElse(null);
 
         assertNotNull(savedEntry);
-        assertEquals(savedEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(savedEntry.getUserMember(), foundEntry.getUserMember());
         assertEquals(newEntry.getItemId(), foundEntry.getItemId());
         assertEquals(newEntry.getItemType(), foundEntry.getItemType());
         assertEquals(newEntry.getIsSubscribing(), foundEntry.getIsSubscribing());
@@ -39,8 +46,10 @@ public class SubscribeListTests {
     @Test
     public void testUpdateById() {
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
         SubscribeList newEntry = SubscribeList.builder()
-            .userId(1001)
+            .userMember(foundUser)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)
@@ -49,7 +58,7 @@ public class SubscribeListTests {
 
         SubscribeList modEntry = SubscribeList.builder()
             .id(savedEntry.getId())
-            .userId(1002)
+            .userMember(foundUser)
             .itemId(4)
             .itemType(ItemType.PRODUCT)
             .isSubscribing(true)
@@ -60,7 +69,7 @@ public class SubscribeListTests {
 
         assertNotNull(foundEntry);
         assertEquals(modEntry.getId(), foundEntry.getId());
-        assertEquals(modEntry.getUserId(), foundEntry.getUserId());
+        assertEquals(modEntry.getUserMember(), foundEntry.getUserMember());
         assertEquals(modEntry.getItemId(), foundEntry.getItemId());
         assertEquals(modEntry.getItemType(), foundEntry.getItemType());
         assertEquals(modEntry.getIsSubscribing(), foundEntry.getIsSubscribing());
@@ -69,8 +78,11 @@ public class SubscribeListTests {
     @Test
     public void testDeleteById() {
 
+        UserMember foundUser = userMemberRepository.findById(1001).orElse(null);
+
+
         SubscribeList newEntry = SubscribeList.builder()
-            .userId(1001)
+            .userMember(foundUser)
             .itemId(3)
             .itemType(ItemType.BRAND)
             .isSubscribing(false)

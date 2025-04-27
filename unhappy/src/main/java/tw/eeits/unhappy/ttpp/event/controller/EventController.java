@@ -36,7 +36,7 @@ import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
 
 @RestController
-@RequestMapping("/app/events")
+@RequestMapping("/api/events")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;

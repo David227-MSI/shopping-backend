@@ -25,7 +25,7 @@ import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 
 
 @RestController
-@RequestMapping("/app/subscribes")
+@RequestMapping("/api/subscribes")
 @RequiredArgsConstructor
 public class SubscribeListController {
 

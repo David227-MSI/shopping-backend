@@ -33,7 +33,7 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
 
 @RestController
-@RequestMapping("/app/coupons")
+@RequestMapping("/api/coupons")
 @RequiredArgsConstructor
 public class CouponController {
     private final CouponService couponService;
