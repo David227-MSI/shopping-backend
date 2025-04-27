@@ -25,4 +25,7 @@ public class OrderResponseDTO {
     private String transactionNumber;
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;
+    private String recipientName;
+    private String recipientPhone;
+    private String recipientAddress;
 }
