@@ -49,6 +49,13 @@ public interface NotificationService {
      * @return   查詢成功: 模板 / 查詢失敗: Null
      */
     NotificationTemplate findTemplateById(Integer id);
+
+    /**
+     * @brief    以ID查詢用戶通知訊息
+     * @param id 用戶通知訊息 ID
+     * @return   ServiceResponse封包
+     */
+    ServiceResponse<NotificationPublished> findNotificationById(Integer id);
     // 基本查詢相關======================================================
     
     

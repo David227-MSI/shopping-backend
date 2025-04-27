@@ -161,6 +161,34 @@ public class NotificationServiceImpl implements NotificationService {
     public NotificationTemplate findTemplateById(Integer id) {
         return templateRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public ServiceResponse<NotificationPublished> findNotificationById(Integer id) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        if(id == null) {ec.add("請輸入用戶通知訊息ID");}
+
+        // service logic
+        NotificationPublished foundEntry = publishedRepository.findById(id).orElse(null);
+        if(foundEntry == null) {ec.add("找不到該通知訊息");}
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+            if(foundEntry.getIsRead()) {
+                return ServiceResponse.success(foundEntry);
+            }
+            foundEntry.setIsRead(true);
+            NotificationPublished savedEntry = publishedRepository.save(foundEntry);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢用戶通知訊息異常: " + e.getMessage());
+        }
+    }
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================

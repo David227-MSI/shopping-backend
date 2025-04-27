@@ -6,9 +6,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class SpringBootConfig implements WebMvcConfigurer {
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/api/notifications/**")
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD");
-	}
+
+	// 如果有CORS問題在下面添加路徑白名單
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        String[] allowedPaths = {
+            "/api/notifications/**",
+            "/api/coupons/**",
+            // 允許路徑貼在這
+        };
+
+        for (String path : allowedPaths) {
+            registry.addMapping(path)
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD")
+                    .allowedOrigins("*")
+                    .allowedHeaders("*")
+                    .allowCredentials(false);
+        }
+    }
 }

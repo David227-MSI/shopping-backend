@@ -29,6 +29,7 @@ import tw.eeits.unhappy.ttpp.notification.dto.NotificationTemplateRequest;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
+
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -178,8 +179,6 @@ public class NotificationController {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
-    
-
     @PostMapping("/user/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findUserNotifications(
         @RequestBody NotificationQuery query) {
@@ -207,6 +206,31 @@ public class NotificationController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("notificationList", notificationList);
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+
+    @GetMapping("/user/notification/{id}")
+    public ResponseEntity<ApiRes<Map<String, Object>>> getNotificationById(@PathVariable Integer id) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        if(id == null) {ec.add("通知訊息 ID 為必要欄位");}
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<NotificationPublished> res = notificationService.findNotificationById(id);
+        NotificationPublished foundData = res.getData();
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", foundData.getNotificationTemplate().getTitle());
+        data.put("content", foundData.getNotificationTemplate().getContent());
+        data.put("isRead", foundData.getIsRead());
+        data.put("noticeType", foundData.getNotificationTemplate().getNoticeType());
+        data.put("createdAt", foundData.getCreatedAt());
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
