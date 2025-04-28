@@ -18,25 +18,28 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
     // 取該商品的所有公開評論
     @Query(
         value = """
-            SELECT r.* FROM product_review r
-            JOIN order_item oi ON oi.id = r.order_item_id
+            SELECT r.* 
+            FROM product_review r
+            JOIN order_items oi ON oi.id = r.order_item_id
             WHERE oi.product_id = :pid
                 AND r.is_visible = 1
-            """,
+        """,
         countQuery = """
-            SELECT COUNT(*) FROM product_review r
-            JOIN order_item oi ON oi.id = r.order_item_id
+            SELECT COUNT(*) 
+            FROM product_review r
+            JOIN order_items oi ON oi.id = r.order_item_id
             WHERE oi.product_id = :pid
                 AND r.is_visible = 1
-            """,
-        nativeQuery = true)
+        """,
+        nativeQuery = true
+    )
     Page<ProductReview> findVisibleByProduct(@Param("pid") Integer pid, Pageable pageable);
 
     // 取該商品的有圖片公開評論
     @Query(value = """
         SELECT r.*
         FROM product_review r
-        JOIN order_item oi ON oi.id = r.order_item_id
+        JOIN order_items oi ON oi.id = r.order_item_id
         WHERE oi.product_id = :pid
             AND r.is_visible = 1
             AND r.review_images IS NOT NULL
@@ -44,7 +47,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
         """,
         countQuery = """
             SELECT COUNT(*) FROM product_review r
-            JOIN order_item oi ON oi.id = r.order_item_id
+            JOIN order_items oi ON oi.id = r.order_item_id
             WHERE oi.product_id = :pid
                 AND r.is_visible = 1
                 AND r.review_images IS NOT NULL

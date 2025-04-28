@@ -48,6 +48,22 @@ public class ReviewService {
 
     /* ---------- Read ---------- */
 
+    private Sort fixSort(Sort original) {
+        return Sort.by(
+            original.stream()
+                    .map(order -> {
+                        String property = order.getProperty();
+                        if ("createdAt".equals(property)) {
+                            property = "created_at";
+                        }
+                        if ("helpfulCount".equals(property)) {
+                            property = "helpful_count";
+                        }
+                        return new Sort.Order(order.getDirection(), property);
+                    }).toList()
+        );
+    }
+
     public Page<ReviewResp> listByProduct(Integer productId,
     ReviewSortOption option,
     int page, int size) {
@@ -57,12 +73,20 @@ public class ReviewService {
     case MOST_LIKED  -> Sort.by(Sort.Direction.DESC, "helpfulCount");
     case WITH_IMAGES -> Sort.by(Sort.Direction.DESC, "createdAt");
     };
+    sort = fixSort(sort);
+
     Pageable pageable = PageRequest.of(page, size, sort);
     
+    // Pageable fixedPageable = PageRequest.of(
+    //     pageable.getPageNumber(),
+    //     pageable.getPageSize(),
+    //     fixSort(pageable.getSort())
+    // );
+    
     Page<ProductReview> pageEntity =
-    (option == ReviewSortOption.WITH_IMAGES)
-    ? reviewRepo.findVisibleWithImagesByProduct(productId, pageable)
-    : reviewRepo.findVisibleByProduct(productId, pageable);
+        (option == ReviewSortOption.WITH_IMAGES)
+        ? reviewRepo.findVisibleWithImagesByProduct(productId, pageable)
+        : reviewRepo.findVisibleByProduct(productId, pageable);
     
     return pageEntity.map(this::toResp);
     }
