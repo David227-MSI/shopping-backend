@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp.coupon.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,8 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
 @Repository
 public interface CouponPublishedRepository extends JpaRepository<CouponPublished, String>, JpaSpecificationExecutor<CouponPublished> {
+
+    Optional<CouponPublished> findCouponById(String id);
 
     static Specification<CouponPublished> byCouponsCriteria(CouponQuery query) {
         return (root, queryBuilder, criteriaBuilder) -> {

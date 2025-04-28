@@ -28,6 +28,7 @@ import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponPublishedRequest;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
+import tw.eeits.unhappy.ttpp.coupon.dto.CouponTransferRequest;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
@@ -36,12 +37,12 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 @RequestMapping("/api/coupons")
 @RequiredArgsConstructor
 public class CouponController {
+
     private final CouponService couponService;
     private final UserMemberService userMemberService;
     // private final ProductService productService;
     // private final BrandService brandService;
     private final Validator validator;
-
 
     // =================================================================
     // 建立優惠相關======================================================
@@ -255,6 +256,39 @@ public class CouponController {
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
+
+    @PostMapping("/user/transfer")
+    public ResponseEntity<ApiRes<Map<String, Object>>> couponTransfer(
+        @RequestBody CouponTransferRequest request) {
+        
+        ErrorCollector ec = new ErrorCollector();
+        
+        // verify data type
+        ec.validate(request, validator);
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<CouponPublished> res = couponService.couponTransfer(request.getCouponId(), request.getRecipientMail());
+        
+        if (!res.isSuccess()) {
+            ec.add(res.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+        
+        CouponPublished resCoupon = res.getData();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", resCoupon.getId());
+        data.put("ownerMail", resCoupon.getUserMember().getEmail());
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+    
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================

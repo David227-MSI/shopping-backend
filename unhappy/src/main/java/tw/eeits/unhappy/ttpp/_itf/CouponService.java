@@ -30,6 +30,14 @@ public interface CouponService {
 
     // 修改相關==========================================================
     /**
+     * @brief                輸入受贈者email轉移優惠券持有權
+     * @param couponId       欲轉移的優惠券ID
+     * @param recipientMail  受贈用戶的email
+     * @return
+     */
+    ServiceResponse<CouponPublished> couponTransfer(String couponId, String recipientMail);
+
+    /**
      * @brief    將優惠券標記為已使用
      * @param id 優惠券ID (String UUID)
      * @return   ServiceResponse封包

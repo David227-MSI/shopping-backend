@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
@@ -19,6 +21,8 @@ import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
 @Service
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
+
+    private final UserMemberRepository userMemberRepository;
     private final CouponTemplateRepository templateRepository;
     private final CouponPublishedRepository publishedRepository;
     private final Validator validator;
@@ -101,6 +105,49 @@ public class CouponServiceImpl implements CouponService {
     // =================================================================
     // 修改相關==========================================================
     // =================================================================
+    @Override
+    public ServiceResponse<CouponPublished> couponTransfer(String couponId, String recipientMail) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        CouponPublished foundCoupon = null;
+        UserMember foundRecipient = null;
+
+        // service logic
+        // check coupon is valid 
+        if(couponId == null) {
+            ec.add("請輸入優惠券ID");
+        } else {
+            foundCoupon = publishedRepository.findCouponById(couponId).orElse(null);
+            if(foundCoupon == null) {
+                ec.add("找不到該優惠券");
+            } else if(foundCoupon.getIsUsed()) {
+                ec.add("優惠券已被使用過");
+            }
+        }
+        // check recipient
+        if(recipientMail == null || recipientMail.trim() == "") {
+            ec.add("受贈者信箱為必要欄位");
+        } else {
+            foundRecipient = userMemberRepository.findByEmail(recipientMail).orElse(null);
+            if(foundRecipient == null) {ec.add("找不到受贈用戶");}
+        }
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+            foundCoupon.setUserMember(foundRecipient);
+            CouponPublished savedEntry = publishedRepository.save(foundCoupon);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("優惠券轉移發生異常: " + e.getMessage());
+        }
+    }
+
+
 
     public ServiceResponse<CouponPublished> markCouponAsUsed(String id) {
 
