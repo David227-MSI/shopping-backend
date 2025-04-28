@@ -1,36 +1,3 @@
-<template>
-  <div>
-    <h1>購物車頁面</h1>
-
-    <div v-if="cartItems.length === 0">
-      <p>購物車是空的</p>
-    </div>
-
-    <div v-else>
-      <ul>
-        <li v-for="item in cartItems" :key="item.id">
-          {{ item.productName }} - 數量: {{ item.quantity }} - 單價: {{ item.price }} 元
-          <button @click="updateQuantity(item.productId, item.quantity - 1)" :disabled="isLoading || item.quantity <= 1">➖</button>
-          <button @click="updateQuantity(item.productId, item.quantity + 1)" :disabled="isLoading">➕</button>
-          <button @click="removeItem(item.productId)" :disabled="isLoading">🗑️ 刪除</button>
-        </li>
-      </ul>
-
-      <hr />
-
-      <button @click="clearCart" :disabled="isLoading">🧹 清空購物車</button>
-
-      <div style="margin-top: 20px;">
-        <p>💰 總金額：{{ totalAmount }} 元</p>
-
-        <button @click="goToCheckout" :disabled="isLoading || cartItems.length === 0">
-          {{ isLoading ? '處理中...' : '🚚 前往結帳' }}
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -168,10 +135,256 @@ const goToCheckout = async () => {
 onMounted(() => {
   loadCart();
 });
+
+// 臨時商品圖片對應
+const getImageUrl = (productName) => {
+  if (productName.includes('香水')) {
+    return 'https://www.jomalone.com.tw/media/export/cms/products/1000x1000/jo_sku_L00C01_1000x1000_0.png';
+  }
+  if (productName.toLowerCase().includes('iphone')) {
+    return 'https://d2lfcsub12kx0l.cloudfront.net/tw/product/img/Apple_apple_iphone_plus_0907185907356_360x270.jpg';
+  }
+  return 'https://via.placeholder.com/80?text=No+Image'; // 預設
+};
+
+
 </script>
 
+<template>
+  <div class="cart-container">
+    <h1 class="page-title">購物車</h1>
+
+    <div v-if="cartItems.length === 0" class="empty-cart">
+      <p>目前購物車內沒有商品</p>
+    </div>
+
+    <div v-else class="cart-main">
+      <!-- 左邊 商品列表 -->
+      <div class="cart-list">
+        <ul>
+          <li v-for="item in cartItems" :key="item.id" class="cart-item">
+            <div class="item-image">
+              <img :src="getImageUrl(item.productName)" alt="商品圖片" />
+            </div>
+            <div class="item-info">
+              <div class="product-name">{{ item.productName }}</div>
+              <div class="product-detail">單價: {{ item.price }} 元</div>
+              <div class="item-actions">
+                <button @click="updateQuantity(item.productId, item.quantity - 1)" :disabled="isLoading || item.quantity <= 1">-</button>
+                <span class="quantity">{{ item.quantity }}</span>
+                <button @click="updateQuantity(item.productId, item.quantity + 1)" :disabled="isLoading">+</button>
+                <button @click="removeItem(item.productId)" :disabled="isLoading" class="delete-btn">刪除</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 右邊 結帳資訊 -->
+      <div class="checkout-summary">
+        <div class="summary-card">
+          <h2>結帳明細</h2>
+          <div class="summary-item">
+            <span>商品總金額</span>
+            <span>${{ totalAmount }}</span>
+          </div>
+          <div class="summary-item">
+            <span>折價券</span>
+            <span class="discount">- $2000</span>
+          </div>
+          <div class="summary-total">
+            <span>結帳金額</span>
+            <span>${{ totalAmount - 2000 }}</span>
+          </div>
+          <button @click="goToCheckout" :disabled="isLoading || cartItems.length === 0" class="checkout-btn">
+            {{ isLoading ? '處理中...' : '結帳' }}
+          </button>
+        </div>
+
+        <div class="coupon-card">
+          <h3>折價券</h3>
+          <p>已使用 1 張折價券 / 折抵 $2000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+
 <style scoped>
-button {
-  margin: 0 4px;
+.cart-container {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 30px;
+  background: #fff;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #333;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.cart-main {
+  display: flex;
+  gap: 40px;
+}
+
+.cart-list {
+  flex: 2;
+}
+
+.cart-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  background: #fafafa;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  margin-right: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.product-name {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.product-detail {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-actions button {
+  padding: 6px 14px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  background: transparent;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.item-actions button:hover {
+  background: #eee;
+}
+
+.item-actions .delete-btn {
+  border-color: #e53935;
+  color: #e53935;
+}
+
+.item-actions .delete-btn:hover {
+  background: #e53935;
+  color: #fff;
+}
+
+.quantity {
+  min-width: 30px;
+  text-align: center;
+}
+
+.checkout-summary {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.summary-card, .coupon-card {
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  border: 1px solid #eee;
+}
+
+.summary-card h2, .coupon-card h3 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #666;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 20px 0;
+  color: #222;
+}
+
+.discount {
+  color: #e53935;
+}
+
+.checkout-btn {
+  width: 100%;
+  padding: 16px 0;
+  background: #ff5722;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.checkout-btn:hover {
+  background: #e64a19;
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(255, 87, 34, 0.4);
 }
 </style>
+
+
