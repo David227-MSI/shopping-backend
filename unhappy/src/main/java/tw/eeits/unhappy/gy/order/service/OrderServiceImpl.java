@@ -154,8 +154,7 @@ public class OrderServiceImpl implements OrderService {
 
     // 結帳購物車商品(標記為已結帳)
     private void checkoutCartItems(List<CartItem> cartItems) {
-        cartItems.forEach(cartItem -> cartItem.setCheckedOut(true));
-        cartItemRepository.saveAll(cartItems);
+        cartItems.forEach(cartItem -> cartItemRepository.markCartItemCheckedOutById(cartItem.getId()));
     }
 
     // DTO轉換方法
