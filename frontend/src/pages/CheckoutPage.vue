@@ -82,12 +82,18 @@ const submitOrder = async () => {
   try {
     isSubmitting.value = true;
 
+    const orderItems = cartItems.value.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }));
+
     const orderRequest = {
       userId: userId.value,
       couponPublishedId: null,
       recipientName: userInfo.value.name,
       recipientPhone: userInfo.value.phone,
       recipientAddress: userInfo.value.address,
+      items: orderItems,
     };
 
     const response = await axios.post('/api/orders', orderRequest);
@@ -99,6 +105,8 @@ const submitOrder = async () => {
       timer: 1500,
       showConfirmButton: false,
     });
+
+    cartStore.clearCart();
 
     router.push({ name: 'order-complete', state: { order: response } });
   } catch (error) {
