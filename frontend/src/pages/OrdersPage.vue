@@ -47,7 +47,7 @@ const selectedOrder = ref(null);
 const loadOrders = async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get(`/api/orders/${userId}`);
+    const response = await axios.get(`/api/orders/user/${userId}`);
     orders.value = response;
   } catch (error) {
     console.error('載入訂單失敗', error);
