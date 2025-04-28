@@ -5,7 +5,7 @@ import axios from '@/services/axios';
 export const useCartStore = defineStore('cart', () => {
   // 狀態
   const cartItems = ref([]);
-  const userId = ref(null); // 有 userId = 會員，null = 訪客
+  const userId = ref(1001); // 有 userId = 會員，null = 訪客
 
   // 總金額
   const totalAmount = computed(() =>
