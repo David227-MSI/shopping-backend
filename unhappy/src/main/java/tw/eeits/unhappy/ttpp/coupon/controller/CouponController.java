@@ -241,6 +241,7 @@ public class CouponController {
             mp.put("isUsed", coupon.getIsUsed());
             mp.put("applicableId", coupon.getCouponTemplate().getApplicableId());
             mp.put("applicableType", coupon.getCouponTemplate().getApplicableType());
+            mp.put("discountType", coupon.getCouponTemplate().getDiscountType());
             mp.put("discountValue", coupon.getCouponTemplate().getDiscountValue());
             mp.put("startTime", coupon.getCouponTemplate().getStartTime());
             mp.put("endTime", coupon.getCouponTemplate().getEndTime());
