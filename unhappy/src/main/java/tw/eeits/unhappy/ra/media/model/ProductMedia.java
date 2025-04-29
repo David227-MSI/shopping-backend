@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ra._fake.Product;
 
 @Entity
 @Table(
@@ -33,13 +34,13 @@ public class ProductMedia {
     @Column(name = "id")
     private Integer id;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "product_id", nullable = false)
-    // @NotNull(message = "Product id 不可為空值")
-    // private Product product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     @NotNull(message = "Product id 不可為空值")
-    @Column(name = "product_id", nullable = false)
-    private Integer productId;
+    private Product product;
+    // @NotNull(message = "Product id 不可為空值")
+    // @Column(name = "product_id", nullable = false)
+    // private Integer productId;
 
     @NotNull(message = "Media type 不可為空值")
     @Convert(converter = MediaTypeConverter.class)

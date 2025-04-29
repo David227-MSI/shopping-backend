@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 public record ReviewCreateReq(
+        @NotNull               Integer userId,
+        @NotNull               Integer orderItemId,
         @Size(max = 1000)      String  reviewText,
         List<String>           reviewImages,
         @NotNull @Min(1) @Max(5) Integer scoreQuality,

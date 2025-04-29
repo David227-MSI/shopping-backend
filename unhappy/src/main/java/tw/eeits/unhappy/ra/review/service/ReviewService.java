@@ -1,182 +1,127 @@
 package tw.eeits.unhappy.ra.review.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
+import tw.eeits.unhappy.ra.review.dto.PageDto;
+import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
+import tw.eeits.unhappy.ra.review.dto.ReviewResp;
+import tw.eeits.unhappy.ra.review.model.ProductReview;
+import tw.eeits.unhappy.ra.review.model.ReviewLike;
+import tw.eeits.unhappy.ra.review.model.ReviewSortOption;
+import tw.eeits.unhappy.ra.review.repository.ProductReviewRepository;
+import tw.eeits.unhappy.ra.review.repository.ReviewLikeRepository;
+import tw.eeits.unhappy.ra._fake.OrderItem;
+import tw.eeits.unhappy.ra._fake.UserMember;
 
-import tw.eeits.unhappy.ra.review.dto.*;
-import tw.eeits.unhappy.ra.review.model.*;
-import tw.eeits.unhappy.ra.review.repository.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
 
     private final ProductReviewRepository reviewRepo;
-    private final ReviewLikeRepository    likeRepo;
+    private final ReviewLikeRepository likeRepo;
 
-    /* ---------- Create ---------- */
+    public PageDto<ReviewResp> listByProduct(Integer productId, ReviewSortOption option, int page, int size) {
+        Sort sort = switch (option) {
+            case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case MOST_LIKED -> Sort.by(Sort.Direction.DESC, "helpfulCount");
+            case WITH_IMAGES -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-    @Transactional
-    public ReviewResp addReview(Integer userId, Integer orderItemId, ReviewCreateReq req) {
+        Page<ProductReview> pageEntity =
+                (option == ReviewSortOption.WITH_IMAGES)
+                        ? reviewRepo.findByProductIdAndIsVisibleAndReviewImagesIsNotNull(productId, true, pageable)
+                        : reviewRepo.findByProductIdAndIsVisible(productId, true, pageable);
 
-        if (req.tags().size() > 3)
-            throw new IllegalArgumentException("最多勾選 3 個標籤");
-
-        if (reviewRepo.existsByUserIdAndOrderItemId(userId, orderItemId))
-            throw new IllegalStateException("同一筆訂單只能評論一次");
-
-        // TODO: 驗證 orderItem 是否屬於 user 且已完成 → isVerifiedPurchase
-        boolean verified = true;
-
-        ProductReview pr = new ProductReview();
-        pr.setUserId(userId);
-        pr.setOrderItemId(orderItemId);
-        pr.setReviewText(req.reviewText());
-        pr.setReviewImages(req.reviewImages());
-        pr.setScoreQuality(req.scoreQuality());
-        pr.setScoreDescription(req.scoreDescription());
-        pr.setScoreDelivery(req.scoreDelivery());
-        pr.setIsVerifiedPurchase(verified);
-        pr.setTagName(req.tags());
-
-        ProductReview saved = reviewRepo.save(pr);
-        return toResp(saved);
+        return PageDto.from(pageEntity.map(this::toResp));
     }
 
-    /* ---------- Read ---------- */
-
-    private Sort fixSort(Sort original) {
-        return Sort.by(
-            original.stream()
-                    .map(order -> {
-                        String property = order.getProperty();
-                        if ("createdAt".equals(property)) {
-                            property = "created_at";
-                        }
-                        if ("helpfulCount".equals(property)) {
-                            property = "helpful_count";
-                        }
-                        return new Sort.Order(order.getDirection(), property);
-                    }).toList()
-        );
-    }
-
-    public Page<ReviewResp> listByProduct(Integer productId,
-    ReviewSortOption option,
-    int page, int size) {
-
-    Sort sort = switch (option) {
-    case LATEST      -> Sort.by(Sort.Direction.DESC, "createdAt");
-    case MOST_LIKED  -> Sort.by(Sort.Direction.DESC, "helpfulCount");
-    case WITH_IMAGES -> Sort.by(Sort.Direction.DESC, "createdAt");
-    };
-    sort = fixSort(sort);
-
-    Pageable pageable = PageRequest.of(page, size, sort);
-    
-    // Pageable fixedPageable = PageRequest.of(
-    //     pageable.getPageNumber(),
-    //     pageable.getPageSize(),
-    //     fixSort(pageable.getSort())
-    // );
-    
-    Page<ProductReview> pageEntity =
-        (option == ReviewSortOption.WITH_IMAGES)
-        ? reviewRepo.findVisibleWithImagesByProduct(productId, pageable)
-        : reviewRepo.findVisibleByProduct(productId, pageable);
-    
-    return pageEntity.map(this::toResp);
-    }
-
-    public ReviewResp getOne(Integer reviewId) {
-        return toResp(reviewRepo.findById(reviewId)
-                                .orElseThrow(() ->
-                                    new IllegalArgumentException("評論不存在")));
-    }
-
-    /* ---------- Update ---------- */
-
-    @Transactional
-    public ReviewResp updateReview(Integer reviewId, Integer userId, ReviewCreateReq req) {
-
-        ProductReview pr = reviewRepo.findById(reviewId)
-                                    .orElseThrow(() -> new IllegalArgumentException("評論不存在"));
-        if (!pr.getUserId().equals(userId))
-            throw new SecurityException("只能修改自己的評論");
-
-        if (req.tags().size() > 3)
-            throw new IllegalArgumentException("最多勾選 3 個標籤");
-
-        pr.setReviewText(req.reviewText());
-        pr.setReviewImages(req.reviewImages());
-        pr.setScoreQuality(req.scoreQuality());
-        pr.setScoreDescription(req.scoreDescription());
-        pr.setScoreDelivery(req.scoreDelivery());
-        pr.setTagName(req.tags());
-
-        return toResp(pr);        // 依賴 JPA flush
-    }
-
-    /* ---------- Delete (軟刪) ---------- */
-
-    @Transactional
-    public void deleteReview(Integer reviewId, Integer userId) {
-        ProductReview pr = reviewRepo.findById(reviewId)
-                                    .orElseThrow();
-        if (!pr.getUserId().equals(userId))
-            throw new SecurityException("只能刪除自己的評論");
-        pr.setIsVisible(false);
-    }
-
-    /* ---------- 後台審核隱藏評論 ---------- */
-
-    @Transactional
-    public void adminSetVisible(Integer reviewId, boolean visible) {
-        ProductReview r = reviewRepo.findById(reviewId)
-                                    .orElseThrow(() -> new IllegalArgumentException("評論不存在"));
-        r.setIsVisible(visible);
-    }
-
-    /* ---------- Like / Unlike ---------- */
-
-    @Transactional
-    public int toggleLike(Integer reviewId, Integer userId) {
-        try {
-            if (likeRepo.existsByProductReviewIdAndUserId(reviewId, userId)) {
-                likeRepo.deleteByProductReviewIdAndUserId(reviewId, userId);
-                reviewRepo.decrementHelpfulCount(reviewId);
-            } else {
-                ReviewLike like = new ReviewLike();
-                like.setProductReview(reviewRepo.getReferenceById(reviewId));
-                like.setUserId(userId);
-                likeRepo.save(like);              // 這裡若撞 UNIQUE 會丟異常
-                reviewRepo.incrementHelpfulCount(reviewId);
-            }
-        } catch (DataIntegrityViolationException e) {
-            // 代表別的執行緒先插入了，這裡直接「重試一次」即可
-            return toggleLike(reviewId, userId);
-        }
-        return likeRepo.countByProductReviewId(reviewId);
-    }
-
-    /* ---------- helper ---------- */
     private ReviewResp toResp(ProductReview r) {
+        int realLikeCount = likeRepo.countByProductReview_Id(r.getId());
         return new ReviewResp(
                 r.getId(),
-                r.getUserId(),
-                r.getOrderItemId(),
+                r.getUserMember().getId(),
+                r.getOrderItem().getId(),
                 r.getReviewText(),
-                r.getReviewImages(),
+                r.getReviewImages() == null ? List.of() : r.getReviewImages(),
                 r.getScoreQuality(),
                 r.getScoreDescription(),
                 r.getScoreDelivery(),
                 r.getIsVerifiedPurchase(),
-                r.getTagName(),
-                r.getHelpfulCount(),
+                r.getTagName() == null ? List.of() : r.getTagName().stream().map(Enum::name).toList(),
+                realLikeCount,
                 r.getCreatedAt()
         );
+    }
+
+    @Transactional
+    public int toggleLike(Integer reviewId, Integer userId) {
+        boolean alreadyLiked = likeRepo.existsByProductReview_IdAndUserMember_Id(reviewId, userId);
+
+        if (alreadyLiked) {
+            likeRepo.deleteByReviewIdAndUserId(reviewId, userId);
+            reviewRepo.decrementHelpfulCount(reviewId);
+        } else {
+            ReviewLike like = new ReviewLike();
+            like.setProductReview(reviewRepo.getReferenceById(reviewId));
+            UserMember user = new UserMember();
+            user.setId(userId);
+            like.setUserMember(user);
+            likeRepo.save(like);
+            reviewRepo.incrementHelpfulCount(reviewId);
+        }
+
+        return likeRepo.countByProductReview_Id(reviewId);
+    }
+
+    @Transactional
+    public void createReview(ReviewCreateReq req) {
+        if (req.tags() != null && req.tags().size() > 3) {
+            throw new IllegalArgumentException("評論標籤不可超過3個");
+        }
+
+        ProductReview review = new ProductReview();
+        review.setReviewText(req.reviewText());
+        review.setReviewImages(req.reviewImages());
+        review.setScoreQuality(req.scoreQuality());
+        review.setScoreDescription(req.scoreDescription());
+        review.setScoreDelivery(req.scoreDelivery());
+        review.setTagName(req.tags());
+
+        UserMember user = new UserMember();
+        user.setId(req.userId());
+        review.setUserMember(user);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(req.orderItemId());
+        review.setOrderItem(orderItem);
+
+        reviewRepo.save(review);
+    }
+
+    @Transactional
+    public void deleteReview(Integer reviewId) {
+        reviewRepo.deleteById(reviewId);
+    }
+
+    @Transactional
+    public void updateReviewText(Integer reviewId, String newText) {
+        ProductReview review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        review.setReviewText(newText);
+    }
+
+    @Transactional
+    public void hideReview(Integer reviewId) {
+        ProductReview review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        review.setIsVisible(false);
     }
 }

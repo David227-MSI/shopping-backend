@@ -3,17 +3,17 @@ package tw.eeits.unhappy.ra.review.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import tw.eeits.unhappy.ra.review.model.*;
+import tw.eeits.unhappy.ra._fake.OrderItem;
+import tw.eeits.unhappy.ra._fake.UserMember;
+import tw.eeits.unhappy.ra.review.model.ProductReview;
+import tw.eeits.unhappy.ra.review.model.ReviewLike;
+import tw.eeits.unhappy.ra.review.model.ReviewTag;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = {
-    "azure.storage.connection-string=UseDevelopmentStorage=true",
-    "azure.storage.container=unit-test"
-})
+@SpringBootTest
 class ReviewLikeRepositoryTest {
 
     @Autowired
@@ -24,11 +24,16 @@ class ReviewLikeRepositoryTest {
 
     @Test
     void testSaveAndFindReviewLike() {
-
-        /* ---------- 1. 先建立一筆全新的 ProductReview ---------- */
         ProductReview review = new ProductReview();
-        review.setUserId(1003);        // 確保 user_member 有此人
-        review.setOrderItemId(5);      // 確保 order_items 有此筆
+
+        UserMember userReview = new UserMember();
+        userReview.setId(1003);
+        review.setUserMember(userReview);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(5);
+        review.setOrderItem(orderItem);
+
         review.setScoreQuality(5);
         review.setScoreDescription(5);
         review.setScoreDelivery(5);
@@ -38,21 +43,22 @@ class ReviewLikeRepositoryTest {
         review.setTagName(Set.of(ReviewTag.FAST, ReviewTag.QUALITY));
 
         ProductReview savedReview = productReviewRepository.save(review);
-        assertNotNull(savedReview.getId(), "評論應成功寫入 DB");
+        assertNotNull(savedReview.getId());
 
-        /* ---------- 2. 建立 ReviewLike，指向剛才那筆評論 ---------- */
         ReviewLike like = new ReviewLike();
-        like.setProductReview(savedReview);  // 假設 ReviewLike 與 ProductReview 為 @ManyToOne
-        like.setUserId(1001);                // 同一位使用者點讚
+        like.setProductReview(savedReview);
+
+        UserMember liker = new UserMember();
+        liker.setId(1001);
+        like.setUserMember(liker);
+
         ReviewLike savedLike = reviewLikeRepository.save(like);
 
-        assertNotNull(savedLike.getId(), "ReviewLike 應成功寫入 DB");
+        assertNotNull(savedLike.getId());
 
-        /* ---------- 3. 查詢並驗證 ---------- */
-        ReviewLike fetched = reviewLikeRepository.findById(savedLike.getId())
-                                                .orElseThrow();
+        ReviewLike fetched = reviewLikeRepository.findById(savedLike.getId()).orElseThrow();
 
-        assertEquals(savedReview.getId(), fetched.getProductReview().getId(), "ReviewLike 指向的 Review ID 應一致");
-        assertEquals(1001, fetched.getUserId(), "User ID 應一致");
+        assertEquals(savedReview.getId(), fetched.getProductReview().getId());
+        assertEquals(1001, fetched.getUserMember().getId());
     }
 }

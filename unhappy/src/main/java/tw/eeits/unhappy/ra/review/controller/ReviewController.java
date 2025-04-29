@@ -23,7 +23,7 @@ import tw.eeits.unhappy.ra.review.service.ReviewMediaService;
 import tw.eeits.unhappy.ra.review.service.ReviewService;
 
 @RestController
-@RequestMapping("/app/reviews")
+@RequestMapping("/api/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
@@ -34,36 +34,32 @@ public class ReviewController {
     @GetMapping("/product/{pid}")
     public ResponseEntity<ApiRes<PageDto<ReviewResp>>> listByProduct(
             @PathVariable Integer pid,
-            @RequestParam(defaultValue = "LATEST")  ReviewSortOption sort,
-            @RequestParam(defaultValue = "false")   boolean onlyImages,
-            @RequestParam(defaultValue = "0")       int page,
-            @RequestParam(defaultValue = "10")      int size) {
+            @RequestParam(defaultValue = "LATEST") ReviewSortOption sort,
+            @RequestParam(defaultValue = "false") boolean onlyImages,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        // 如果只看有圖，直接改用 WITH_IMAGES 排序（createdAt DESC）
         ReviewSortOption opt = onlyImages ? ReviewSortOption.WITH_IMAGES : sort;
-
-        Page<ReviewResp> pageEntity = reviewService.listByProduct(pid, opt, page, size);
-        return ResponseEntity.ok(ResponseFactory.success(PageDto.from(pageEntity)));
+        PageDto<ReviewResp> result = reviewService.listByProduct(pid, opt, page, size);
+        return ResponseEntity.ok(ResponseFactory.success(result));
     }
 
     /* ---------- 前台：新增評論 ---------- */
     @PostMapping("/{orderItemId}")
-    public ResponseEntity<ApiRes<ReviewResp>> addReview(
+    public ResponseEntity<ApiRes<Void>> addReview(
             @PathVariable Integer orderItemId,
-            @RequestParam    Integer userId,          // demo 直接傳參數
+            @RequestParam    Integer userId,
             @RequestBody     @Valid ReviewCreateReq req) {
 
-        ReviewResp resp = reviewService.addReview(userId, orderItemId, req);
-        return ResponseEntity.ok(ResponseFactory.success(resp));
+        reviewService.createReview(req);
+        return ResponseEntity.ok(ResponseFactory.success((Void) null));
     }
 
     /* ---------- 前台：新增評論圖片 ---------- */
-    @PostMapping(
-    value = "/upload",
-    consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiRes<String>> uploadImg(
             @RequestParam Integer userId,
-            @RequestPart  MultipartFile file) throws IOException {
+            @RequestPart MultipartFile file) throws IOException {
 
         String url = reviewMediaService.upload(userId, file);
         return ResponseEntity.ok(ResponseFactory.success(url));
@@ -73,7 +69,7 @@ public class ReviewController {
     @PostMapping("/{id}/like")
     public ResponseEntity<ApiRes<Integer>> toggleLike(
             @PathVariable Integer id,
-            @RequestParam    Integer userId) {      // demo: userId 直接帶參數，正式可改從登入上下文取得
+            @RequestParam Integer userId) {
 
         int newCount = reviewService.toggleLike(id, userId);
         return ResponseEntity.ok(ResponseFactory.success(newCount));
@@ -81,12 +77,10 @@ public class ReviewController {
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
     @PatchMapping("/{id}/visible")
-    public ResponseEntity<ApiRes<Void>> setVisible(
-            @PathVariable Integer id,
-            @RequestParam  boolean visible) {
+    public ResponseEntity<ApiRes<Void>> hideReview(
+            @PathVariable Integer id) {
 
-        reviewService.adminSetVisible(id, visible);
-        // 若 ResponseFactory 沒有無參 success()，可傳入 null
+        reviewService.hideReview(id);
         return ResponseEntity.ok(ResponseFactory.success((Void) null));
     }
 }

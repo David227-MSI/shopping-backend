@@ -12,6 +12,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ra._fake.OrderItem;
+import tw.eeits.unhappy.ra._fake.UserMember;
 import tw.eeits.unhappy.ra.review.StringListJsonConverter;
 
 @Entity
@@ -26,21 +28,21 @@ public class ProductReview {
     @Column(name = "id")
     private Integer id;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "user_id", nullable = false)
-    // @NotNull(message = "userMember 不可為空值")
-    // private UserMember userMember;
-    @NotNull(message = "User id 不可為空值")
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "userMember 不可為空值")
+    private UserMember userMember;
+    // @NotNull(message = "User id 不可為空值")
+    // @Column(name = "user_id", nullable = false)
+    // private Integer userId;
 
-    // @OneToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "order_item_id", nullable = false)
-    // @NotNull(message = "Order item 不可為空值")
-    // private OrderItem orderItem;
-    @NotNull(message = "orderItemId 不可為空值")
-    @Column(name = "order_item_id", nullable = false)
-    private Integer orderItemId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id", nullable = false)
+    @NotNull(message = "Order item 不可為空值")
+    private OrderItem orderItem;
+    // @NotNull(message = "orderItemId 不可為空值")
+    // @Column(name = "order_item_id", nullable = false)
+    // private Integer orderItemId;
 
     @Size(max = 1000)
     @Column(name = "review_text", length = 1000)

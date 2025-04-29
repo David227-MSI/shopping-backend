@@ -27,7 +27,7 @@ public enum ReviewTag {
     /* ----- 給 Jackson 反序列化時用 ----- */
     @JsonCreator               // ➜ 從 JSON 讀中文 → Enum
     public static ReviewTag fromJson(String label) {
-        return fromLabel(label);   // 你原本就寫好的方法
+        return fromLabel(label);
     }
 
     public String getLabel() {

@@ -12,49 +12,30 @@ import tw.eeits.unhappy.ra.review.model.ProductReview;
 @Repository
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Integer> {
 
-    // 檢查用戶是否已經評價過該商品
-    boolean existsByUserIdAndOrderItemId(Integer userId, Integer orderItemId);
+    @Query("""
+        SELECT r
+        FROM ProductReview r
+        WHERE r.orderItem.product.id = :productId
+            AND r.isVisible = :isVisible
+        """)
+    Page<ProductReview> findByProductIdAndIsVisible(
+        @Param("productId") Integer productId,
+        @Param("isVisible") Boolean isVisible,
+        Pageable pageable
+    );
 
-    // 取該商品的所有公開評論
-    @Query(
-        value = """
-            SELECT r.* 
-            FROM product_review r
-            JOIN order_items oi ON oi.id = r.order_item_id
-            WHERE oi.product_id = :pid
-                AND r.is_visible = 1
-        """,
-        countQuery = """
-            SELECT COUNT(*) 
-            FROM product_review r
-            JOIN order_items oi ON oi.id = r.order_item_id
-            WHERE oi.product_id = :pid
-                AND r.is_visible = 1
-        """,
-        nativeQuery = true
-    )
-    Page<ProductReview> findVisibleByProduct(@Param("pid") Integer pid, Pageable pageable);
-
-    // 取該商品的有圖片公開評論
-    @Query(value = """
-        SELECT r.*
-        FROM product_review r
-        JOIN order_items oi ON oi.id = r.order_item_id
-        WHERE oi.product_id = :pid
-            AND r.is_visible = 1
-            AND r.review_images IS NOT NULL
-            AND r.review_images <> ''
-        """,
-        countQuery = """
-            SELECT COUNT(*) FROM product_review r
-            JOIN order_items oi ON oi.id = r.order_item_id
-            WHERE oi.product_id = :pid
-                AND r.is_visible = 1
-                AND r.review_images IS NOT NULL
-                AND r.review_images <> ''
-            """,
-        nativeQuery = true)
-    Page<ProductReview> findVisibleWithImagesByProduct(@Param("pid") Integer pid, Pageable pageable);
+    @Query("""
+        SELECT r
+        FROM ProductReview r
+        WHERE r.orderItem.product.id = :productId
+            AND r.isVisible = :isVisible
+            AND r.reviewImages IS NOT NULL
+        """)
+    Page<ProductReview> findByProductIdAndIsVisibleAndReviewImagesIsNotNull(
+        @Param("productId") Integer productId,
+        @Param("isVisible") Boolean isVisible,
+        Pageable pageable
+    );
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE ProductReview r SET r.helpfulCount = r.helpfulCount + 1 WHERE r.id = :id")
@@ -63,4 +44,15 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
     @Modifying(clearAutomatically = true)
     @Query("UPDATE ProductReview r SET r.helpfulCount = r.helpfulCount - 1 WHERE r.id = :id AND r.helpfulCount > 0")
     void decrementHelpfulCount(@Param("id") Integer id);
+
+    @Query("""
+        SELECT COUNT(r) > 0
+        FROM ProductReview r
+        WHERE r.userMember.id = :userId
+            AND r.orderItem.id = :orderItemId
+        """)
+    boolean existsByUserIdAndOrderItemId(
+        @Param("userId") Integer userId,
+        @Param("orderItemId") Integer orderItemId
+    );
 }
