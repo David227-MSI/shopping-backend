@@ -34,3 +34,10 @@ spring:
           auth: true
           starttls:
             enable: true
+
+# === 從這裡開始是綠界金流設定 ===
+ecpay:
+  merchantId: 2000132
+  hashKey: 5294y06JbISpM5x9
+  hashIV: v77hoKGq4kWxNNIS
+  apiUrl: https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5
