@@ -17,4 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     // 查會員所有訂單 (依時間排序，從最新到最舊)
     List<Order> findByUserMember_IdOrderByCreatedAtDesc(Integer userId);
+
+    // 根據 transactionNumber 查找訂單 （給綠界callback用）
+    Optional<Order> findByTransactionNumber(String transactionNumber);
+
 }
