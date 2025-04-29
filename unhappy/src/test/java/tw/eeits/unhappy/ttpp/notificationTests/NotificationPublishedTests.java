@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import tw.eeits.unhappy.ttpp._fake.UserMember;
-import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.notification.enums.NoticeType;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;

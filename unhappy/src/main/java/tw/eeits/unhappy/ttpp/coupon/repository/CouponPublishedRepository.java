@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
-import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;

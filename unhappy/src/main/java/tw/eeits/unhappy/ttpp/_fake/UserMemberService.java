@@ -1,15 +1,15 @@
-package tw.eeits.unhappy.ttpp._fake;
+// package tw.eeits.unhappy.ttpp._fake;
 
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+// import lombok.RequiredArgsConstructor;
 
-@Service
-@RequiredArgsConstructor
-public class UserMemberService {
-    private final UserMemberRepository userMemberRepository;
+// @Service
+// @RequiredArgsConstructor
+// public class UserMemberService {
+//     private final UserMemberRepository userMemberRepository;
 
-    public UserMember findUserById(Integer id) {
-        return userMemberRepository.findById(id).orElse(null);
-    }
-}
+//     public UserMember findUserById(Integer id) {
+//         return userMemberRepository.findById(id).orElse(null);
+//     }
+// }

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import tw.eeits.unhappy.ttpp._fake.UserMember;
-import tw.eeits.unhappy.ttpp._fake.UserMemberService;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.service.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;

@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 
 @Data

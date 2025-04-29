@@ -7,5 +7,5 @@ import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 
 @Repository
 public interface EventParticipantRepository extends JpaRepository<EventParticipant, Integer>{
-
+    Integer countByUserMemberIdAndEventId(Integer userMemberId, Integer eventId);
 }

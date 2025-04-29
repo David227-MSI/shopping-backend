@@ -2,11 +2,15 @@ package tw.eeits.unhappy.ttpp.event.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
@@ -26,6 +30,7 @@ public class EventServiceImpl implements EventService {
     private final EventPrizeRepository prizeRepository;
     private final EventMediaRepository mediaRepository;
     private final EventParticipantRepository participantRepository;
+    private final UserMemberRepository userMemberRepository;
     private final Validator validator;
 
 
@@ -162,10 +167,49 @@ public class EventServiceImpl implements EventService {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
-    // @Override
-    // public Integer countUserEntries(Event event) {
-    //     return eventRepository.count(event.getUserId());
-    // }
+    @Override
+    public ServiceResponse<Map<String, Object>> countUserEntries(Integer userId, Integer eventId) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        UserMember foundUser = null;
+        Event foundEvent = null;
+
+        // check input and verify datatype
+        if(userId == null) {
+            ec.add("請輸入用戶ID");
+        } else {
+            foundUser = userMemberRepository.findById(userId).orElse(null);
+            if(foundUser == null) {ec.add("找不到查詢用戶");}
+        }
+        if(eventId == null) {
+            ec.add("請輸入活動ID");
+        } else {
+            foundEvent = eventRepository.findById(eventId).orElse(null);
+            if(foundEvent == null) {ec.add("找不到查詢活動");}
+        }
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+            Integer participationCount = participantRepository.countByUserMemberIdAndEventId(userId, eventId);    
+            
+            // pick up return data
+            Map<String, Object> data = new HashMap<>();
+            data.put("eventName", foundEvent.getEventName());
+            data.put("userEmail", foundUser.getEmail());
+            data.put("userId", userId);
+            data.put("count", participationCount);
+
+            return ServiceResponse.success(data);
+
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢參加次數異常: " + e.getMessage());
+        }
+    }
 
 
 

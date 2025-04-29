@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import tw.eeits.unhappy.ttpp._fake.UserMember;
-import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.ttpp._itf.CouponService;

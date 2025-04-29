@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
-import tw.eeits.unhappy.ttpp._fake.UserMember;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;

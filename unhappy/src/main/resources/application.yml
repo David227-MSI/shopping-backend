@@ -34,3 +34,14 @@ spring:
           auth: true
           starttls:
             enable: true
+
+
+# user jwt
+jwt:
+  token:
+    expire: 3600000
+    
+# user email
+email:
+  template:
+    path: classpath:static/email_templates/forget_password_template.html

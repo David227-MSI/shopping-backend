@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import tw.eeits.unhappy.ttpp._fake.UserMember;
-import tw.eeits.unhappy.ttpp._fake.UserMemberRepository;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.enums.PrizeType;

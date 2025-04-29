@@ -1,6 +1,8 @@
 package tw.eeits.unhappy.ttpp._itf;
 
 
+import java.util.Map;
+
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
@@ -76,12 +78,13 @@ public interface EventService {
 
 
     // 用戶操作相關======================================================
-    // /**
-    //  * @brief       查詢用戶已參加特定活動的次數
-    //  * @param event 活動物件
-    //  * @return      查詢成功: 已參加次數 / 查詢失敗: Null
-    //  */
-    // Integer countUserEntries(Event event);
+    /**
+     * @brief         查詢用戶已參加特定活動的次數
+     * @param userId  查詢的用戶ID
+     * @param eventId 查詢的活動ID
+     * @return        ServiceResponse封包
+     */
+    ServiceResponse<Map<String, Object>> countUserEntries(Integer userId, Integer eventId);
 
     /**
      * @brief             建立活動參加者
@@ -90,7 +93,8 @@ public interface EventService {
      */
     ServiceResponse<EventParticipant> attendEvent(EventParticipant participant);
     // 用戶操作相關======================================================
-
+    
+    
 
 
 }
