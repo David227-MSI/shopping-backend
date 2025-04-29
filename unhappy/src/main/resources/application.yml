@@ -10,10 +10,16 @@ spring:
 
   # 資料庫連線資訊
   datasource:
+    # SQL Server設定
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=ProjectDB;trustServerCertificate=true;
     username: sa
     password: P@ssw0rd
+
+    # 連接池設定
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
 
   # JPA設定
   jpa:
@@ -35,7 +41,6 @@ spring:
           starttls:
             enable: true
 
-
 # user jwt
 jwt:
   token:
@@ -45,3 +50,7 @@ jwt:
 email:
   template:
     path: classpath:static/email_templates/forget_password_template.html
+
+
+
+
