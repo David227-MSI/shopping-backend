@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tw.eeits.unhappy.gy.dto.PaymentRequestDTO;
-import tw.eeits.unhappy.gy.order.repository.OrderRepository;
 import tw.eeits.unhappy.gy.payment.ecpay.service.EcpayService;
 
 @RestController
@@ -17,9 +16,6 @@ public class EcpayController {
 
     @Autowired
     private EcpayService ecpayService;
-
-    @Autowired
-    private OrderRepository orderRepository;
 
     // 前端呼叫用: 產生綠界表單
     @PostMapping("/start-payment")
