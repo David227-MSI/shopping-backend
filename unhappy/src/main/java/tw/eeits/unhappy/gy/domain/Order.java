@@ -1,36 +1,17 @@
 package tw.eeits.unhappy.gy.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.gy.enums.OrderStatus;
 import tw.eeits.unhappy.gy.enums.PaymentStatus;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
