@@ -4,22 +4,19 @@ package tw.eeits.unhappy.gy.cart.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.eeit198product.repository.ProductRepository;
 import tw.eeits.unhappy.gy.cart.repository.CartItemRepository;
 import tw.eeits.unhappy.gy.domain.CartItem;
-import tw.eeits.unhappy.gy.domain.Product;
-import tw.eeits.unhappy.gy.domain.UserMember;
 import tw.eeits.unhappy.gy.dto.CartItemRequestDTO;
 import tw.eeits.unhappy.gy.dto.CartItemResponseDTO;
 import tw.eeits.unhappy.gy.exception.CartItemNotFoundException;
 import tw.eeits.unhappy.gy.exception.InvalidQuantityException;
 import tw.eeits.unhappy.gy.exception.ProductNotFoundException;
 import tw.eeits.unhappy.gy.exception.UserNotFoundException;
-import tw.eeits.unhappy.gy.repository.ProductRepository;
-import tw.eeits.unhappy.gy.repository.UserRepository;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
@@ -28,7 +25,7 @@ public class CartItemServiceImpl implements CartItemService {
     private CartItemRepository cartItemRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMemberRepository userRepository;
 
     @Autowired
     private ProductRepository productRepository;

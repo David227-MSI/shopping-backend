@@ -2,10 +2,12 @@ package tw.eeits.unhappy.gy.order.repository;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tw.eeits.unhappy.gy.domain.Order;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +22,10 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     // 根據 transactionNumber 查找訂單 （給綠界callback用）
     Optional<Order> findByTransactionNumber(String transactionNumber);
+
+    // Brand 月銷報表要用的
+    @Query("SELECT o.id FROM Order o WHERE o.paymentStatus = 'PAID' AND o.createdAt >= :startDate AND o.createdAt < :endDate")
+    List<Integer> findPaidOrderIdsBetweenDates(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
 
 }

@@ -1,15 +1,25 @@
 package tw.eeits.unhappy.gy.order.service;
 
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.gy.cart.repository.CartItemRepository;
-import tw.eeits.unhappy.gy.domain.*;
+import tw.eeits.unhappy.gy.domain.CartItem;
+import tw.eeits.unhappy.gy.domain.Order;
+import tw.eeits.unhappy.gy.domain.OrderItem;
 import tw.eeits.unhappy.gy.dto.OrderDetailResponseDTO;
 import tw.eeits.unhappy.gy.dto.OrderItemResponseDTO;
 import tw.eeits.unhappy.gy.dto.OrderRequestDTO;
@@ -22,19 +32,15 @@ import tw.eeits.unhappy.gy.exception.OrderNotFoundException;
 import tw.eeits.unhappy.gy.exception.UserNotFoundException;
 import tw.eeits.unhappy.gy.order.repository.OrderItemRepository;
 import tw.eeits.unhappy.gy.order.repository.OrderRepository;
-import tw.eeits.unhappy.gy.repository.CouponPublishedRepository;
-import tw.eeits.unhappy.gy.repository.UserRepository;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMemberRepository userRepository;
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -92,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
             return new CouponUsageResult(null, BigDecimal.ZERO);
         }
 
-        CouponPublished coupon = couponPublishedRepository.findByIdAndUserMember_Id(dto.getCouponPublishedId(), dto.getUserId())
+        CouponPublished coupon = couponPublishedRepository.findByIdAndUserMemberId(dto.getCouponPublishedId(), dto.getUserId())
                 .orElseThrow(() -> new InvalidCouponUsageException("無法使用此優惠券"));
 
         if (Boolean.TRUE.equals(coupon.getIsUsed())) {

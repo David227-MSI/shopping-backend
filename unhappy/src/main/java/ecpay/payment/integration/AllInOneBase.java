@@ -2,6 +2,7 @@ package ecpay.payment.integration;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Objects;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,7 +38,10 @@ public class AllInOneBase {
 //			String configPath = URLDecoder.decode(classLoader.getResource("/payment_conf.xml").getPath(), "UTF-8");
 //			doc = EcpayFunction.xmlParser(configPath);
 			/* when using testing code*/
-			String paymentConfPath = "./src/main/resources/payment_conf.xml";
+
+			// String paymentConfPath = "./src/main/resources/payment_conf.xml";
+			String paymentConfPath = Objects.requireNonNull(
+				getClass().getClassLoader().getResource("payment_conf.xml")).getPath();
 			doc = EcpayFunction.xmlParser(paymentConfPath);
 			
 			doc.getDocumentElement().normalize();
