@@ -74,7 +74,7 @@ public class ReviewController {
     }
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
-    @PatchMapping("/{id}/visible")
+    @PutMapping("/{id}/visible")
     public ResponseEntity<ApiRes<Void>> hideReview(
             @PathVariable Integer id) {
 
