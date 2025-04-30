@@ -1,6 +1,8 @@
 package tw.eeits.unhappy.eeit198product.repository;
 
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     );
 
     List<Product> findTop5ByIdNotOrderByCreatedAtDesc(Integer id);
+
+
+    // LL
+    // 月銷報表要用的
+    List<Product> findByIdIn(Set<Integer> ids);
+
+
+
 }

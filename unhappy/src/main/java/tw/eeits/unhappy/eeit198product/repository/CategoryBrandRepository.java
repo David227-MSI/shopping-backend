@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
 import tw.eeits.unhappy.eeit198product.entity.CategoryBrand;
 import tw.eeits.unhappy.eeit198product.entity.CategoryBrandId;
+import tw.eeits.unhappy.ll.model.Brand;
 
 public interface CategoryBrandRepository extends JpaRepository<CategoryBrand, CategoryBrandId> {
 

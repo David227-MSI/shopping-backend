@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
 import tw.eeits.unhappy.eeit198product.repository.CategoryBrandRepository;
+import tw.eeits.unhappy.ll.model.Brand;
 
 @Service
 public class CategoryBrandService {

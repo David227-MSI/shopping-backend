@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
-import tw.eeits.unhappy.eeit198product.repository.BrandRepository;
+import tw.eeits.unhappy.ll.model.Brand;
+import tw.eeits.unhappy.ll.repository.BrandRepository;
 
 @Service
 public class BrandService {
@@ -39,7 +39,7 @@ public class BrandService {
             brand.setType(brandDetails.getType());
             brand.setTaxId(brandDetails.getTaxId());
             brand.setAddress(brandDetails.getAddress());
-            brand.setPhotoUrl(brandDetails.getPhotoUrl());
+            brand.setPhoto(brandDetails.getPhoto());
             brand.setEmail(brandDetails.getEmail());
             brand.setPhone(brandDetails.getPhone());
             brand.setFax(brandDetails.getFax());

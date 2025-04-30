@@ -1,6 +1,7 @@
 package tw.eeits.unhappy.eeit198product.entity;
 
 import jakarta.persistence.*;
+import tw.eeits.unhappy.ll.model.Brand;
 
 @Entity
 @Table(name = "category_brand")

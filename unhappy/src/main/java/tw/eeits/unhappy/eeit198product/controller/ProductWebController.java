@@ -7,12 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
 import tw.eeits.unhappy.eeit198product.entity.Category;
 import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.eeit198product.service.BrandService;
 import tw.eeits.unhappy.eeit198product.service.CategoryService;
 import tw.eeits.unhappy.eeit198product.service.ProductService;
+import tw.eeits.unhappy.ll.model.Brand;
 
 @Controller
 public class ProductWebController {

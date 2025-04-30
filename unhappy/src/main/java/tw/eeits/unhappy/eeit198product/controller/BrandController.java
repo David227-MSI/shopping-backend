@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
 import tw.eeits.unhappy.eeit198product.service.BrandService;
+import tw.eeits.unhappy.ll.model.Brand;
 
 @RestController
 @RequestMapping("/api/brands")

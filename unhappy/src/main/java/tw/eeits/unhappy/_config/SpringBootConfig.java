@@ -13,6 +13,7 @@ public class SpringBootConfig implements WebMvcConfigurer {
         String[] allowedPaths = {
             "/api/notifications/**",
             "/api/coupons/**",
+            "/api/**"
             // 允許路徑貼在這
         };
 

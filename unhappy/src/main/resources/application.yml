@@ -45,12 +45,13 @@ spring:
 jwt:
   token:
     expire: 3600000
+  # admin jwt
+  secret: CyeBp5lDC8M2Gr9C+LpL0xkgoWDOhGkDjJeaV6Tf7eA=
     
 # user email
 email:
   template:
     path: classpath:static/email_templates/forget_password_template.html
-
 
 
 

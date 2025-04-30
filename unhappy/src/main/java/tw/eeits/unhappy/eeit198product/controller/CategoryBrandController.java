@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import tw.eeits.unhappy.eeit198product.entity.Brand;
 import tw.eeits.unhappy.eeit198product.service.CategoryBrandService;
 import tw.eeits.unhappy.eeit198product.service.CategoryService;
+import tw.eeits.unhappy.ll.model.Brand;
 
 @RestController
 @RequestMapping("/api/category-brands")
