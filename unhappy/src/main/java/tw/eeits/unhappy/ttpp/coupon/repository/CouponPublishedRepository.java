@@ -21,6 +21,9 @@ public interface CouponPublishedRepository extends JpaRepository<CouponPublished
 
     Optional<CouponPublished> findCouponById(String id);
 
+    // 查詢優惠券是否存在
+    Optional<CouponPublished> findByIdAndUserMemberId(String couponId, Integer userId); 
+
     static Specification<CouponPublished> byCouponsCriteria(CouponQuery query) {
         return (root, queryBuilder, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
