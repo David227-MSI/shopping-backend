@@ -1,14 +1,16 @@
 package tw.eeits.unhappy.eeit198product.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tw.eeits.unhappy.eeit198product.dto.ProductReviewDTO;
-import tw.eeits.unhappy.eeit198product.entity.ProductReview;
-import tw.eeits.unhappy.eeit198product.repository.ProductReviewRepository;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tw.eeits.unhappy.eeit198product.dto.ProductReviewDTO;
+import tw.eeits.unhappy.ra.review.model.ProductReview;
+import tw.eeits.unhappy.ra.review.repository.ProductReviewRepository;
 
 @Service
 public class ProductReviewService {
@@ -25,8 +27,8 @@ public class ProductReviewService {
         for (ProductReview review : reviews) {
             ProductReviewDTO dto = new ProductReviewDTO();
             dto.setId(review.getId());
-            dto.setUserId(review.getUserId());
-            dto.setOrderItemId(review.getOrderItemId());
+            dto.setUserId(review.getUserMember().getId());
+            dto.setOrderItemId(review.getOrderItem().getId());
             dto.setReviewText(review.getReviewText());
             dto.setScoreQuality(review.getScoreQuality());
             dto.setScoreDescription(review.getScoreDescription());
@@ -38,8 +40,7 @@ public class ProductReviewService {
 
             try {
                 if (review.getReviewImages() != null) {
-                    List<String> images = objectMapper.readValue(review.getReviewImages(), List.class);
-                    dto.setReviewImages(images);
+                    dto.setReviewImages(review.getReviewImages());
                 } else {
                     dto.setReviewImages(new ArrayList<>());
                 }

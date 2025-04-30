@@ -1,7 +1,10 @@
 package tw.eeits.unhappy.eeit198product.dto;
 
 import lombok.Data;
+import tw.eeits.unhappy.ra.review.model.ReviewTag;
+
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class ProductReviewDTO {
@@ -16,7 +19,7 @@ public class ProductReviewDTO {
     private Integer scoreDelivery;
     private Boolean verified;
     private Boolean visible;
-    private String tagName;
+    private Set<ReviewTag> tagName;
     private String createdAt;
     
 

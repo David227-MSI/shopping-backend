@@ -41,6 +41,12 @@ spring:
           starttls:
             enable: true
 
+  # 媒體上傳檔案大小限制
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 # user jwt
 jwt:
   token:
@@ -52,6 +58,12 @@ jwt:
 email:
   template:
     path: classpath:static/email_templates/forget_password_template.html
+
+# Azure 儲存空間連線資訊
+azure:
+  storage:
+    connection-string: DefaultEndpointsProtocol=https;AccountName=unhappyproductmedia;AccountKey=SmVnSwDVTv4ihzV2PdozNsjg6WzTTZT4fawbW1Mx2hou1bByMZCqOGsOPUe73HyUxZ74es+qVrsc+ASt58xp/g==;EndpointSuffix=core.windows.net
+    container: product-media
 
 
 
