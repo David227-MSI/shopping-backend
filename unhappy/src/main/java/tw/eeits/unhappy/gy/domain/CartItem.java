@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "cart_items", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "product_id", "is_checked_out"})})
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
