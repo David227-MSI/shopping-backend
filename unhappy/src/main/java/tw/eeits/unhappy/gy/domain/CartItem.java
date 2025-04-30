@@ -1,10 +1,7 @@
 package tw.eeits.unhappy.gy.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import tw.eeits.unhappy.eee.domain.UserMember;
@@ -18,6 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @ToString(exclude = {"userMember", "product"}) // 避免無窮迴圈
 public class CartItem {
 
@@ -37,6 +36,7 @@ public class CartItem {
     private Integer quantity;
 
     @Column(name = "is_checked_out")
+    @Builder.Default
     private Boolean checkedOut = false;
 
     // 新增一筆資料時，created_at 會自動變成當前時間，updatable = false,之後 update 不會改這個欄位
