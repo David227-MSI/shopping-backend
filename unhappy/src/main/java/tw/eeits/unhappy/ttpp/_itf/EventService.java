@@ -1,16 +1,18 @@
 package tw.eeits.unhappy.ttpp._itf;
 
 
+import java.util.List;
 import java.util.Map;
 
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
-public interface EventService {
 
+public interface EventService {
 
     // 建立活動相關======================================================
     /**
@@ -53,6 +55,19 @@ public interface EventService {
      */
     EventPrize findPrizeById(Integer id);
     // 基本查詢相關======================================================
+    
+    
+    
+    
+    
+    // 條件查詢相關======================================================
+    /**
+     * @brief       根據條件查詢活動清單
+     * @param query 查詢條件
+     * @return      ServiceResponse封包
+     */
+    ServiceResponse<List<Event>> findEventByCriteria(EventAdminQuery query);
+    // 條件查詢相關======================================================
 
 
 
@@ -93,8 +108,5 @@ public interface EventService {
      */
     ServiceResponse<EventParticipant> attendEvent(EventParticipant participant);
     // 用戶操作相關======================================================
-    
-    
-
 
 }

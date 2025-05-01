@@ -14,4 +14,7 @@ public interface BrandService {
     BrandResponse findById(Integer id);
 
     List<BrandResponse> findAll();
+
+    Brand findBrandById(Integer id);
+
 }

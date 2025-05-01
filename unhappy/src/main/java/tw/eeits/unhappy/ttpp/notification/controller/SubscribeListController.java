@@ -14,6 +14,10 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.eeit198product.service.ProductService;
+import tw.eeits.unhappy.ll.model.Brand;
+import tw.eeits.unhappy.ll.service.BrandService;
 import tw.eeits.unhappy.ttpp._itf.SubscribeListService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
@@ -31,8 +35,8 @@ public class SubscribeListController {
 
     private final SubscribeListService subscribeService;
     private final UserMemberService userMemberService;
-    // private final ProductService productService;
-    // private final BrandService brandService;
+    private final ProductService productService;
+    private final BrandService brandService;
     private final Validator validator;
 
     @PostMapping("/switch")
@@ -46,17 +50,17 @@ public class SubscribeListController {
 
         // check foreign key
         UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        // Product foundProduct = null;
-        // Brand foundBrand = null;
+        Product foundProduct = null;
+        Brand foundBrand = null;
 
         if(foundUser == null) {ec.add("找不到用戶資訊");}
         if(request.getItemType() == ItemType.PRODUCT) {
-            // foundProduct = productService.findProductById(request.getItemId());
-            // if(foundProduct == null) {ec.add("找不到追蹤商品");}
+            foundProduct = productService.getProductById(request.getItemId()).orElse(null);
+            if(foundProduct == null) {ec.add("找不到追蹤商品");}
         }
         if(request.getItemType() == ItemType.BRAND) {
-            // foundBrand = brandService.findBrandById(request.getItemId());
-            // if(foundBrand == null) {ec.add("找不到追蹤廠商");}
+            foundBrand = brandService.findBrandById(request.getItemId());
+            if(foundBrand == null) {ec.add("找不到追蹤廠商");}
         }
 
 

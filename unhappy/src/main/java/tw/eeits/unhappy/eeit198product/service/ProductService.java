@@ -24,4 +24,5 @@ public interface ProductService {
 
     /** 推薦商品（排除自己，取最新前5筆） */
     List<Product> getRecommendedProducts(Integer excludeProductId);
+
 }

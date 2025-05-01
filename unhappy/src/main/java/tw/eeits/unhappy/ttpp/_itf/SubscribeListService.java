@@ -13,8 +13,15 @@ public interface SubscribeListService {
      */
     ServiceResponse<SubscribeList> subscribeSwitch(SubscribeList subscribelist);
     // 建立相關==========================================================
+    
+    
+    
+    // 查詢相關==========================================================
+ 
+    // ServiceResponse<List<SubscribeList>> findByUserIdAndItemType(Integer userId, ItemType itemType);
 
 
+    // 查詢相關==========================================================
 
 
 }

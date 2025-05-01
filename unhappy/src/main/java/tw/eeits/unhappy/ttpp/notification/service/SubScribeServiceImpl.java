@@ -48,16 +48,16 @@ public class SubScribeServiceImpl implements SubscribeListService {
         // service operation
         try {
             // search record
-            SubscribeList existing = subscribeListRepository.findByUserMemberAndItemTypeAndItemId(
+            SubscribeList foundEntry = subscribeListRepository.findByUserMemberAndItemTypeAndItemId(
                 subscribe.getUserMember(), 
                 subscribe.getItemType(), 
                 subscribe.getItemId()
             );
 
-            if (existing != null) {
+            if (foundEntry != null) {
                 // if record exists, switch subscribe status
-                existing.setIsSubscribing(!existing.getIsSubscribing());
-                SubscribeList updated = subscribeListRepository.save(existing);
+                foundEntry.setIsSubscribing(!foundEntry.getIsSubscribing());
+                SubscribeList updated = subscribeListRepository.save(foundEntry);
                 boolean status = updated.getIsSubscribing();
                 return ServiceResponse.success("追蹤狀態修改為: " + status, updated);
             } else {
@@ -75,6 +75,10 @@ public class SubScribeServiceImpl implements SubscribeListService {
     // =================================================================
     // 建立相關==========================================================
     // =================================================================
+
+
+
+
 
  
 

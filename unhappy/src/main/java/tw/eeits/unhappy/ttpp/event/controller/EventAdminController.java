@@ -2,7 +2,9 @@ package tw.eeits.unhappy.ttpp.event.controller;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import tw.eeits.unhappy.eee.domain.UserMember;
-import tw.eeits.unhappy.eee.service.UserMemberService;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.eeit198product.service.ProductService;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
@@ -22,29 +24,24 @@ import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
+import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
 import tw.eeits.unhappy.ttpp.event.dto.EventPrizeRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventRequest;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
-import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
 import tw.eeits.unhappy.ttpp.event.model.Event;
-import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 import tw.eeits.unhappy.ttpp.media.dto.EventMediaRequest;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
-
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/admin/events")
 @RequiredArgsConstructor
-public class EventController {
+public class EventAdminController {
     private final EventService eventService;
     private final CouponService couponService;
-    private final UserMemberService userMemberService;
+    private final ProductService productService;
     private final Validator validator;
-
-
 
     // =================================================================
     // 建立活動相關======================================================
@@ -165,8 +162,8 @@ public class EventController {
             CouponTemplate foundItem = couponService.findTemplateById(request.getItemId());
             if(foundItem == null) {ec.add("找不到套用的折價券模板");}
         } else if(request.getItemType() == PrizeType.PRODUCT) {
-            // Product foundItem = productService.findProductById(request.getItemId());
-            // if(foundItem == null) {ec.add("找不到套用的折價券模板");}
+            Product foundItem = productService.getProductById(request.getItemId()).orElse(null);
+            if(foundItem == null) {ec.add("找不到套用的商品");}
         }
 
         if(ec.hasErrors()) {
@@ -215,66 +212,42 @@ public class EventController {
 
 
 
+
+
     // =================================================================
-    // 用戶操作相關======================================================
+    // 查詢所有活動======================================================
     // =================================================================
-    @PostMapping("/user/attendEvent")
-    public ResponseEntity<ApiRes<Map<String, Object>>> attendEvent(
-        @RequestBody EventParticipantRequest request) {
-
-        ErrorCollector ec = new ErrorCollector();
-
-        // verify data type
-        ec.validate(request, validator);
-        
-        // check foreign key
-        UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        Event foundEvent = eventService.findEventById(request.getEventId());
-        EventPrize foundPrize = eventService.findPrizeById(request.getPrizeId());
-
-        if(foundUser == null) {ec.add("找不到參加用戶資訊");}
-        if(foundEvent == null) {ec.add("找不到參加的活動");}
-        if(foundPrize == null) {ec.add("找不到參加的活動獎品");}
-
-        if(ec.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(ec.getErrorMessage()));
-        }
-
-        // transfer data from DTO to Entity
-        EventParticipant newEntry = EventParticipant.builder()
-                .userMember(foundUser)
-                .event(foundEvent)
-                .eventPrize(foundPrize)
-                .participateStatus(ParticipateStatus.REGISTERED)
-                .build();
+    @PostMapping("/findAll")
+    public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
+        @RequestBody EventAdminQuery query) {
 
         // call service
-        ServiceResponse<EventParticipant> res = eventService.attendEvent(newEntry);
-
+        ServiceResponse<List<Event>> res = eventService.findEventByCriteria(query);
+        
         if(!res.isSuccess()) {
-            ec.add(res.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(ec.getErrorMessage()));
+                .body(ResponseFactory.fail(res.getMessage()));
         }
 
-        // pick up response data
-        EventParticipant savedEntry = res.getData();
+        List<Event> foundData = res.getData();
+        List<Map<String, Object>> eventList = foundData.stream().map(event -> {
+            Map<String, Object> mp = new HashMap<>();
+            mp.put("id", event.getId());
+            mp.put("eventName", event.getEventName());
+            mp.put("startTime", event.getStartTime());
+            mp.put("endTime", event.getEndTime());
+            mp.put("announceTime", event.getAnnounceTime());
+            mp.put("eventPrizeList", event.getEventPrize());
+            return mp;
+        }).collect(Collectors.toList());
         Map<String, Object> data = new HashMap<>();
-        data.put("id", savedEntry.getId());
-        data.put("userId", savedEntry.getUserMember().getId());
-        data.put("eventName", savedEntry.getEvent().getEventName());
-        data.put("eventPrize", savedEntry.getEventPrize());
+        data.put("eventList", eventList);
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
-    
     // =================================================================
-    // 用戶操作相關======================================================
+    // 查詢所有活動======================================================
     // =================================================================
-
-
-
 
 
 

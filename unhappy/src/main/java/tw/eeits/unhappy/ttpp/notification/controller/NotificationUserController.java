@@ -31,103 +31,14 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/user/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationUserController {
 
     private final NotificationService notificationService;
     private final UserMemberService userMemberService;
     private final Validator validator;
 
-    // =================================================================
-    // 建立通知相關======================================================
-    // =================================================================
-    @PostMapping("/template")
-    public ResponseEntity<ApiRes<Map<String, Object>>> createTemplate(
-        @RequestBody NotificationTemplateRequest request
-    ) {
-        ErrorCollector ec = new ErrorCollector();
-
-        // verify request data
-        ec.validate(request, validator);
-
-        if(ec.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(ec.getErrorMessage()));
-        }
-
-        // transfer data from DTO to Entity
-        NotificationTemplate newEntry = NotificationTemplate.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .noticeType(request.getNoticeType())
-                .build();
-
-        // call service
-        ServiceResponse<NotificationTemplate> res = notificationService.createTemplate(newEntry);
-        if (!res.isSuccess()) {
-            ec.add(res.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(res.getMessage()));
-        }
-        
-        // pick up response data
-        NotificationTemplate savedEntry = res.getData();
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", savedEntry.getId());
-        data.put("title", savedEntry.getTitle());
-        data.put("noticeType", savedEntry.getNoticeType());
-
-        return ResponseEntity.ok(ResponseFactory.success(data));
-    }
-    
-    @PostMapping("/publish")
-    public ResponseEntity<ApiRes<Map<String, Object>>> publishNotification(
-        @RequestBody NotificationPublishRequest request
-    ) {
-        ErrorCollector ec = new ErrorCollector();
-
-        // verify request data
-        ec.validate(request, validator);
-        
-        // verify foreign key
-        NotificationTemplate foundTemplate = notificationService.findTemplateById(request.getTemplateId());
-        UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        
-        if(foundTemplate == null) {ec.add("找不到套用通知訊息模板");}
-        if(foundUser == null) {ec.add("找不到目標用戶");}
-
-        if(ec.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(ec.getErrorMessage()));
-        }
-
-        // transfer data from DTO to Entity
-        NotificationPublished notification = NotificationPublished.builder()
-            .userMember(foundUser)
-            .notificationTemplate(foundTemplate)
-            .isRead(false)
-            .expiredAt(request.getExpiredAt())
-            .build();
-
-        // call service
-        ServiceResponse<NotificationPublished> res = notificationService.publishNotification(notification);
-        if (!res.isSuccess()) {
-            ec.add(res.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(res.getMessage()));
-        }
-
-        // publish notification
-        NotificationPublished savedEntry = res.getData();
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", savedEntry.getUserMember().getId());
-        data.put("title", savedEntry.getNotificationTemplate().getTitle());
-        return ResponseEntity.ok(ResponseFactory.success(data));
-    }
-    // =================================================================
-    // 建立通知相關======================================================
-    // =================================================================
 
 
     // =================================================================
