@@ -1,13 +1,15 @@
 package tw.eeits.unhappy.ttpp.coupon.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import tw.eeits.unhappy.eee.domain.UserMember;
-import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
@@ -16,6 +18,9 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
+import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
 
 
 @Service
@@ -25,6 +30,7 @@ public class CouponServiceImpl implements CouponService {
     private final UserMemberRepository userMemberRepository;
     private final CouponTemplateRepository templateRepository;
     private final CouponPublishedRepository publishedRepository;
+    private final CouponMediaRepository mediaRepository;
     private final Validator validator;
 
     // =================================================================
@@ -95,6 +101,30 @@ public class CouponServiceImpl implements CouponService {
             return ServiceResponse.fail("發送優惠券發生錯誤: " + e.getMessage());
         }
     }
+
+
+    @Override
+    public ServiceResponse<CouponMedia> addMediaToTemplate(Integer couponId, MediaType mediaType, MultipartFile file) throws IOException {
+        
+        ErrorCollector ec = new ErrorCollector();
+
+        CouponTemplate foundTemplate = templateRepository.findById(couponId).orElse(null);
+
+        if(foundTemplate == null) {ec.add("找不到優惠券模板");}
+        
+        CouponMedia newEntry = CouponMedia.builder()
+                .couponTemplate(foundTemplate)
+                .mediaType(mediaType)
+                .mediaData(file.getBytes())
+                .build();
+        try {
+            CouponMedia savedEntry = mediaRepository.save(newEntry);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("圖片添加異常: " + e.getMessage());
+        }
+    }
+
     // =================================================================
     // 建立相關==========================================================
     // =================================================================

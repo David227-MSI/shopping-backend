@@ -18,6 +18,10 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.eeit198product.repository.ProductRepository;
+import tw.eeits.unhappy.ll.model.Brand;
+import tw.eeits.unhappy.ll.repository.BrandRepository;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
@@ -26,6 +30,7 @@ import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponPublishedRequest;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
+import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
@@ -36,8 +41,8 @@ public class CouponAdminController {
 
     private final CouponService couponService;
     private final UserMemberService userMemberService;
-    // private final ProductService productService;
-    // private final BrandService brandService;
+    private final ProductRepository productRepository;
+    private final BrandRepository brandRepository;
     private final Validator validator;
 
     // =================================================================
@@ -53,13 +58,13 @@ public class CouponAdminController {
         ec.validate(request, validator);
         
         // verify foreign key (Brand, Product)
-        // if(request.getApplicableType() == ApplicableType.PRODUCT) {
-        //     Product foundProduct = productService.findProductById(request.getApplicableId());
-        //     if(foundProduct == null) {ec.add("找不到目標商品");}
-        // } else if(request.getApplicableType() == ApplicableType.BRAND) {
-        //     Brand foundBrand = brandService.findBrandById(request.getApplicableId());
-        //     if(foundBrand == null) {ec.add("找不到目標廠商");}
-        // }
+        if(request.getApplicableType() == ApplicableType.PRODUCT) {
+            Product foundProduct = productRepository.findById(request.getApplicableId()).orElse(null);
+            if(foundProduct == null) {ec.add("找不到目標商品");}
+        } else if(request.getApplicableType() == ApplicableType.BRAND) {
+            Brand foundBrand = brandRepository.findById(request.getApplicableId()).orElse(null);
+            if(foundBrand == null) {ec.add("找不到目標廠商");}
+        }
 
         if(ec.hasErrors()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -156,7 +161,7 @@ public class CouponAdminController {
     // =================================================================
     
     @GetMapping("/templates/{id}")
-    public ResponseEntity<ApiRes<CouponTemplate>> getMethodName(@PathVariable Integer id) {
+    public ResponseEntity<ApiRes<CouponTemplate>> findTemplateById(@PathVariable Integer id) {
         CouponTemplate foundEntry = couponService.findTemplateById(id);
         return ResponseEntity.ok(ResponseFactory.success(foundEntry));
     }

@@ -1,11 +1,16 @@
 package tw.eeits.unhappy.ttpp._itf;
 
+import java.io.IOException;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
 public interface CouponService {
 
@@ -23,6 +28,11 @@ public interface CouponService {
      * @return                ServiceResponse封包
      */
     ServiceResponse<CouponPublished> publishCoupon(CouponPublished couponPublished);
+
+
+
+
+    ServiceResponse<CouponMedia> addMediaToTemplate(Integer couponId, MediaType mediaType, MultipartFile file) throws IOException;
     // 建立相關==========================================================
     
 
