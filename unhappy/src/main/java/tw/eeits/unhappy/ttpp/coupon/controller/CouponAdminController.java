@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ttpp.coupon.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
 @RestController
 @RequestMapping("/api/admin/coupons")
@@ -151,6 +154,43 @@ public class CouponAdminController {
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
+
+
+
+    @PostMapping("/uploadImage")
+    public ResponseEntity<?> addMediaToTemplate(MediaRequest request) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        if(request == null) {
+            ec.add("請輸入請求資料");
+        } else {
+            ec.validate(request, validator);
+        }
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        try {
+            ServiceResponse<CouponMedia> res = couponService.addMediaToTemplate(request);
+
+            if (!res.isSuccess()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseFactory.fail(res.getMessage()));
+            } 
+            
+            return ResponseEntity.ok(res);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ServiceResponse.fail("圖片處理失敗: " + e.getMessage()));
+        }
+    }
+
+
+
     // =================================================================
     // 建立優惠相關======================================================
     // =================================================================
@@ -188,6 +228,7 @@ public class CouponAdminController {
             mp.put("discountValue", template.getDiscountValue());
             mp.put("startTime", template.getStartTime());
             mp.put("endTime", template.getEndTime());
+            mp.put("couponMedia", template.getCouponMedia());
             return mp;
         }).collect(Collectors.toList());
 

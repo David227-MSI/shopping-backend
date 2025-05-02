@@ -72,6 +72,7 @@ public class CouponUserController {
             mp.put("discountValue", coupon.getCouponTemplate().getDiscountValue());
             mp.put("startTime", coupon.getCouponTemplate().getStartTime());
             mp.put("endTime", coupon.getCouponTemplate().getEndTime());
+            mp.put("couponMedia", coupon.getCouponTemplate().getCouponMedia());
             return mp;
         }).collect(Collectors.toList());
 

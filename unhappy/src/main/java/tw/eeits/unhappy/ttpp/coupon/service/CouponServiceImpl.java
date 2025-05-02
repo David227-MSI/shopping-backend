@@ -18,6 +18,7 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
+import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
@@ -104,18 +105,18 @@ public class CouponServiceImpl implements CouponService {
 
 
     @Override
-    public ServiceResponse<CouponMedia> addMediaToTemplate(Integer couponId, MediaType mediaType, MultipartFile file) throws IOException {
+    public ServiceResponse<CouponMedia> addMediaToTemplate(MediaRequest request) throws IOException {
         
         ErrorCollector ec = new ErrorCollector();
 
-        CouponTemplate foundTemplate = templateRepository.findById(couponId).orElse(null);
+        CouponTemplate foundTemplate = templateRepository.findById(request.getId()).orElse(null);
 
         if(foundTemplate == null) {ec.add("找不到優惠券模板");}
         
         CouponMedia newEntry = CouponMedia.builder()
                 .couponTemplate(foundTemplate)
-                .mediaType(mediaType)
-                .mediaData(file.getBytes())
+                .mediaType(request.getMediaType())
+                .mediaData(request.getMediaData().getBytes())
                 .build();
         try {
             CouponMedia savedEntry = mediaRepository.save(newEntry);

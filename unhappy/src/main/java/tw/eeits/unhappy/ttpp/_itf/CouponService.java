@@ -9,6 +9,7 @@ import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
@@ -32,7 +33,7 @@ public interface CouponService {
 
 
 
-    ServiceResponse<CouponMedia> addMediaToTemplate(Integer couponId, MediaType mediaType, MultipartFile file) throws IOException;
+    ServiceResponse<CouponMedia> addMediaToTemplate(MediaRequest request) throws IOException;
     // 建立相關==========================================================
     
 

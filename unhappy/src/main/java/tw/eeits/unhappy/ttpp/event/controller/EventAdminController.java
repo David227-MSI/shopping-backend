@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ttpp.event.controller;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
 import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
-import tw.eeits.unhappy.ttpp.media.dto.EventMediaRequest;
+import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
 @RestController
@@ -95,7 +96,7 @@ public class EventAdminController {
 
     @PostMapping("/addMedia")
     public ResponseEntity<ApiRes<Map<String, Object>>> addMediaToEvent(
-        @RequestBody EventMediaRequest request) {
+        @RequestBody MediaRequest request) throws IOException {
 
         ErrorCollector ec = new ErrorCollector();
 
@@ -103,7 +104,7 @@ public class EventAdminController {
         ec.validate(request, validator);
 
         // check foreign key
-        Event foundEvent = eventService.findEventById(request.getEventId());
+        Event foundEvent = eventService.findEventById(request.getId());
         if(foundEvent == null) {ec.add("找不到相關活動");}
 
         if(ec.hasErrors()) {
@@ -114,7 +115,7 @@ public class EventAdminController {
         // transfer data from DTO to Entity
         EventMedia newEntry = EventMedia.builder()
                 .event(foundEvent)
-                .mediaData(request.getMediaData())
+                .mediaData(request.getMediaData().getBytes())
                 .mediaType(request.getMediaType())
                 .build();
         

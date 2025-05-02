@@ -12,7 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -33,7 +33,7 @@ import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 public class CouponMedia {
     
     // fk_coupon_media_coupon_template
-    @ManyToOne
+    @OneToOne
     @JsonBackReference
     @NotNull(message = "couponId 不可為空值")
     @JoinColumn(name = "coupon_id", nullable = false)
