@@ -7,8 +7,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
@@ -146,6 +148,50 @@ public class NotificationServiceImpl implements NotificationService {
     // =================================================================
     // 修改相關==========================================================
     // =================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<Boolean> deleteNotificationById(Integer id) {
+        try {
+            publishedRepository.deleteById(id);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail(e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public ServiceResponse<Boolean> deleteNotificationByUserMember(UserMember userMember) {
+        try {
+            publishedRepository.deleteByUserMember(userMember);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail(e.getMessage());
+        }
+    }
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+
+
+
+
+
+
 
 
 

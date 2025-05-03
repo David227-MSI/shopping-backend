@@ -18,6 +18,12 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 @Repository
 public interface NotificationPublishedRepository extends JpaRepository<NotificationPublished, Integer>, JpaSpecificationExecutor<NotificationPublished> {
 
+
+    void deleteByUserMember(UserMember userMember);
+
+    List<NotificationPublished> findByUserMemberAndIsRead(UserMember userMember, Boolean isRead);
+
+
     static Specification<NotificationPublished> byNotificationsCriteria(NotificationQuery query) {
         return (root, queryBuilder, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();

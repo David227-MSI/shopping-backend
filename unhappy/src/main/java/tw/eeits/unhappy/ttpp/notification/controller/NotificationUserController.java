@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
@@ -23,9 +23,7 @@ import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
-import tw.eeits.unhappy.ttpp.notification.dto.NotificationPublishRequest;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
-import tw.eeits.unhappy.ttpp.notification.dto.NotificationTemplateRequest;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 
@@ -37,7 +35,6 @@ public class NotificationUserController {
 
     private final NotificationService notificationService;
     private final UserMemberService userMemberService;
-    private final Validator validator;
 
 
 
@@ -90,7 +87,56 @@ public class NotificationUserController {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
-    @PostMapping("/user/query")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ApiRes<Boolean>> deleteUserNotification(
+        @PathVariable Integer id
+    ) {
+        ErrorCollector ec = new ErrorCollector();
+
+        if(id == null) {ec.add("找不到目標訊息");}
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Boolean> res = notificationService.deleteNotificationById(id);
+        if (!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ResponseFactory.fail(res.getMessage()));
+        }
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+
+    @DeleteMapping("/deleteAll/{userId}")
+    public ResponseEntity<ApiRes<Boolean>> deleteNotificationByUser(
+        @PathVariable Integer userId
+    ) {
+        ErrorCollector ec = new ErrorCollector();
+
+        UserMember foundUser = userMemberService.findUserById(userId);
+
+        if(userId == null) {
+            ec.add("請輸入用戶ID");
+        } else if(foundUser == null) {
+            ec.add("找不到操作用戶");
+        }
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Boolean> res = notificationService.deleteNotificationByUserMember(foundUser);
+        if (!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(ResponseFactory.fail(res.getMessage()));
+        }
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+
+
+    @PostMapping("/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findUserNotifications(
         @RequestBody NotificationQuery query) {
         
@@ -107,7 +153,7 @@ public class NotificationUserController {
         List<Map<String, Object>> notificationList = foundData.stream().map(notification -> {
             Map<String, Object> mp = new HashMap<>();
             mp.put("id", notification.getId());
-            mp.put("isUsed", notification.getIsRead());
+            mp.put("isRead", notification.getIsRead());
             mp.put("title", notification.getNotificationTemplate().getTitle());
             mp.put("noticeType", notification.getNotificationTemplate().getNoticeType());
             mp.put("createdAt", notification.getCreatedAt());
@@ -121,7 +167,7 @@ public class NotificationUserController {
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
 
-    @GetMapping("/user/notification/{id}")
+    @GetMapping("/notification/{id}")
     public ResponseEntity<ApiRes<Map<String, Object>>> getNotificationById(@PathVariable Integer id) {
 
         ErrorCollector ec = new ErrorCollector();

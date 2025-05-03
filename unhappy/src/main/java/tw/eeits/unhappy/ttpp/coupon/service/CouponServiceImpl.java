@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
 import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
-import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
 

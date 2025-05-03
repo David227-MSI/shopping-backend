@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,19 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import tw.eeits.unhappy.eee.domain.UserMember;
-import tw.eeits.unhappy.eee.service.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
-import tw.eeits.unhappy.ttpp.coupon.dto.CouponPublishedRequest;
-import tw.eeits.unhappy.ttpp.coupon.dto.CouponTemplateRequest;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponTransferRequest;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
-import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 
 
 @RestController
@@ -39,9 +32,6 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 public class CouponUserController {
 
     private final CouponService couponService;
-    private final UserMemberService userMemberService;
-    // private final ProductService productService;
-    // private final BrandService brandService;
     private final Validator validator;
 
    
@@ -70,6 +60,7 @@ public class CouponUserController {
             mp.put("applicableType", coupon.getCouponTemplate().getApplicableType());
             mp.put("discountType", coupon.getCouponTemplate().getDiscountType());
             mp.put("discountValue", coupon.getCouponTemplate().getDiscountValue());
+            mp.put("tradeable", coupon.getCouponTemplate().getTradeable());
             mp.put("startTime", coupon.getCouponTemplate().getStartTime());
             mp.put("endTime", coupon.getCouponTemplate().getEndTime());
             mp.put("couponMedia", coupon.getCouponTemplate().getCouponMedia());
@@ -84,7 +75,7 @@ public class CouponUserController {
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
 
-    @PostMapping("/user/transfer")
+    @PostMapping("/transfer")
     public ResponseEntity<ApiRes<Map<String, Object>>> couponTransfer(
         @RequestBody CouponTransferRequest request) {
         
