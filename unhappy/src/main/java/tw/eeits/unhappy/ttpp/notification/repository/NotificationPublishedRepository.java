@@ -6,6 +6,9 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.criteria.Join;
@@ -22,6 +25,12 @@ public interface NotificationPublishedRepository extends JpaRepository<Notificat
     void deleteByUserMember(UserMember userMember);
 
     List<NotificationPublished> findByUserMemberAndIsRead(UserMember userMember, Boolean isRead);
+
+    @Modifying
+    @Query("UPDATE NotificationPublished n SET n.isRead = true WHERE n.userMember = :userMember AND n.isRead = false")
+    Integer markAllAsReadByUserMember(@Param("userMember") UserMember userMember);
+
+
 
 
     static Specification<NotificationPublished> byNotificationsCriteria(NotificationQuery query) {

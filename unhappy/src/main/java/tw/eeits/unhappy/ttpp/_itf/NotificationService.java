@@ -36,6 +36,14 @@ public interface NotificationService {
      * @return   ServiceResponse封包
      */
     ServiceResponse<NotificationPublished> markNotificationAsRead(Integer id);
+
+
+    /**
+     * @brief            將用戶的所有通知訊息標記已讀
+     * @param userMember 用戶
+     * @return           ServiceResponse封包
+     */
+    ServiceResponse<Integer> markAllAsReadByUserMember(UserMember userMember);
     // 修改相關==========================================================
 
 

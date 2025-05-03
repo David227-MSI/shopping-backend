@@ -145,6 +145,20 @@ public class NotificationServiceImpl implements NotificationService {
             return ServiceResponse.fail("修改通知訊息發生錯誤: " + e.getMessage());
         }
     }
+
+
+
+    @Override
+    @Transactional
+    public ServiceResponse<Integer> markAllAsReadByUserMember(UserMember userMember) {
+        
+        try {
+            Integer updatedCount = publishedRepository.markAllAsReadByUserMember(userMember);
+            return ServiceResponse.success(updatedCount);
+        } catch (Exception e) {
+            return ServiceResponse.fail("更新失敗: " + e.getMessage());
+        }
+    }
     // =================================================================
     // 修改相關==========================================================
     // =================================================================
@@ -164,6 +178,7 @@ public class NotificationServiceImpl implements NotificationService {
     // 刪除相關==========================================================
     // =================================================================
     @Override
+    @Transactional
     public ServiceResponse<Boolean> deleteNotificationById(Integer id) {
         try {
             publishedRepository.deleteById(id);

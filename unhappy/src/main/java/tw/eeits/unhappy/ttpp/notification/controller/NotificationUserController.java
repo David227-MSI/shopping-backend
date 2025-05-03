@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,6 +79,54 @@ public class NotificationUserController {
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+    @PutMapping("/markAllAsRead/{userId}")
+    public ResponseEntity<ApiRes<Map<String, Object>>> markAllNotificationsAsRead(
+        @PathVariable Integer userId
+    ) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        UserMember foundUser = null;
+
+        if(userId == null) {
+            ec.add("請輸入用戶ID");
+        } else {
+            foundUser = userMemberService.findUserById(userId);
+            if(foundUser == null) {ec.add("找不到操作用戶");}
+        }
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Integer> res = notificationService.markAllAsReadByUserMember(foundUser);
+
+        if (!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("updatedCount", res.getData());
+        return ResponseEntity.ok(ResponseFactory.success(data));
+
+    }
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
 
 
 
