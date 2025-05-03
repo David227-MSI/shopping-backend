@@ -75,7 +75,7 @@ public class AdminUserController {
         adminUserService.updateAdminUser(id, request, actingUserId);
     }
 
-    @PostMapping
+    @PostMapping("/users")
     public void createAdminUser(@RequestBody @Valid CreateAdminUserRequest request,
             HttpServletRequest httpRequest) {
 
