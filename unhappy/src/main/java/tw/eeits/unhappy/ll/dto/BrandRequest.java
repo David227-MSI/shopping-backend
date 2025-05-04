@@ -1,14 +1,9 @@
 package tw.eeits.unhappy.ll.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.Data;
-import tw.eeits.unhappy.ll.model.BrandStatus;
 
 @Data
-public class BrandResponse {
-
-    private Integer id;
+public class BrandRequest {
 
     private String name;
 
@@ -24,17 +19,13 @@ public class BrandResponse {
 
     private String fax;
 
-    private String photo;
-
     private String contactName;
 
     private String contactEmail;
 
     private String contactPhone;
 
-    private BrandStatus status;
+    // 不用加 photo，因為圖片是 MultipartFile，獨立用 @RequestPart("photo") 接收
 
-    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
 }
