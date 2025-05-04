@@ -40,6 +40,21 @@ public class AdminBrandController {
         return ResponseEntity.ok(created);
     }
 
+    // ✅ 純 JSON 新增
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createWithPhoto(
+            @RequestPart("brand") String brandJson,
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
+        try {
+            BrandRequest dto = new ObjectMapper().readValue(brandJson, BrandRequest.class);
+            brandService.createBrandWithPhoto(dto, photo);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("JSON 解析失敗：" + e.getMessage());
+        }
+    }
+
     // 查詢單一品牌
     @GetMapping("/{id}")
     public ResponseEntity<BrandResponse> findById(@PathVariable Integer id) {
@@ -56,11 +71,11 @@ public class AdminBrandController {
 
     // 更新品牌
     // @PutMapping("/{id}")
-    // public ResponseEntity<Brand> update(@PathVariable Integer id, @RequestBody @Valid Brand brand) {
-    //     Brand updated = brandService.update(id, brand);
-    //     return ResponseEntity.ok(updated);
+    // public ResponseEntity<Brand> update(@PathVariable Integer id, @RequestBody
+    // @Valid Brand brand) {
+    // Brand updated = brandService.update(id, brand);
+    // return ResponseEntity.ok(updated);
     // }
-    
 
     // ✅ 純 JSON 更新
     @PutMapping("/{id}")
@@ -70,35 +85,23 @@ public class AdminBrandController {
     }
 
     // ✅ JSON + 圖片 更新
-    // @PutMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // public ResponseEntity<?> updateWithPhoto(
-    //         @PathVariable Integer id,
-    //         @Valid @RequestPart("brand") BrandRequest dto,
-    //         @RequestPart(value = "photo", required = false) MultipartFile photo) {
-
-    //     brandService.updateBrandWithPhoto(id, dto, photo);
-    //     return ResponseEntity.ok().build();
-    // }
 
     @PutMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<?> updateWithPhoto(
-        @PathVariable Integer id,
-        @RequestPart("brand") String brandJson,
-        @RequestPart(value = "photo", required = false) MultipartFile photo
-) {
-    // System.out.println("收到 JSON 原文：\n" + brandJson);
-    try {
-        ObjectMapper mapper = new ObjectMapper();
-        BrandRequest dto = mapper.readValue(brandJson, BrandRequest.class);
+    public ResponseEntity<?> updateWithPhoto(
+            @PathVariable Integer id,
+            @RequestPart("brand") String brandJson,
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
+        // System.out.println("收到 JSON 原文：\n" + brandJson);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            BrandRequest dto = mapper.readValue(brandJson, BrandRequest.class);
 
-        brandService.updateBrandWithPhoto(id, dto, photo);
-        return ResponseEntity.ok().build();
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("JSON 解析失敗：" + e.getMessage());
+            brandService.updateBrandWithPhoto(id, dto, photo);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("JSON 解析失敗：" + e.getMessage());
+        }
     }
-}
-
-
 
 }

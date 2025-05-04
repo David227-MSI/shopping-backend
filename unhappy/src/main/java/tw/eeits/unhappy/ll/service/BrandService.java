@@ -12,8 +12,9 @@ public interface BrandService {
 
     Brand create(Brand brand);
 
-    // Brand update(Integer id, Brand brand);
+    void createBrandWithPhoto(BrandRequest dto, MultipartFile photo);
 
+    // Brand update(Integer id, Brand brand);
     void updateBrand(Integer id, Brand brand); // 純 JSON 更新
 
     void updateBrandWithPhoto(Integer id, BrandRequest dto, MultipartFile photo); // multipart 更新
@@ -21,4 +22,6 @@ public interface BrandService {
     BrandResponse findById(Integer id);
 
     List<BrandResponse> findAll();
+
+    
 }
