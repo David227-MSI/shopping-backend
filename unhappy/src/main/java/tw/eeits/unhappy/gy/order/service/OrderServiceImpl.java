@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // 套用優惠券
+    // 套用優惠券 ( 可能廢棄 )
     private CouponUsageResult applyCouponIfNeeded(OrderRequestDTO dto, BigDecimal totalAmount) {
         if (dto.getCouponPublishedId() == null) {
             return new CouponUsageResult(null, BigDecimal.ZERO);
@@ -144,7 +144,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
-    // 儲存訂單明細(商品)
+    // 儲存訂單明細 (商品)
     private void createOrderItems(Order order, List<CartItem> cartItems) {
         List<OrderItem> orderItems = cartItems.stream()
                 .map(cartItem -> OrderItem.builder()
@@ -158,7 +158,7 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);
     }
 
-    // 結帳購物車商品(標記為已結帳)
+    // 結帳購物車商品 (標記為已結帳)
     private void checkoutCartItems(List<CartItem> cartItems) {
         cartItems.forEach(cartItem -> cartItemRepository.markCartItemCheckedOutById(cartItem.getId()));
     }
