@@ -18,7 +18,6 @@ public class FilterConfig {
         // registrationBean.addUrlPatterns("/api/admin/*");
         registrationBean.addUrlPatterns("/api/admin/*", "/api/admin/*/*", "/api/admin/*/*/*");
 
-
         // 設定執行順序，數字越小越優先
         registrationBean.setOrder(1);
 
@@ -27,26 +26,7 @@ public class FilterConfig {
 }
 
 
-// package tw.eeits.unhappy.ll.config;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-// import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-// import lombok.RequiredArgsConstructor;
-// import tw.eeits.unhappy.ll.security.JwtAuthenticationFilter;
 
-// @Configuration
-// @RequiredArgsConstructor
-// public class WebConfig implements WebMvcConfigurer {
-
-//     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-//     @Override
-//     public void addInterceptors(InterceptorRegistry registry) {
-//         registry.addInterceptor(jwtAuthenticationFilter)
-//                 .addPathPatterns("/api/**") // 所有 API 都攔
-//                 .excludePathPatterns("/api/admin/login"); // 登入本身不用驗證
-//     }
-// }
+// 舊的JWT攔截器設定，是寫在WebConfig，繼承不同，不能直接用
