@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import tw.eeits.unhappy.ra._response.ApiRes;
 import tw.eeits.unhappy.ra._response.ResponseFactory;
 import tw.eeits.unhappy.ra.review.dto.AverageScoresDto;
@@ -14,16 +19,20 @@ import tw.eeits.unhappy.ra.review.dto.PageDto;
 import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
 import tw.eeits.unhappy.ra.review.dto.ReviewResp;
 import tw.eeits.unhappy.ra.review.model.ReviewSortOption;
+import tw.eeits.unhappy.ra.review.model.ReviewTag;
 import tw.eeits.unhappy.ra.review.service.ReviewMediaService;
 import tw.eeits.unhappy.ra.review.service.ReviewService;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewMediaService reviewMediaService;
+    private final ObjectMapper objectMapper;
 
     /* ---------- 前台：商品評論列表 ---------- */
     @GetMapping("/products/{pid}/reviews")
@@ -46,24 +55,89 @@ public class ReviewController {
         return ResponseFactory.success(dto);
     }
 
+    /* ---------- 前台：檢查評論是否存在 ---------- */
+    @GetMapping("/reviews/{orderItemId}/exists")
+    public ApiRes<ExistsResponse> checkReviewExists(
+            @PathVariable Integer orderItemId,
+            @RequestParam Integer userId) {
+        log.info("檢查評論是否存在: orderItemId={}, userId={}", orderItemId, userId);
+        ReviewResp review = reviewService.findByOrderItemIdAndUserId(orderItemId, userId);
+        return ResponseFactory.success(new ExistsResponse(review != null, review != null ? review.id() : null));
+    }
+
+    /* ---------- 前台：獲取評論詳情 ---------- */
+    @GetMapping("/reviews/{id}")
+    public ApiRes<ReviewResp> getReview(@PathVariable Integer id) {
+        log.info("獲取評論詳情: reviewId={}", id);
+        ReviewResp review = reviewService.findById(id);
+        return ResponseFactory.success(review);
+    }
+
     /* ---------- 前台：新增評論 ---------- */
-    @PostMapping("/reviews/{orderItemId}")
+    @PostMapping(value = "/reviews/{orderItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiRes<Void>> addReview(
             @PathVariable Integer orderItemId,
-            @RequestBody     @Valid ReviewCreateReq req) {
+            @RequestParam("userId") Integer userId,
+            @RequestParam("reviewText") String reviewText,
+            @RequestParam("scoreQuality") Integer scoreQuality,
+            @RequestParam("scoreDescription") Integer scoreDescription,
+            @RequestParam("scoreDelivery") Integer scoreDelivery,
+            @RequestParam("tags") String tagsJson,
+            @RequestPart(name = "images", required = false) MultipartFile[] images) throws IOException {
+
+        log.info("接收到新增評論請求: orderItemId={}, userId={}, images={}", 
+                orderItemId, userId, images != null ? images.length : 0);
+
+        List<String> tagStrings;
+        try {
+            tagStrings = Arrays.asList(objectMapper.readValue(tagsJson, String[].class));
+            log.info("解析 tagsJson: {}", tagStrings);
+        } catch (Exception e) {
+            log.error("解析 tagsJson 失敗: {}", tagsJson, e);
+            throw new IllegalArgumentException("無效的標籤格式");
+        }
+
+        Set<ReviewTag> tags;
+        try {
+            tags = tagStrings.stream()
+                    .map(ReviewTag::fromLabel)
+                    .collect(Collectors.toSet());
+            log.info("轉換標籤: {}", tags);
+        } catch (Exception e) {
+            log.error("轉換標籤失敗: {}", tagStrings, e);
+            throw new IllegalArgumentException("無效的標籤值: " + e.getMessage());
+        }
+
+        List<String> imageUrls = images != null ? reviewMediaService.uploadMultiple(userId, images) : List.of();
+        log.info("圖片上傳結果: imageUrls={}", imageUrls);
+
+        ReviewCreateReq req = new ReviewCreateReq(
+                userId, orderItemId, reviewText, imageUrls,
+                scoreQuality, scoreDescription, scoreDelivery, tags);
 
         reviewService.createReview(req);
+        log.info("評論儲存成功: orderItemId={}", orderItemId);
         return ResponseEntity.ok(ResponseFactory.success((Void) null));
     }
 
-    /* ---------- 前台：新增評論圖片 ---------- */
-    @PostMapping(value = "/reviews/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiRes<String>> uploadImg(
-            @RequestParam Integer userId,
-            @RequestPart MultipartFile file) throws IOException {
+    /* ---------- 前台：更新評論文字和標籤 ---------- */
+    @PutMapping("/reviews/{id}")
+    public ResponseEntity<ApiRes<Void>> updateReview(
+            @PathVariable Integer id,
+            @RequestBody UpdateReviewReq req) {
+        log.info("更新評論: reviewId={}, tags={}", id, req.tags());
+        reviewService.updateReview(id, req.reviewText(), req.tags());
+        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+    }
 
-        String url = reviewMediaService.upload(userId, file);
-        return ResponseEntity.ok(ResponseFactory.success(url));
+    /* ---------- 前台：更新評論文字（舊端點，保留相容性） ---------- */
+    @PutMapping("/reviews/{id}/text")
+    public ResponseEntity<ApiRes<Void>> updateReviewText(
+            @PathVariable Integer id,
+            @RequestBody UpdateReviewTextReq req) {
+        log.info("更新評論文字: reviewId={}", id);
+        reviewService.updateReviewText(id, req.reviewText());
+        return ResponseEntity.ok(ResponseFactory.success((Void) null));
     }
 
     /* ---------- 前台：按/收回讚 ---------- */
@@ -78,10 +152,13 @@ public class ReviewController {
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
     @PutMapping("/reviews/{id}/visible")
-    public ResponseEntity<ApiRes<Void>> hideReview(
-            @PathVariable Integer id) {
-
+    public ResponseEntity<ApiRes<Void>> hideReview(@PathVariable Integer id) {
         reviewService.hideReview(id);
         return ResponseEntity.ok(ResponseFactory.success((Void) null));
     }
+
+    /* ----- 內部 DTO ----- */
+    private record ExistsResponse(boolean exists, Integer reviewId) {}
+    private record UpdateReviewTextReq(String reviewText) {}
+    private record UpdateReviewReq(String reviewText, List<String> tags) {}
 }

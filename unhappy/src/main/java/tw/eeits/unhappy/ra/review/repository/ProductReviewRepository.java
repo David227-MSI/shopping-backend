@@ -1,6 +1,7 @@
 package tw.eeits.unhappy.ra.review.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,19 +54,25 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
         WHERE r.userMember.id = :userId
             AND r.orderItem.id = :orderItemId
         """)
-    boolean existsByUserIdAndOrderItemId(
-        @Param("userId") Integer userId,
-        @Param("orderItemId") Integer orderItemId
+    boolean existsByOrderItemIdAndUserId(
+        @Param("orderItemId") Integer orderItemId,
+        @Param("userId") Integer userId
     );
 
+    @Query("""
+        SELECT r
+        FROM ProductReview r
+        WHERE r.orderItem.id = :orderItemId
+            AND r.userMember.id = :userId
+        """)
+    Optional<ProductReview> findByOrderItemIdAndUserId(
+        @Param("orderItemId") Integer orderItemId,
+        @Param("userId") Integer userId
+    );
 
-
-    // Product
     @Query(value = "SELECT pr.* FROM product_review pr " +
                    "WHERE pr.order_item_id IN (" +
                    "SELECT oi.id FROM order_items oi WHERE oi.product_id = :productId" +
                    ") AND pr.is_visible = 1", nativeQuery = true)
     List<ProductReview> findReviewsByProductId(@Param("productId") Integer productId);
-
-
 }
