@@ -1,18 +1,15 @@
 package tw.eeits.unhappy.ra.review.controller;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import jakarta.validation.Valid;
-
 import java.io.IOException;
-
 import tw.eeits.unhappy.ra._response.ApiRes;
 import tw.eeits.unhappy.ra._response.ResponseFactory;
+import tw.eeits.unhappy.ra.review.dto.AverageScoresDto;
 import tw.eeits.unhappy.ra.review.dto.PageDto;
 import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
 import tw.eeits.unhappy.ra.review.dto.ReviewResp;
@@ -21,7 +18,7 @@ import tw.eeits.unhappy.ra.review.service.ReviewMediaService;
 import tw.eeits.unhappy.ra.review.service.ReviewService;
 
 @RestController
-@RequestMapping("/api/reviews")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ReviewController {
 
@@ -29,24 +26,30 @@ public class ReviewController {
     private final ReviewMediaService reviewMediaService;
 
     /* ---------- 前台：商品評論列表 ---------- */
-    @GetMapping("/product/{pid}")
-    public ResponseEntity<ApiRes<PageDto<ReviewResp>>> listByProduct(
+    @GetMapping("/products/{pid}/reviews")
+    public ApiRes<PageDto<ReviewResp>> listByProduct(
             @PathVariable Integer pid,
             @RequestParam(defaultValue = "LATEST") ReviewSortOption sort,
             @RequestParam(defaultValue = "false") boolean onlyImages,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0")     int page,
+            @RequestParam(defaultValue = "10")    int size) {
 
         ReviewSortOption opt = onlyImages ? ReviewSortOption.WITH_IMAGES : sort;
-        PageDto<ReviewResp> result = reviewService.listByProduct(pid, opt, page, size);
-        return ResponseEntity.ok(ResponseFactory.success(result));
+        PageDto<ReviewResp> dto = reviewService.listByProduct(pid, opt, page, size);
+        return ResponseFactory.success(dto);
+    }
+
+    /* ---------- 前台：商品評論平均分數 ---------- */
+    @GetMapping("/products/{pid}/avg")
+    public ApiRes<AverageScoresDto> getAverageScores(@PathVariable Integer pid) {
+        AverageScoresDto dto = reviewService.getAverageScoresByProduct(pid);
+        return ResponseFactory.success(dto);
     }
 
     /* ---------- 前台：新增評論 ---------- */
-    @PostMapping("/{orderItemId}")
+    @PostMapping("/reviews/{orderItemId}")
     public ResponseEntity<ApiRes<Void>> addReview(
             @PathVariable Integer orderItemId,
-            @RequestParam    Integer userId,
             @RequestBody     @Valid ReviewCreateReq req) {
 
         reviewService.createReview(req);
@@ -54,7 +57,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：新增評論圖片 ---------- */
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/reviews/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiRes<String>> uploadImg(
             @RequestParam Integer userId,
             @RequestPart MultipartFile file) throws IOException {
@@ -64,7 +67,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：按/收回讚 ---------- */
-    @PostMapping("/{id}/like")
+    @PostMapping("/reviews/{id}/like")
     public ResponseEntity<ApiRes<Integer>> toggleLike(
             @PathVariable Integer id,
             @RequestParam Integer userId) {
@@ -74,7 +77,7 @@ public class ReviewController {
     }
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
-    @PutMapping("/{id}/visible")
+    @PutMapping("/reviews/{id}/visible")
     public ResponseEntity<ApiRes<Void>> hideReview(
             @PathVariable Integer id) {
 

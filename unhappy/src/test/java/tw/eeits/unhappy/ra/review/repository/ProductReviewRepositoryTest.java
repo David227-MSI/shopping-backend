@@ -3,8 +3,8 @@ package tw.eeits.unhappy.ra.review.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import tw.eeits.unhappy.ra._fake.OrderItem;
-import tw.eeits.unhappy.ra._fake.UserMember;
+import tw.eeits.unhappy.gy.domain.OrderItem;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ra.review.model.ProductReview;
 import tw.eeits.unhappy.ra.review.model.ReviewTag;
 

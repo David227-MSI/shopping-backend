@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import tw.eeits.unhappy.ra._fake.Product;
+import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.ra.media.model.MediaType;
 import tw.eeits.unhappy.ra.media.model.ProductMedia;
 

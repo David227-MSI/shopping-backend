@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import tw.eeits.unhappy.ra._fake.Product;
+import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.ra.media.model.ProductMedia;
 import tw.eeits.unhappy.ra.media.service.ProductMediaService;
 import tw.eeits.unhappy.ra.media.repository.ProductMediaRepository;

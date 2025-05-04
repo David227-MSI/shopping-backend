@@ -1,17 +1,16 @@
 package tw.eeits.unhappy.ra.review.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.gy.domain.OrderItem;
+import tw.eeits.unhappy.ra.review.dto.AverageScoresDto;
 import tw.eeits.unhappy.ra.review.dto.PageDto;
 import tw.eeits.unhappy.ra.review.dto.ReviewCreateReq;
 import tw.eeits.unhappy.ra.review.dto.ReviewResp;
@@ -42,6 +41,30 @@ public class ReviewService {
                         : reviewRepo.findByProductIdAndIsVisible(productId, true, pageable);
 
         return PageDto.from(pageEntity.map(this::toResp));
+    }
+
+    public AverageScoresDto getAverageScoresByProduct(Integer productId) {
+        List<ProductReview> reviews = reviewRepo.findReviewsByProductId(productId);
+        if (reviews.isEmpty()) {
+            return new AverageScoresDto(0.0, 0.0, 0.0);
+        }
+
+        double totalQuality = 0.0;
+        double totalDescription = 0.0;
+        double totalDelivery = 0.0;
+        int count = reviews.size();
+
+        for (ProductReview review : reviews) {
+            totalQuality += review.getScoreQuality();
+            totalDescription += review.getScoreDescription();
+            totalDelivery += review.getScoreDelivery();
+        }
+
+        return new AverageScoresDto(
+            totalQuality / count,
+            totalDescription / count,
+            totalDelivery / count
+        );
     }
 
     private ReviewResp toResp(ProductReview r) {

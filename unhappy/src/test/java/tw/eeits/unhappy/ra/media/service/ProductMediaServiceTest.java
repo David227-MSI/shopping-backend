@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-import tw.eeits.unhappy.ra._fake.Product;
+import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.ra.media.model.MediaType;
 import tw.eeits.unhappy.ra.media.model.ProductMedia;
 import tw.eeits.unhappy.ra.media.repository.ProductMediaRepository;
