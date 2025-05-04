@@ -29,6 +29,7 @@ public class EcpayServiceImpl implements EcpayService {
     @Autowired
     private OrderRepository orderRepository;
 
+    // 綠界參數
     private final String HASH_KEY = "pwFHCqoQZGmho4w6";
     private final String HASH_IV = "EkRm7iFT261dpevs";
     private final String MERCHANT_ID = "3002607";
@@ -39,7 +40,7 @@ public class EcpayServiceImpl implements EcpayService {
         Order order = orderRepository.findById(dto.getOrderId())
                 .orElseThrow(() -> new OrderNotFoundException("訂單不存在"));
 
-        // 建立交易編號並更新
+        // 建立交易編號(綠界用)並更新
         String merchantTradeNo = "SHOP" + UUID.randomUUID().toString().replace("-", "").substring(0, 15);
         order.setTransactionNumber(merchantTradeNo);
         orderRepository.save(order);
@@ -61,10 +62,7 @@ public class EcpayServiceImpl implements EcpayService {
         // CheckMacValue
         String checkMacValue = generateCheckMacValue(params);
         params.put("CheckMacValue", checkMacValue);
-
-        System.out.println("✔️ 送出給前端的 ECPay 欄位資料:");
         params.forEach((k, v) -> System.out.println(k + ": " + v));
-
         return params; // 回傳純欄位資料，讓前端動態組 <form>
     }
 
