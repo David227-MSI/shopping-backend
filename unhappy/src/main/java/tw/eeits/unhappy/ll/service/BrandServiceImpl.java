@@ -171,6 +171,7 @@ public class BrandServiceImpl implements BrandService {
         brand.setContactName(dto.getContactName());
         brand.setContactEmail(dto.getContactEmail());
         brand.setContactPhone(dto.getContactPhone());
+        brand.setStatus(dto.getStatus()); // 狀態從 DTO 來
 
         if (brand.getStatus() == null) {
             brand.setStatus(BrandStatus.ACTIVE);
