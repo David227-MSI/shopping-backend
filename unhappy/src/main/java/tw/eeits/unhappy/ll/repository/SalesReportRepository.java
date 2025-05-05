@@ -15,4 +15,6 @@ public interface SalesReportRepository
 
 	List<SalesReport> findByReportMonthOrderByVersionDesc(String reportMonth);
 
+	List<SalesReport> findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(String month, Integer version);
+
 }
