@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
 import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
 
@@ -108,18 +110,20 @@ public class CouponServiceImpl implements CouponService {
 
 
     @Override
-    public ServiceResponse<CouponMedia> addMediaToTemplate(MediaRequest request) throws IOException {
+    public ServiceResponse<CouponMedia> addMediaToTemplate(
+        CouponTemplate template, 
+        MultipartFile mediaData, 
+        MediaType mediaType
+    ) throws IOException {
         
         ErrorCollector ec = new ErrorCollector();
 
-        CouponTemplate foundTemplate = templateRepository.findById(request.getId()).orElse(null);
-
-        if(foundTemplate == null) {ec.add("找不到優惠券模板");}
+        if(template == null) {ec.add("找不到優惠券模板");}
         
         CouponMedia newEntry = CouponMedia.builder()
-                .couponTemplate(foundTemplate)
-                .mediaType(request.getMediaType())
-                .mediaData(request.getMediaData().getBytes())
+                .couponTemplate(template)
+                .mediaType(mediaType)
+                .mediaData(mediaData.getBytes())
                 .build();
         try {
             CouponMedia savedEntry = mediaRepository.save(newEntry);

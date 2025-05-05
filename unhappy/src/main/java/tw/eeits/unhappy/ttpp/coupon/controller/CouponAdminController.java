@@ -1,18 +1,20 @@
 package tw.eeits.unhappy.ttpp.coupon.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Validator;
@@ -35,7 +37,6 @@ import tw.eeits.unhappy.ttpp.coupon.dto.OrderSelectCouponRequest;
 import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
 
@@ -53,9 +54,9 @@ public class CouponAdminController {
     // =================================================================
     // 建立優惠相關======================================================
     // =================================================================
-    @PostMapping("/template")
+    @PostMapping(value = "/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiRes<Map<String, Object>>> createTemplate(
-        @RequestBody CouponTemplateRequest request
+        @ModelAttribute CouponTemplateRequest request
     ) {
         ErrorCollector ec = new ErrorCollector();
 
@@ -90,20 +91,42 @@ public class CouponAdminController {
                 .build();
 
         // call service
-        ServiceResponse<CouponTemplate> res = couponService.createTemplate(newEntry);
-
-        if (!res.isSuccess()) {
-            ec.add(res.getMessage());
+        ServiceResponse<CouponTemplate> resTemplate = couponService.createTemplate(newEntry);
+        
+        if (!resTemplate.isSuccess()) {
+            ec.add(resTemplate.getMessage());
             return ResponseEntity.badRequest()
-                .body(ResponseFactory.fail(res.getMessage()));
+            .body(ResponseFactory.fail(resTemplate.getMessage()));
+        }
+
+        
+        CouponTemplate savedTemplate = resTemplate.getData();
+        ServiceResponse<CouponMedia> resMedia = null;
+        try {
+            resMedia = couponService.addMediaToTemplate(
+                savedTemplate, 
+                request.getMediaData(), 
+                request.getMediaType()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+            .body(ResponseFactory.fail("上傳圖片發生異常: " + e.getMessage()));
+        }
+
+        if (!resMedia.isSuccess()) {
+            ec.add(resMedia.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ResponseFactory.fail(resMedia.getMessage()));
         }
 
         // pick up response data
-        CouponTemplate savedEntry = res.getData();
+        CouponMedia savedMedia = resMedia.getData();
         Map<String, Object> data = new HashMap<>();
-        data.put("id", savedEntry.getId());
-        data.put("applicableType", savedEntry.getApplicableType());
-        data.put("discountType", savedEntry.getDiscountType());
+        data.put("id", savedTemplate.getId());
+        data.put("applicableType", savedTemplate.getApplicableType());
+        data.put("discountType", savedTemplate.getDiscountType());
+        data.put("mediaType", savedMedia.getMediaType());
+        data.put("mediaData", savedMedia.getMediaData());
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
@@ -159,37 +182,37 @@ public class CouponAdminController {
 
 
 
-    @PostMapping("/uploadImage")
-    public ResponseEntity<?> addMediaToTemplate(MediaRequest request) {
+    // @PostMapping("/uploadImage")
+    // public ResponseEntity<?> addMediaToTemplate(MediaRequest request) {
 
-        ErrorCollector ec = new ErrorCollector();
+    //     ErrorCollector ec = new ErrorCollector();
 
-        if(request == null) {
-            ec.add("請輸入請求資料");
-        } else {
-            ec.validate(request, validator);
-        }
+    //     if(request == null) {
+    //         ec.add("請輸入請求資料");
+    //     } else {
+    //         ec.validate(request, validator);
+    //     }
 
-        if(ec.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseFactory.fail(ec.getErrorMessage()));
-        }
+    //     if(ec.hasErrors()) {
+    //         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    //             .body(ResponseFactory.fail(ec.getErrorMessage()));
+    //     }
 
-        // call service
-        try {
-            ServiceResponse<CouponMedia> res = couponService.addMediaToTemplate(request);
+    //     // call service
+    //     try {
+    //         ServiceResponse<CouponMedia> res = couponService.addMediaToTemplate(request);
 
-            if (!res.isSuccess()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseFactory.fail(res.getMessage()));
-            } 
+    //         if (!res.isSuccess()) {
+    //             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    //                 .body(ResponseFactory.fail(res.getMessage()));
+    //         } 
             
-            return ResponseEntity.ok(res);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ServiceResponse.fail("圖片處理失敗: " + e.getMessage()));
-        }
-    }
+    //         return ResponseEntity.ok(res);
+    //     } catch (IOException e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //                 .body(ServiceResponse.fail("圖片處理失敗: " + e.getMessage()));
+    //     }
+    // }
 
 
 
