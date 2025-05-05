@@ -134,10 +134,9 @@ public class OrderServiceImpl implements OrderService {
                 .couponPublished(couponResult.getCoupon())
                 .totalAmount(totalAmount)
                 .discountAmount(couponResult.getDiscountAmount())
-                .status(OrderStatus.COMPLETED)
-                .paymentStatus(PaymentStatus.PAID)
+                .status(OrderStatus.PENDING) // 暫時測試 ngrok
+                .paymentStatus(PaymentStatus.UNPAID) // 暫時測試 ngrok
                 .paymentMethod("綠界-信用卡一次付清")
-                .paidAt(java.time.LocalDateTime.now())
                 .recipientName(dto.getRecipientName())
                 .recipientPhone(dto.getRecipientPhone())
                 .recipientAddress(dto.getRecipientAddress())
