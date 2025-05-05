@@ -69,8 +69,13 @@ public class ReviewController {
     @GetMapping("/reviews/{id}")
     public ApiRes<ReviewResp> getReview(@PathVariable Integer id) {
         log.info("獲取評論詳情: reviewId={}", id);
-        ReviewResp review = reviewService.findById(id);
-        return ResponseFactory.success(review);
+        try {
+            ReviewResp review = reviewService.findById(id);
+            return ResponseFactory.success(review);
+        } catch (RuntimeException e) {
+            log.error("獲取評論失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseFactory.fail("評論不存在");
+        }
     }
 
     /* ---------- 前台：新增評論 ---------- */
@@ -94,7 +99,7 @@ public class ReviewController {
             log.info("解析 tagsJson: {}", tagStrings);
         } catch (Exception e) {
             log.error("解析 tagsJson 失敗: {}", tagsJson, e);
-            throw new IllegalArgumentException("無效的標籤格式");
+            return ResponseEntity.badRequest().body(ResponseFactory.fail("無效的標籤格式"));
         }
 
         Set<ReviewTag> tags;
@@ -105,29 +110,48 @@ public class ReviewController {
             log.info("轉換標籤: {}", tags);
         } catch (Exception e) {
             log.error("轉換標籤失敗: {}", tagStrings, e);
-            throw new IllegalArgumentException("無效的標籤值: " + e.getMessage());
+            return ResponseEntity.badRequest().body(ResponseFactory.fail("無效的標籤值: " + e.getMessage()));
         }
 
         List<String> imageUrls = images != null ? reviewMediaService.uploadMultiple(userId, images) : List.of();
         log.info("圖片上傳結果: imageUrls={}", imageUrls);
 
-        ReviewCreateReq req = new ReviewCreateReq(
-                userId, orderItemId, reviewText, imageUrls,
-                scoreQuality, scoreDescription, scoreDelivery, tags);
-
-        reviewService.createReview(req);
-        log.info("評論儲存成功: orderItemId={}", orderItemId);
-        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        try {
+            ReviewCreateReq req = new ReviewCreateReq(
+                    userId, orderItemId, reviewText, imageUrls,
+                    scoreQuality, scoreDescription, scoreDelivery, tags);
+            reviewService.createReview(req);
+            log.info("評論儲存成功: orderItemId={}", orderItemId);
+            return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        } catch (IllegalArgumentException e) {
+            log.error("新增評論失敗: orderItemId={}, error={}", orderItemId, e.getMessage());
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(e.getMessage()));
+        }
     }
 
     /* ---------- 前台：更新評論文字和標籤 ---------- */
     @PutMapping("/reviews/{id}")
     public ResponseEntity<ApiRes<Void>> updateReview(
             @PathVariable Integer id,
+            @RequestParam("userId") Integer userId,
             @RequestBody UpdateReviewReq req) {
-        log.info("更新評論: reviewId={}, tags={}", id, req.tags());
-        reviewService.updateReview(id, req.reviewText(), req.tags());
-        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        log.info("更新評論: reviewId={}, userId={}, tags={}", id, userId, req.tags());
+        try {
+            ReviewResp review = reviewService.findById(id);
+            if (!review.userId().equals(userId)) {
+                log.warn("無權更新評論: reviewId={}, userId={}", id, userId);
+                return ResponseEntity.status(403).body(ResponseFactory.fail("無權更新此評論"));
+            }
+            reviewService.updateReview(id, req.reviewText(), req.tags());
+            log.info("評論更新成功: reviewId={}", id);
+            return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        } catch (IllegalArgumentException e) {
+            log.error("更新評論失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(e.getMessage()));
+        } catch (RuntimeException e) {
+            log.error("更新評論失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseEntity.status(404).body(ResponseFactory.fail("評論不存在"));
+        }
     }
 
     /* ---------- 前台：更新評論文字（舊端點，保留相容性） ---------- */
@@ -136,8 +160,13 @@ public class ReviewController {
             @PathVariable Integer id,
             @RequestBody UpdateReviewTextReq req) {
         log.info("更新評論文字: reviewId={}", id);
-        reviewService.updateReviewText(id, req.reviewText());
-        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        try {
+            reviewService.updateReviewText(id, req.reviewText());
+            return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        } catch (RuntimeException e) {
+            log.error("更新評論文字失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseEntity.status(404).body(ResponseFactory.fail("評論不存在"));
+        }
     }
 
     /* ---------- 前台：按/收回讚 ---------- */
@@ -145,16 +174,25 @@ public class ReviewController {
     public ResponseEntity<ApiRes<Integer>> toggleLike(
             @PathVariable Integer id,
             @RequestParam Integer userId) {
-
-        int newCount = reviewService.toggleLike(id, userId);
-        return ResponseEntity.ok(ResponseFactory.success(newCount));
+        try {
+            int newCount = reviewService.toggleLike(id, userId);
+            return ResponseEntity.ok(ResponseFactory.success(newCount));
+        } catch (RuntimeException e) {
+            log.error("按讚失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseEntity.status(404).body(ResponseFactory.fail("評論不存在"));
+        }
     }
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
     @PutMapping("/reviews/{id}/visible")
     public ResponseEntity<ApiRes<Void>> hideReview(@PathVariable Integer id) {
-        reviewService.hideReview(id);
-        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        try {
+            reviewService.hideReview(id);
+            return ResponseEntity.ok(ResponseFactory.success((Void) null));
+        } catch (RuntimeException e) {
+            log.error("隱藏評論失敗: reviewId={}, error={}", id, e.getMessage());
+            return ResponseEntity.status(404).body(ResponseFactory.fail("評論不存在"));
+        }
     }
 
     /* ----- 內部 DTO ----- */
