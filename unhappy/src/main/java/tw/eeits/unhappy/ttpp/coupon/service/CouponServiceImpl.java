@@ -1,7 +1,10 @@
 package tw.eeits.unhappy.ttpp.coupon.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -9,10 +12,12 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.repository.UserMemberRepository;
+import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
+import tw.eeits.unhappy.ttpp.coupon.enums.ApplicableType;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
@@ -209,6 +214,83 @@ public class CouponServiceImpl implements CouponService {
             return ServiceResponse.fail("修改優惠券發生錯誤: " + e.getMessage());
         }
     }
+
+
+    @Override
+    public ServiceResponse<List<CouponPublished>> getValidCouponByUserMember(UserMember userMember, BigDecimal totalAmount, List<Product> orderItems) {
+        ErrorCollector ec = new ErrorCollector();
+
+        if (userMember == null) {
+            ec.add("找不到目標用戶");
+        }
+        if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            ec.add("訂單金額無效");
+        }
+        if (orderItems == null || orderItems.isEmpty()) {
+            ec.add("商品清單不可為空");
+        }
+
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+            List<CouponPublished> foundList = publishedRepository.findByUserMemberAndIsUsed(userMember, false);
+
+
+            foundList.forEach(c -> {
+                System.out.println("Coupon ID: " + c.getId() +
+                    "\nStartTime: " + c.getCouponTemplate().getStartTime() + 
+                    "\nEndTime: " + c.getCouponTemplate().getEndTime()
+                );
+            });
+
+
+            LocalDateTime currentTime = LocalDateTime.now();
+            List<CouponPublished> validCoupons = foundList.stream()
+                .filter(coupon -> {
+                    CouponTemplate template = coupon.getCouponTemplate();
+                    LocalDateTime startTime = template.getStartTime();
+                    LocalDateTime endTime = template.getEndTime();
+
+                    // check valid date
+                    boolean isValidTime = (startTime == null || !currentTime.isBefore(startTime)) && 
+                                        (endTime == null || !currentTime.isAfter(endTime));
+
+                    // check minSpend
+                    boolean isValidMinSpend = template.getMinSpend().compareTo(totalAmount) <= 0;
+
+                    // check applicable type
+                    boolean isValidApplicable = true;
+                    ApplicableType applicableType = template.getApplicableType();
+                    Integer applicableId = template.getApplicableId();
+                    if (applicableType == ApplicableType.PRODUCT) {
+                        isValidApplicable = orderItems.stream()
+                            .anyMatch(product -> product.getId().equals(applicableId));
+                    } else if (applicableType == ApplicableType.BRAND) {
+                        isValidApplicable = orderItems.stream()
+                            .anyMatch(product -> product.getBrand().getId().equals(applicableId));
+                    }
+
+                    // 確保所有條件都符合
+                    return isValidTime && isValidMinSpend && isValidApplicable;
+                })
+                .collect(Collectors.toList());
+
+                validCoupons.forEach(c -> {
+                    System.out.println("Coupon ID: " + c.getId() +
+                        ", Template ID: " + c.getCouponTemplate().getId());
+                });
+
+
+
+            return ServiceResponse.success(validCoupons);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢優惠券清單發生異常: " + e);
+        }
+    }
+
     // =================================================================
     // 修改相關==========================================================
     // =================================================================

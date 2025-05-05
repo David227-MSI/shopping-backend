@@ -21,6 +21,8 @@ public interface CouponPublishedRepository extends JpaRepository<CouponPublished
 
     Optional<CouponPublished> findCouponById(String id);
 
+    List<CouponPublished> findByUserMemberAndIsUsed(UserMember userMember, Boolean isUsed);
+
     // 查詢優惠券是否存在
     Optional<CouponPublished> findByIdAndUserMemberId(String couponId, Integer userId); 
 

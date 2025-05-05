@@ -53,4 +53,12 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getRecommendedProducts(Integer excludeProductId) {
         return productRepository.findTop5ByIdNotOrderByCreatedAtDesc(excludeProductId);
     }
+
+
+
+    // ttpp
+    @Override
+    public List<Product> findByIds(List<Integer> ids) {
+        return productRepository.findAllById(ids);
+    }
 }
