@@ -109,4 +109,21 @@ public class ProductMediaService {
             remains.get(i).setMediaOrder(i + 1);
         }
     }
+
+    // 設置主圖
+    @Transactional
+    public void setMain(Integer mediaId) {
+        ProductMedia media = repo.findById(mediaId)
+                                .orElseThrow(() -> new IllegalArgumentException("Media not found"));
+
+        // 取消舊主圖
+        repo.findFirstByProductIdAndIsMainTrue(media.getProduct().getId())
+                .ifPresent(m -> {
+                if (!m.getId().equals(mediaId)) {
+                    m.setIsMain(false);
+                }
+            });
+
+        media.setIsMain(true);
+    }
 }
