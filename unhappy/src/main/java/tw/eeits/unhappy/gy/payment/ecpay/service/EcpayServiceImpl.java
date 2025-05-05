@@ -2,6 +2,7 @@ package tw.eeits.unhappy.gy.payment.ecpay.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.eeits.unhappy.gy.domain.Order;
@@ -29,6 +30,13 @@ public class EcpayServiceImpl implements EcpayService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Value("${ecpay.return-url}")
+    private String returnUrl;
+
+    @Value("${ecpay.order-result-url}")
+    private String orderResultUrl;
+
+
     // 綠界參數
     private final String HASH_KEY = "pwFHCqoQZGmho4w6";
     private final String HASH_IV = "EkRm7iFT261dpevs";
@@ -54,8 +62,8 @@ public class EcpayServiceImpl implements EcpayService {
         params.put("TotalAmount", dto.getAmount().setScale(0, RoundingMode.HALF_UP).toString());
         params.put("TradeDesc", URLEncoder.encode("Unhappy 購物網站付款", StandardCharsets.UTF_8));
         params.put("ItemName", "Unhappy 訂單");
-        params.put("ReturnURL", "http://localhost:8080/api/ecpay/payment-callback");
-        params.put("OrderResultURL", "http://localhost:5173/order-result.html?orderId=" + order.getId());
+        params.put("ReturnURL", returnUrl);
+        params.put("OrderResultURL", orderResultUrl + "?orderId=" + order.getId());
         params.put("ChoosePayment", "Credit");
         params.put("NeedExtraPaidInfo", "N");
 
