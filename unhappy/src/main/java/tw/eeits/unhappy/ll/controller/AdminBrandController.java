@@ -40,7 +40,7 @@ public class AdminBrandController {
         return ResponseEntity.ok(created);
     }
 
-    // ✅ 純 JSON 新增
+    // 新增品牌 + 圖片
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createWithPhoto(
             @RequestPart("brand") String brandJson,
@@ -77,15 +77,14 @@ public class AdminBrandController {
     // return ResponseEntity.ok(updated);
     // }
 
-    // ✅ 純 JSON 更新
+    // 更新品牌
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Brand brand) {
         brandService.updateBrand(id, brand);
         return ResponseEntity.ok().build();
     }
 
-    // ✅ JSON + 圖片 更新
-
+    // 更新品牌 + 圖片
     @PutMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateWithPhoto(
             @PathVariable Integer id,
