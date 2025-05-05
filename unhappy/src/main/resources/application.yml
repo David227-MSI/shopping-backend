@@ -65,5 +65,8 @@ azure:
     connection-string: DefaultEndpointsProtocol=https;AccountName=unhappyproductmedia;AccountKey=SmVnSwDVTv4ihzV2PdozNsjg6WzTTZT4fawbW1Mx2hou1bByMZCqOGsOPUe73HyUxZ74es+qVrsc+ASt58xp/g==;EndpointSuffix=core.windows.net
     container: product-media
 
-
+# ecpay 對外網域 & 成功付款回傳頁面
+ecpay:
+  return-url: https://xxxx.ngrok-free.app/api/ecpay/payment-callback
+  order-result-url: http://localhost/order-result.html
 
