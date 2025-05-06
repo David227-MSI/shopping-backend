@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> MANAGER_AND_STAFF_API = List.of(
             "/api/admin/brands",
             "/api/contact/messages",
-            "/api/sales-report"
+            "/api/admin/sales-report"
             );
 
     @Override

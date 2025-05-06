@@ -1,24 +1,10 @@
 package tw.eeits.unhappy.ll.service;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.eeit198product.repository.ProductRepository;
 import tw.eeits.unhappy.gy.domain.OrderItem;
@@ -29,10 +15,18 @@ import tw.eeits.unhappy.ll.model.SalesReport;
 import tw.eeits.unhappy.ll.repository.BrandRepository;
 import tw.eeits.unhappy.ll.repository.SalesReportRepository;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional // 一定要加，避免 Lazy loading 爆錯
+@Transactional
 public class SalesReportService {
 
     private final OrderRepository orderRepository;
@@ -41,51 +35,32 @@ public class SalesReportService {
     private final BrandRepository brandRepository;
     private final SalesReportRepository salesReportRepository;
 
-    /**
-     * 產生指定月份的銷售報表
-     * @param reportMonth 格式：yyyy-MM，例如 "2025-04"
-     */
     public void generateSalesReport(String reportMonth) {
-        // 1. 計算起訖時間
         LocalDate startDate = LocalDate.parse(reportMonth + "-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         LocalDate endDate = startDate.plusMonths(1);
 
-        // 2. 查詢該月份付款成功 (PAID) 的訂單ID
         List<Integer> paidOrderIds = orderRepository.findPaidOrderIdsBetweenDates(
-                startDate.atStartOfDay(), endDate.atStartOfDay()
-        );
-        if (paidOrderIds.isEmpty()) {
-            return; // 沒有資料就直接跳出
-        }
+                startDate.atStartOfDay(), endDate.atStartOfDay());
+        if (paidOrderIds.isEmpty()) return;
 
-        // 3. 查詢訂單項目 (OrderItems)
         List<OrderItem> orderItems = orderItemRepository.findByOrderIdIn(paidOrderIds);
-        if (orderItems.isEmpty()) {
-            return; // 沒有商品就直接跳出
-        }
+        if (orderItems.isEmpty()) return;
 
-        // 4. 整理所有 Product IDs
         Set<Integer> productIds = orderItems.stream()
-                .map(orderItem -> orderItem.getProduct().getId())
+                .map(item -> item.getProduct().getId())
                 .collect(Collectors.toSet());
-
-        // 5. 查詢商品資料 (Products)
         Map<Integer, Product> productMap = productRepository.findByIdIn(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        // 6. 查詢品牌資料 (Brands)
         Set<Integer> brandIds = productMap.values().stream()
-                .map(product -> product.getBrand().getId())
+                .map(p -> p.getBrand().getId())
                 .collect(Collectors.toSet());
-
         Map<Integer, Brand> brandMap = brandRepository.findByIdIn(brandIds).stream()
                 .collect(Collectors.toMap(Brand::getId, b -> b));
 
-        // 7. 查詢當月最高的 version
         Integer maxVersion = salesReportRepository.findMaxVersionByMonth(reportMonth);
         int newVersion = (maxVersion == null) ? 1 : maxVersion + 1;
 
-        // 8. 整理彙總資料
         Map<Integer, SalesAggregation> aggregationMap = new HashMap<>();
         for (OrderItem item : orderItems) {
             Integer productId = item.getProduct().getId();
@@ -96,22 +71,19 @@ public class SalesReportService {
                 }
                 agg.quantitySold += item.getQuantity();
                 agg.totalAmount = agg.totalAmount.add(
-                        item.getPriceAtTheTime().multiply(BigDecimal.valueOf(item.getQuantity()))
-                );
+                        item.getPriceAtTheTime().multiply(BigDecimal.valueOf(item.getQuantity())));
                 return agg;
             });
         }
 
-        // 9. 產生 sales_report 資料
         List<SalesReport> reports = new ArrayList<>();
         for (Map.Entry<Integer, SalesAggregation> entry : aggregationMap.entrySet()) {
             Integer productId = entry.getKey();
             SalesAggregation agg = entry.getValue();
-
             Product product = productMap.get(productId);
             Brand brand = brandMap.getOrDefault(product.getBrand().getId(), null);
 
-            SalesReport report = SalesReport.builder()
+            reports.add(SalesReport.builder()
                     .reportMonth(reportMonth)
                     .version(newVersion)
                     .brandId(product.getBrand().getId())
@@ -123,75 +95,121 @@ public class SalesReportService {
                     .totalAmount(agg.totalAmount)
                     .isExported(false)
                     .generatedAt(LocalDateTime.now())
-                    .build();
-
-            reports.add(report);
+                    .build());
         }
 
-        // 10. 批次存進資料庫
         salesReportRepository.saveAll(reports);
     }
 
-    
-    // 彙總用的小結構
-    
+    @Transactional(readOnly = true)
+    public List<SalesReport> getSalesReportsByMonth(String reportMonth) {
+        return salesReportRepository.findByReportMonthOrderByVersionDesc(reportMonth);
+    }
+
+    public byte[] exportToExcel(String reportMonth, Integer version) {
+        List<SalesReport> reports = salesReportRepository
+                .findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(reportMonth, version);
+        if (reports.isEmpty()) return null;
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("報表");
+            String[] titles = {"品牌", "商品", "平均價格", "銷售數量", "總金額", "產生時間"};
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < titles.length; i++) header.createCell(i).setCellValue(titles[i]);
+
+            int rowIdx = 1;
+            LocalDateTime now = LocalDateTime.now();
+            for (SalesReport r : reports) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(r.getBrandName());
+                row.createCell(1).setCellValue(r.getProductName());
+                row.createCell(2).setCellValue(r.getAveragePrice().toString());
+                row.createCell(3).setCellValue(r.getQuantitySold());
+                row.createCell(4).setCellValue(r.getTotalAmount().toString());
+                row.createCell(5).setCellValue(r.getGeneratedAt().toString());
+                r.setIsExported(true);
+                r.setExportedAt(now);
+            }
+
+            salesReportRepository.saveAll(reports);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("匯出報表失敗", e);
+        }
+    }
+
+    public byte[] exportToExcelByBrand(String reportMonth, Integer version, Integer brandId) {
+        List<SalesReport> reports = salesReportRepository
+                .findByReportMonthAndVersionAndBrandIdOrderByProductNameAsc(reportMonth, version, brandId);
+        if (reports.isEmpty()) return null;
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("報表");
+            String[] titles = {"品牌", "商品", "平均價格", "銷售數量", "總金額", "產生時間"};
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < titles.length; i++) header.createCell(i).setCellValue(titles[i]);
+
+            int rowIdx = 1;
+            LocalDateTime now = LocalDateTime.now();
+            for (SalesReport r : reports) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(r.getBrandName());
+                row.createCell(1).setCellValue(r.getProductName());
+                row.createCell(2).setCellValue(r.getAveragePrice().toString());
+                row.createCell(3).setCellValue(r.getQuantitySold());
+                row.createCell(4).setCellValue(r.getTotalAmount().toString());
+                row.createCell(5).setCellValue(r.getGeneratedAt().toString());
+                r.setIsExported(true);
+                r.setExportedAt(now);
+            }
+
+            salesReportRepository.saveAll(reports);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("匯出品牌報表失敗", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<SalesReport> getReportsByBrand(Integer brandId) {
+        return salesReportRepository.findByBrandIdOrderByReportMonthDescVersionDesc(brandId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SalesReport> getLatestVersionReportsByMonth(String reportMonth) {
+        Integer maxVersion = salesReportRepository.findMaxVersionByMonth(reportMonth);
+        if (maxVersion == null) return List.of();
+        return salesReportRepository.findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(reportMonth, maxVersion);
+    }
+
     private static class SalesAggregation {
         String productName;
         int quantitySold = 0;
         BigDecimal totalAmount = BigDecimal.ZERO;
     }
 
-    /**
- * 查詢某個月份的銷售報表（所有版本）
- */
-@Transactional(readOnly = true)
-public List<SalesReport> getSalesReportsByMonth(String reportMonth) {
-    return salesReportRepository.findByReportMonthOrderByVersionDesc(reportMonth);
-}
+    @Transactional(readOnly = true)
+    public List<Integer> getBrandIdsByMonth(String reportMonth) {
+        //  Option 1:  使用 SalesReportRepository (如果可以有效率地完成)
+        //  這假設 SalesReportRepository 可以輕鬆修改以完成此操作。
+        //  return salesReportRepository.findDistinctBrandIdsByReportMonth(reportMonth);  //  需要在 SalesReportRepository 中新增
 
-
-// 匯出報表
-public byte[] exportToExcel(String reportMonth, Integer version) {
-    List<SalesReport> reports = salesReportRepository
-        .findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(reportMonth, version);
-    if (reports.isEmpty()) {
-        return null;
+        //  Option 2:  更穩健，但可能效率較低 (如果資料量很大)
+        //  取得該月份的所有報表，並提取不重複的品牌 ID。
+        List<SalesReport> reports = salesReportRepository.findByReportMonthOrderByVersionDesc(reportMonth);
+        return reports.stream()
+                .map(SalesReport::getBrandId)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
-    try (Workbook workbook = new XSSFWorkbook()) {
-        Sheet sheet = workbook.createSheet("報表");
-
-        // 標題列
-        Row header = sheet.createRow(0);
-        String[] titles = {
-            "品牌", "商品", "平均價格", "銷售數量", "總金額", "產生時間"
-        };
-        for (int i = 0; i < titles.length; i++) {
-            header.createCell(i).setCellValue(titles[i]);
-        }
-
-        // 資料列
-        int rowIdx = 1;
-        for (SalesReport r : reports) {
-            Row row = sheet.createRow(rowIdx++);
-            row.createCell(0).setCellValue(r.getBrandName());
-            row.createCell(1).setCellValue(r.getProductName());
-            row.createCell(2).setCellValue(r.getAveragePrice().toString());
-            row.createCell(3).setCellValue(r.getQuantitySold());
-            row.createCell(4).setCellValue(r.getTotalAmount().toString());
-            row.createCell(5).setCellValue(r.getGeneratedAt().toString());
-        }
-
-        // 匯出成 ByteArray
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        workbook.write(out);
-        return out.toByteArray();
-    } catch (Exception e) {
-        throw new RuntimeException("匯出報表失敗", e);
-    }
 }
 
 
 
-
-}
