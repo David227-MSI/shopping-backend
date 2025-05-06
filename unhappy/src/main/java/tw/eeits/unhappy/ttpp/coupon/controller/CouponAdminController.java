@@ -314,6 +314,7 @@ public class CouponAdminController {
             mp.put("id", coupon.getId());
             mp.put("applicableId", template.getApplicableId());
             mp.put("applicableType", template.getApplicableType());
+            mp.put("discountType", template.getDiscountType());
             mp.put("discountValue", template.getDiscountValue());
             mp.put("maxDiscount", template.getMaxDiscount());
             mp.put("startTime", template.getStartTime());
