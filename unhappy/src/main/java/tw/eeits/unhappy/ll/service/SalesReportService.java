@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ll.service;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -12,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ import tw.eeits.unhappy.ll.model.Brand;
 import tw.eeits.unhappy.ll.model.SalesReport;
 import tw.eeits.unhappy.ll.repository.BrandRepository;
 import tw.eeits.unhappy.ll.repository.SalesReportRepository;
+
 
 @Service
 @RequiredArgsConstructor
@@ -128,9 +132,9 @@ public class SalesReportService {
         salesReportRepository.saveAll(reports);
     }
 
-    /**
-     * 彙總用的小結構
-     */
+    
+    // 彙總用的小結構
+    
     private static class SalesAggregation {
         String productName;
         int quantitySold = 0;
@@ -144,6 +148,50 @@ public class SalesReportService {
 public List<SalesReport> getSalesReportsByMonth(String reportMonth) {
     return salesReportRepository.findByReportMonthOrderByVersionDesc(reportMonth);
 }
+
+
+// 匯出報表
+public byte[] exportToExcel(String reportMonth, Integer version) {
+    List<SalesReport> reports = salesReportRepository
+        .findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(reportMonth, version);
+    if (reports.isEmpty()) {
+        return null;
+    }
+
+    try (Workbook workbook = new XSSFWorkbook()) {
+        Sheet sheet = workbook.createSheet("報表");
+
+        // 標題列
+        Row header = sheet.createRow(0);
+        String[] titles = {
+            "品牌", "商品", "平均價格", "銷售數量", "總金額", "產生時間"
+        };
+        for (int i = 0; i < titles.length; i++) {
+            header.createCell(i).setCellValue(titles[i]);
+        }
+
+        // 資料列
+        int rowIdx = 1;
+        for (SalesReport r : reports) {
+            Row row = sheet.createRow(rowIdx++);
+            row.createCell(0).setCellValue(r.getBrandName());
+            row.createCell(1).setCellValue(r.getProductName());
+            row.createCell(2).setCellValue(r.getAveragePrice().toString());
+            row.createCell(3).setCellValue(r.getQuantitySold());
+            row.createCell(4).setCellValue(r.getTotalAmount().toString());
+            row.createCell(5).setCellValue(r.getGeneratedAt().toString());
+        }
+
+        // 匯出成 ByteArray
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        return out.toByteArray();
+    } catch (Exception e) {
+        throw new RuntimeException("匯出報表失敗", e);
+    }
+}
+
+
 
 
 }

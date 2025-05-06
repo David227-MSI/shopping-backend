@@ -2,6 +2,8 @@ package tw.eeits.unhappy.ll.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,38 @@ public class SalesReportController {
         List<SalesReport> reports = salesReportService.getSalesReportsByMonth(reportMonth);
         return ResponseEntity.ok(reports);
     }
+
+
+
+    // 匯出報表
+
+
+@GetMapping("/export")
+public ResponseEntity<byte[]> exportReport(
+        @RequestParam String reportMonth,
+        @RequestParam Integer version) {
+
+    byte[] file = salesReportService.exportToExcel(reportMonth, version);
+    if (file == null) {
+        return ResponseEntity.notFound().build();
+    }
+
+    String filename = String.format("sales-report-%s-v%d.xlsx", reportMonth, version);
+
+    return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+            .body(file);
+}
+
+
+
+
+
+
+
+
+
 }
 
 

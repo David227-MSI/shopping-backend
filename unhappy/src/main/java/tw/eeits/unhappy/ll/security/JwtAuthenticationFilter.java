@@ -36,6 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> MANAGER_ONLY_API = List.of(
             "/api/admin/users");
 
+
+
+
     // 允許 MANAGER 和 STAFF 都能操作的API (例如: 品牌管理、客服處理)
     private static final List<String> MANAGER_AND_STAFF_API = List.of(
             "/api/admin/brands",
@@ -119,6 +122,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return MANAGER_AND_STAFF_API.stream().anyMatch(path::startsWith);
     }
 }
+
+
 
 // package tw.eeits.unhappy.ll.security;
 
