@@ -77,5 +77,12 @@ public class ProductMediaController {
             main == null ? null : ProductMediaDto.from(main)
         ));
     }
+
+    /* ---------- 6. 設定主圖 ---------- */
+    @PutMapping("/{id}/main")
+    public ResponseEntity<ApiRes<Void>> setMain(@PathVariable Integer id) {
+        mediaSvc.setMain(id);
+        return ResponseEntity.ok(ResponseFactory.success((Void) null));
+    }
 }
 

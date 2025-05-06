@@ -79,15 +79,30 @@ public class ProductMediaService {
 
     /** 拖曳排序後一次重排，避免 UNIQUE 衝突 */
     @Transactional
-    public void reorder(Integer productId, Map<Integer, Integer> newOrders) {
-        List<ProductMedia> list = repo.findByProductId(productId); // 鎖定行
+    public void reorder(Integer productId, Map<Integer,Integer> newOrders) {
+    
+        // 1️⃣ 鎖定這批資料
+        List<ProductMedia> list = repo.findByProductId(productId);   // PESSIMISTIC_WRITE
+    
+        // 2️⃣ 先把順序全部推到負值區，確定不會撞到正值範圍
         list.forEach(m -> {
-            Integer o = newOrders.get(m.getId());
-            if (o != null && !o.equals(m.getMediaOrder())) {
-                m.setMediaOrder(o);
+            Integer newOrder = newOrders.get(m.getId());
+            if (newOrder != null) {
+                m.setMediaOrder(-1000 - newOrder);   // 例如 -1001、-1002…
             }
         });
+        repo.flush();               // 立即下 SQL，衝出唯一索引視線
+    
+        // 3️⃣ 再寫回真正的新順序
+        list.forEach(m -> {
+            Integer newOrder = newOrders.get(m.getId());
+            if (newOrder != null) {
+                m.setMediaOrder(newOrder);
+            }
+        });
+        // 交給 @Transactional 結尾 flush / commit
     }
+    
 
     /** 刪除 media 並移除雲端檔案，再重新編號 */
     @Transactional
@@ -108,5 +123,22 @@ public class ProductMediaService {
         for (int i = 0; i < remains.size(); i++) {
             remains.get(i).setMediaOrder(i + 1);
         }
+    }
+
+    // 設置主圖
+    @Transactional
+    public void setMain(Integer mediaId) {
+        ProductMedia media = repo.findById(mediaId)
+                                .orElseThrow(() -> new IllegalArgumentException("Media not found"));
+
+        // 取消舊主圖
+        repo.findFirstByProductIdAndIsMainTrue(media.getProduct().getId())
+                .ifPresent(m -> {
+                if (!m.getId().equals(mediaId)) {
+                    m.setIsMain(false);
+                }
+            });
+
+        media.setIsMain(true);
     }
 }
