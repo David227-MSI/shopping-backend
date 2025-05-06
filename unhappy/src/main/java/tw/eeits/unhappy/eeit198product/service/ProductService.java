@@ -3,6 +3,7 @@ package tw.eeits.unhappy.eeit198product.service;
 import java.util.List;
 import java.util.Optional;
 
+import tw.eeits.unhappy.eeit198product.dto.ProductDTO;
 import tw.eeits.unhappy.eeit198product.entity.Product;
 
 public interface ProductService {
@@ -15,6 +16,9 @@ public interface ProductService {
 
     /** 取得單一商品（Optional 包裝，可避免 null） */
     Optional<Product> getProductById(Integer id);
+
+    /** 取得單一商品（包含圖片資訊，返回 DTO） */
+    ProductDTO getProductDetailsWithImages(Integer id);
 
     /** 建立商品 */
     Product createProduct(Product product);
