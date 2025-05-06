@@ -1,22 +1,34 @@
 package tw.eeits.unhappy.ll.service;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Cell;
-
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.gy.domain.OrderItem;
+import tw.eeits.unhappy.gy.order.repository.OrderItemRepository;
+import tw.eeits.unhappy.gy.order.repository.OrderRepository;
 import tw.eeits.unhappy.ll.model.SalesReport;
 import tw.eeits.unhappy.ll.repository.SalesReportRepository;
 
@@ -24,6 +36,8 @@ import tw.eeits.unhappy.ll.repository.SalesReportRepository;
 @RequiredArgsConstructor
 public class SalesReportServiceImpl implements SalesReportService {
 
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final SalesReportRepository salesReportRepository;
 
     // 查詢某月份所有品牌報表
@@ -124,6 +138,111 @@ public class SalesReportServiceImpl implements SalesReportService {
     @Override
     public List<SalesReport> findReportsForExport(String month, Integer brandId, Integer version) {
         return resolveReportQuery(month, brandId, version);
+    }
+
+    // 取得資料 產生報表
+
+    // step1: 取得資料
+    private List<OrderItem> getPaidOrderItemsByMonth(String month) {
+        // 轉換 yyyy-MM 為該月的起始與結束時間
+        YearMonth yearMonth = YearMonth.parse(month);
+        LocalDateTime start = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime end = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+
+        // 查詢付款成功的訂單 ID
+        List<Integer> paidOrderIds = orderRepository.findPaidOrderIdsBetweenDates(start, end);
+
+        // 如果沒有符合的訂單，直接回傳空清單
+        if (paidOrderIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 查詢對應的訂單明細
+        return orderItemRepository.findByOrderIdIn(paidOrderIds);
+    }
+
+    // step2 將訂單明細 (OrderItem) 分組並彙整為 SalesReport 物件
+    private List<SalesReport> groupToSalesReport(String reportMonth, List<OrderItem> items) {
+        Map<Integer, List<OrderItem>> grouped = items.stream()
+                .collect(Collectors.groupingBy(item -> item.getProduct().getId()));
+
+        List<SalesReport> reports = new ArrayList<>();
+
+        for (Map.Entry<Integer, List<OrderItem>> entry : grouped.entrySet()) {
+            Integer productId = entry.getKey();
+            List<OrderItem> itemGroup = entry.getValue();
+
+            // 只取第一筆商品資訊（都一樣）
+            Product product = itemGroup.get(0).getProduct();
+
+            int totalQty = itemGroup.stream().mapToInt(OrderItem::getQuantity).sum();
+            BigDecimal totalAmount = itemGroup.stream()
+                    .map(item -> item.getPriceAtTheTime().multiply(BigDecimal.valueOf(item.getQuantity())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal averagePrice = totalQty == 0
+                    ? BigDecimal.ZERO
+                    : totalAmount.divide(BigDecimal.valueOf(totalQty), 2, RoundingMode.HALF_UP);
+
+            SalesReport report = SalesReport.builder()
+                    .reportMonth(reportMonth)
+                    .brandId(product.getBrand().getId())
+                    .brandName(product.getBrand().getName())
+                    .productId(product.getId())
+                    .productName(product.getName())
+                    .averagePrice(averagePrice)
+                    .quantitySold(totalQty)
+                    .totalAmount(totalAmount)
+                    .isExported(false)
+                    .generatedAt(LocalDateTime.now())
+                    .version(0) // 下一步才會補上
+                    .build();
+
+            reports.add(report);
+        }
+
+        return reports;
+    }
+
+    // step3 需要檢查該 month + brandId 已有的最大 version，然後 +1
+    private int getNextReportVersion(String month, Integer brandId) {
+        Integer maxVersion = salesReportRepository.findMaxVersionByMonthAndBrand(month, brandId);
+        return maxVersion == null ? 1 : maxVersion + 1;
+    }
+
+    // step4 產出報表
+    @Override
+    public List<SalesReport> generateMonthlyReport(String month, @Nullable Integer brandId) {
+        // 取得訂單明細
+        List<OrderItem> items = getPaidOrderItemsByMonth(month);
+
+        // 如果指定 brandId，先過濾出該品牌商品
+        if (brandId != null) {
+            items = items.stream()
+                    .filter(item -> item.getProduct().getBrand().getId().equals(brandId))
+                    .toList();
+        }
+
+        if (items.isEmpty()) {
+            return List.of(); // 無資料，不做任何處理
+        }
+
+        // 彙整成報表格式（尚未設定 version）
+        List<SalesReport> reports = groupToSalesReport(month, items);
+
+        // 依照 brandId 計算 version（一組一個）
+        Map<Integer, Integer> versionMap = new HashMap<>();
+        for (SalesReport report : reports) {
+            Integer bId = report.getBrandId();
+            if (!versionMap.containsKey(bId)) {
+                int nextVersion = getNextReportVersion(month, bId);
+                versionMap.put(bId, nextVersion);
+            }
+            report.setVersion(versionMap.get(bId));
+        }
+
+        // 寫入資料庫
+        return salesReportRepository.saveAll(reports);
     }
 
 }

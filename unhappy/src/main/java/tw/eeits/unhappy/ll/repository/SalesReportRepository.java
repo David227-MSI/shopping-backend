@@ -3,7 +3,8 @@ package tw.eeits.unhappy.ll.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import tw.eeits.unhappy.ll.model.SalesReport;
 
@@ -22,6 +23,12 @@ public interface SalesReportRepository
   // 查詢某月份某品牌某版本
   List<SalesReport> findByReportMonthAndBrandIdAndVersion(String reportMonth, Integer brandId, Integer version);
 
+  // 根據報表的 reportMonth + brandId 自動取得下一個 version。
+  @Query("SELECT MAX(sr.version) FROM SalesReport sr WHERE sr.reportMonth = :month AND sr.brandId = :brandId")
+  Integer findMaxVersionByMonthAndBrand(@Param("month") String month, @Param("brandId") Integer brandId);
+
+
+  
   // // 查詢某月份的最大版本號
   // @Query("SELECT MAX(s.version) FROM SalesReport s WHERE s.reportMonth =
   // :reportMonth")

@@ -3,6 +3,7 @@ package tw.eeits.unhappy.ll.service;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.lang.Nullable;
 
 import tw.eeits.unhappy.ll.model.SalesReport;
 
@@ -25,5 +26,8 @@ public interface SalesReportService {
 
     // 取得資料（取品牌名命名）
     List<SalesReport> findReportsForExport(String month, Integer brandId, Integer version);
+
+    // 產出月報表
+    public List<SalesReport> generateMonthlyReport(String month, @Nullable Integer brandId);
 
 }
