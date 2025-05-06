@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import tw.eeits.unhappy.ll.dto.SalesReportSummaryDto;
 import tw.eeits.unhappy.ll.model.SalesReport;
 
 public interface SalesReportRepository
@@ -27,38 +28,23 @@ public interface SalesReportRepository
   @Query("SELECT MAX(sr.version) FROM SalesReport sr WHERE sr.reportMonth = :month AND sr.brandId = :brandId")
   Integer findMaxVersionByMonthAndBrand(@Param("month") String month, @Param("brandId") Integer brandId);
 
+  // 複數產品只顯示一張報表紀錄
+  @Query(value = """
+      SELECT
+          brand_id,
+          brand_name,
+          report_month,
+          version,
+          CAST(MAX(CAST(is_exported AS INT)) AS BIT) AS is_exported,
+          MAX(exported_at) AS exported_at
+      FROM sales_report
+      WHERE (:month IS NULL OR report_month = :month)
+        AND (:brandId IS NULL OR brand_id = :brandId)
+      GROUP BY brand_id, brand_name, report_month, version
+      ORDER BY brand_id, report_month, version
+      """, nativeQuery = true)
+  List<Object[]> findReportSummariesNative(
+      @Param("month") String month,
+      @Param("brandId") Integer brandId);
 
-  
-  // // 查詢某月份的最大版本號
-  // @Query("SELECT MAX(s.version) FROM SalesReport s WHERE s.reportMonth =
-  // :reportMonth")
-  // Integer findMaxVersionByMonth(@Param("reportMonth") String reportMonth);
-
-  // // 查詢某月份所有版本（最新的在前）
-  // List<SalesReport> findByReportMonthOrderByVersionDesc(String reportMonth);
-
-  // // 匯出某月份、某版本的完整報表
-  // List<SalesReport>
-  // findByReportMonthAndVersionOrderByBrandNameAscProductNameAsc(
-  // String reportMonth, Integer version
-  // );
-
-  // // 匯出某品牌、某月份、某版本的報表（排序依商品）
-  // List<SalesReport> findByReportMonthAndVersionAndBrandIdOrderByProductNameAsc(
-  // String reportMonth, Integer version, Integer brandId
-  // );
-
-  // // 查詢某品牌的歷史報表（所有月份與版本）
-  // List<SalesReport> findByBrandIdOrderByReportMonthDescVersionDesc(Integer
-  // brandId);
-
-  // // 查詢某月份的最新版本報表
-  // @Query("""
-  // SELECT s FROM SalesReport s
-  // WHERE s.reportMonth = :month AND s.version = (
-  // SELECT MAX(s2.version) FROM SalesReport s2 WHERE s2.reportMonth = :month
-  // )
-  // ORDER BY s.brandName ASC, s.productName ASC
-  // """)
-  // List<SalesReport> findLatestVersionByMonth(@Param("month") String month);
 }

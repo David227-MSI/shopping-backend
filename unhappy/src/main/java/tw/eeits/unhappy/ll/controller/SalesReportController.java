@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.ll.dto.SalesReportSummaryDto;
 import tw.eeits.unhappy.ll.model.SalesReport;
 import tw.eeits.unhappy.ll.service.SalesReportService;
 
@@ -124,5 +125,16 @@ public class SalesReportController {
 
         return ResponseEntity.ok(reports);
     }
+
+
+
+    //複數產品只顯示一張報表紀錄
+    @GetMapping("/summary")
+public List<SalesReportSummaryDto> getReportSummaries(
+    @RequestParam(required = false) String month,
+    @RequestParam(required = false) Integer brandId
+) {
+    return salesReportService.findReportSummaries(month, brandId);
+}
 
 }

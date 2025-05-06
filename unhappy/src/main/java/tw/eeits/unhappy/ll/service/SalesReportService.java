@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.lang.Nullable;
 
+import tw.eeits.unhappy.ll.dto.SalesReportSummaryDto;
 import tw.eeits.unhappy.ll.model.SalesReport;
 
 public interface SalesReportService {
@@ -29,5 +30,9 @@ public interface SalesReportService {
 
     // 產出月報表
     public List<SalesReport> generateMonthlyReport(String month, @Nullable Integer brandId);
+
+    //複數產品只顯示一張報表紀錄
+    List<SalesReportSummaryDto> findReportSummaries(String month, Integer brandId);
+
 
 }

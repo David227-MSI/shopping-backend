@@ -29,6 +29,7 @@ import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.gy.domain.OrderItem;
 import tw.eeits.unhappy.gy.order.repository.OrderItemRepository;
 import tw.eeits.unhappy.gy.order.repository.OrderRepository;
+import tw.eeits.unhappy.ll.dto.SalesReportSummaryDto;
 import tw.eeits.unhappy.ll.model.SalesReport;
 import tw.eeits.unhappy.ll.repository.SalesReportRepository;
 
@@ -243,6 +244,22 @@ public class SalesReportServiceImpl implements SalesReportService {
 
         // 寫入資料庫
         return salesReportRepository.saveAll(reports);
+    }
+
+    // 複數產品只顯示一張報表紀錄
+    @Override
+    public List<SalesReportSummaryDto> findReportSummaries(String month, Integer brandId) {
+        List<Object[]> rows = salesReportRepository.findReportSummariesNative(month, brandId);
+
+        return rows.stream()
+                .map(r -> new SalesReportSummaryDto(
+                        (Integer) r[0],
+                        (String) r[1],
+                        (String) r[2],
+                        (Integer) r[3],
+                        (Boolean) r[4],
+                        r[5] != null ? ((Timestamp) r[5]).toLocalDateTime() : null))
+                .toList();
     }
 
 }
