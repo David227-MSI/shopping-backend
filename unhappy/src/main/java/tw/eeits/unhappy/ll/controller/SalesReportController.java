@@ -2,6 +2,8 @@ package tw.eeits.unhappy.ll.controller;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
@@ -65,12 +67,48 @@ public class SalesReportController {
         workbook.close();
         byte[] excelBytes = out.toByteArray();
 
+        // 取得報表內容（用來取品牌名）
+        List<SalesReport> reports = salesReportService.findReportsForExport(month, brandId, version);
+        String filename = generateReportFilename(month, brandId, version, reports);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-        headers.setContentDisposition(ContentDisposition.attachment().filename("sales_report.xlsx").build());
+        headers.setContentDisposition(ContentDisposition
+                .attachment()
+                .filename(filename)
+                .build());
 
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+    }
+
+    private String generateReportFilename(String month, Integer brandId, Integer version, List<SalesReport> reports) {
+        StringBuilder name = new StringBuilder();
+
+        if (month != null) {
+            name.append(month); // 例如 2025-04
+        }
+
+        String brandName = null;
+        if (brandId != null) {
+            brandName = !reports.isEmpty() ? reports.get(0).getBrandName() : "brand";
+
+            // ✅ 判斷品牌名稱是否包含非 ASCII 字元（中文、全形符號等）
+            boolean containsNonAscii = brandName.chars().anyMatch(c -> c > 127);
+            if (containsNonAscii) {
+                brandName = "brand";
+            }
+
+            name.append("_").append(brandName);
+        }
+
+        if (version != null) {
+            name.append("_v").append(version);
+        }
+
+        name.append("_sales_Report.xlsx");
+
+        return name.toString();
     }
 
 }

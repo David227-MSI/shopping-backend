@@ -1,6 +1,12 @@
 package tw.eeits.unhappy.ll.service;
 
 import java.util.List;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Cell;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -50,8 +56,23 @@ public class SalesReportServiceImpl implements SalesReportService {
     public Workbook exportReports(String month, Integer brandId, Integer version) {
         List<SalesReport> reports = resolveReportQuery(month, brandId, version);
 
+        // ✅ 將每筆報表標記為已匯出
+        LocalDateTime now = LocalDateTime.now();
+        for (SalesReport report : reports) {
+            report.setIsExported(true);
+            report.setExportedAt(now);
+        }
+
+        // ✅ 一次儲存回資料庫
+        salesReportRepository.saveAll(reports);
+
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sales Report");
+
+        CreationHelper creationHelper = workbook.getCreationHelper();
+        CellStyle dateTimeStyle = workbook.createCellStyle();
+        short format = creationHelper.createDataFormat().getFormat("yyyy-mm-dd hh:mm");
+        dateTimeStyle.setDataFormat(format);
 
         // 建立表頭列
         Row header = sheet.createRow(0);
@@ -74,7 +95,12 @@ public class SalesReportServiceImpl implements SalesReportService {
             row.createCell(4).setCellValue(report.getAveragePrice().doubleValue());
             row.createCell(5).setCellValue(report.getQuantitySold());
             row.createCell(6).setCellValue(report.getTotalAmount().doubleValue());
-            row.createCell(7).setCellValue(report.getGeneratedAt() != null ? report.getGeneratedAt().toString() : "");
+
+            Cell cell = row.createCell(7);
+            if (report.getGeneratedAt() != null) {
+                cell.setCellValue(Timestamp.valueOf(report.getGeneratedAt())); // 必須轉為 java.util.Date 或 Timestamp
+                cell.setCellStyle(dateTimeStyle);
+            }
         }
 
         return workbook;
@@ -93,4 +119,11 @@ public class SalesReportServiceImpl implements SalesReportService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "請指定查詢條件");
         }
     }
+
+    // 匯出報表時，查詢報表內容（用來取品牌名）
+    @Override
+    public List<SalesReport> findReportsForExport(String month, Integer brandId, Integer version) {
+        return resolveReportQuery(month, brandId, version);
+    }
+
 }
