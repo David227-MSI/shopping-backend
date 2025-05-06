@@ -1,5 +1,6 @@
 package tw.eeits.unhappy.ttpp.event.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +17,14 @@ import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
-import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
+import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 import tw.eeits.unhappy.ttpp.event.repository.EventParticipantRepository;
 import tw.eeits.unhappy.ttpp.event.repository.EventPrizeRepository;
 import tw.eeits.unhappy.ttpp.event.repository.EventRepository;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 import tw.eeits.unhappy.ttpp.media.repository.EventMediaRepository;
 
@@ -76,33 +79,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ServiceResponse<EventMedia> addMediaToEvent(EventMedia media) {
-
+    public ServiceResponse<EventMedia> addMediaToEvent(
+        Event event, 
+        MultipartFile mediaData, 
+        MediaType mediaType
+    ) throws IOException {
+        
         ErrorCollector ec = new ErrorCollector();
 
-        // check input and verify datatype
-        if(media == null) {
-            ec.add("輸入媒體為 null");;
-        } else {
-            ec.validate(media, validator);
-        }
-
-        // service logic
-
-
-
-
-
-        if(ec.hasErrors()) {
-            return ServiceResponse.fail(ec.getErrorMessage());
-        }
-
-        // service operation
+        if(event == null) {ec.add("找不到優惠券模板");}
+        
+        EventMedia newEntry = EventMedia.builder()
+                .event(event)
+                .mediaType(mediaType)
+                .mediaData(mediaData.getBytes())
+                .build();
         try {
-            EventMedia savedEntry = mediaRepository.save(media);
+            EventMedia savedEntry = mediaRepository.save(newEntry);
             return ServiceResponse.success(savedEntry);
         } catch (Exception e) {
-            return ServiceResponse.fail("建立活動媒體錯誤: " + e.getMessage());
+            return ServiceResponse.fail("圖片添加異常: " + e.getMessage());
         }
     }
 
@@ -176,7 +172,7 @@ public class EventServiceImpl implements EventService {
     // 條件查詢相關======================================================
     // =================================================================
     @Override
-    public ServiceResponse<List<Event>> findEventByCriteria(EventAdminQuery query) {
+    public ServiceResponse<List<Event>> findEventByCriteria(EventQuery query) {
         
         // service operation
         try {

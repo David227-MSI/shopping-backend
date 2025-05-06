@@ -47,7 +47,7 @@ public class CouponTemplateRequest {
     @NotNull(message = "結束時間 為必要資訊")
     private LocalDateTime endTime;
 
-    @NotNull(message = "媒體種類 為必要資訊")
+    // @NotNull(message = "媒體種類 為必要資訊")
     private MediaType mediaType;
 
     @NotNull(message = "媒體數據 為必要資訊")

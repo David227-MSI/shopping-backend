@@ -9,13 +9,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.criteria.Predicate;
-import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
+import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer>, JpaSpecificationExecutor<Event>{
 
-    static Specification<Event> byEventCriteria(EventAdminQuery query) {
+    static Specification<Event> byEventCriteria(EventQuery query) {
         return (root, queryBuilder, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 

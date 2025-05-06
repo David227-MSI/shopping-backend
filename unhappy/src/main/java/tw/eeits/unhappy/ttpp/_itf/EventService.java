@@ -1,14 +1,18 @@
 package tw.eeits.unhappy.ttpp._itf;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
-import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
+import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
 
 
@@ -27,7 +31,11 @@ public interface EventService {
      * @param media 插入的媒體
      * @return      ServiceResponse封包
      */
-    ServiceResponse<EventMedia> addMediaToEvent(EventMedia media);
+    ServiceResponse<EventMedia> addMediaToEvent(
+        Event event, 
+        MultipartFile mediaData, 
+        MediaType mediaType
+    ) throws IOException;
 
     /**
      * @brief       建立活動用的獎品
@@ -66,7 +74,7 @@ public interface EventService {
      * @param query 查詢條件
      * @return      ServiceResponse封包
      */
-    ServiceResponse<List<Event>> findEventByCriteria(EventAdminQuery query);
+    ServiceResponse<List<Event>> findEventByCriteria(EventQuery query);
     // 條件查詢相關======================================================
 
 

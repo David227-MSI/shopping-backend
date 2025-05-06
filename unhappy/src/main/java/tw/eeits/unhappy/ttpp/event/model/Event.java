@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -38,18 +41,21 @@ public class Event {
     
     // mapped: fk_event_prize_event
     @Builder.Default
+    @JsonBackReference
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventPrize> eventPrize = new ArrayList<>();
     
     // mapped: fk_event_participant_event
     @Builder.Default
+    @JsonBackReference
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventParticipant> eventParticipants = new ArrayList<>();
     
     // mapped: fk_event_media_event
-    @Builder.Default
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventMedia> eventMedia = new ArrayList<>();
+    // @Builder.Default
+    @JsonBackReference
+    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private EventMedia eventMedia;
 
 
     @Id
@@ -133,13 +139,13 @@ public class Event {
     }
 
     // mapped: fk_event_media_event
-    public void addEventMedia(EventMedia media) {
-        eventMedia.add(media);
-        media.setEvent(this);
-    }
-    public void removeEventMedia(EventMedia media) {
-        eventMedia.remove(media);
-        media.setEvent(null);
-    }
+    // public void addEventMedia(EventMedia media) {
+    //     eventMedia.add(media);
+    //     media.setEvent(this);
+    // }
+    // public void removeEventMedia(EventMedia media) {
+    //     eventMedia.remove(media);
+    //     media.setEvent(null);
+    // }
 
 }

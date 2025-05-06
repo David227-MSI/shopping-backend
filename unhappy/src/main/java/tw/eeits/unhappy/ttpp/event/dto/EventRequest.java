@@ -3,10 +3,13 @@ package tw.eeits.unhappy.ttpp.event.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 
 @Data
 public class EventRequest {
@@ -37,5 +40,11 @@ public class EventRequest {
     @NotNull(message = "Established by 不可為空值")
     @Size(max = 100, message = "Established by 不可超過100字")
     private String establishedBy;
+
+    // @NotNull(message = "媒體種類 為必要資訊")
+    private MediaType mediaType;
+
+    @NotNull(message = "媒體數據 為必要資訊")
+    private MultipartFile mediaData;
 
 }

@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +27,8 @@ import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
 import tw.eeits.unhappy.ttpp.event.dto.EventPrizeRequest;
+import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.dto.EventRequest;
 import tw.eeits.unhappy.ttpp.event.enums.EventStatus;
 import tw.eeits.unhappy.ttpp.event.enums.PrizeType;
@@ -47,10 +49,10 @@ public class EventAdminController {
     // =================================================================
     // 建立活動相關======================================================
     // =================================================================
-    @PostMapping("/createEvent")
+    @PostMapping(value = "/createEvent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiRes<Map<String, Object>>> createEvent(
-        @RequestBody EventRequest request) {
-
+        @ModelAttribute EventRequest request
+    ) {
         ErrorCollector ec = new ErrorCollector();
 
         // verify data type
@@ -74,22 +76,38 @@ public class EventAdminController {
                 .build();
 
         // call service
-        ServiceResponse<Event> res = eventService.createEvent(newEntry);
+        ServiceResponse<Event> resEvent = eventService.createEvent(newEntry);
 
-        if (!res.isSuccess()) {
-            ec.add(res.getMessage());
+        if (!resEvent.isSuccess()) {
+            ec.add(resEvent.getMessage());
             return ResponseEntity.badRequest()
-                .body(ResponseFactory.fail(res.getMessage()));
+                .body(ResponseFactory.fail(resEvent.getMessage()));
+        }
+
+
+        Event savedEvent = resEvent.getData();
+        ServiceResponse<EventMedia> resMedia = null;
+        try {
+            resMedia = eventService.addMediaToEvent(
+                savedEvent, 
+                request.getMediaData(), 
+                request.getMediaType()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+            .body(ResponseFactory.fail("上傳圖片發生異常: " + e.getMessage()));
         }
 
         // pick up response data
-        Event savedEntry = res.getData();
+        EventMedia savedMedia = resMedia.getData();
         Map<String, Object> data = new HashMap<>();
-        data.put("id", savedEntry.getId());
-        data.put("eventName", savedEntry.getEventName());
-        data.put("announceTime", savedEntry.getAnnounceTime());
-        data.put("startTime", savedEntry.getStartTime());
-        data.put("EstablishedBy", savedEntry.getEstablishedBy());
+        data.put("id", savedEvent.getId());
+        data.put("eventName", savedEvent.getEventName());
+        data.put("announceTime", savedEvent.getAnnounceTime());
+        data.put("startTime", savedEvent.getStartTime());
+        data.put("EstablishedBy", savedEvent.getEstablishedBy());
+        data.put("mediaType", savedMedia.getMediaType());
+        data.put("mediaData", savedMedia.getMediaData());
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
@@ -111,16 +129,13 @@ public class EventAdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ResponseFactory.fail(ec.getErrorMessage()));
         }
-
-        // transfer data from DTO to Entity
-        EventMedia newEntry = EventMedia.builder()
-                .event(foundEvent)
-                .mediaData(request.getMediaData().getBytes())
-                .mediaType(request.getMediaType())
-                .build();
         
         // call service
-        ServiceResponse<EventMedia> res = eventService.addMediaToEvent(newEntry);
+        ServiceResponse<EventMedia> res = eventService.addMediaToEvent(
+            foundEvent,
+            request.getMediaData(),
+            request.getMediaType()
+        );
 
         if (!res.isSuccess()) {
             ec.add(res.getMessage());
@@ -220,7 +235,7 @@ public class EventAdminController {
     // =================================================================
     @PostMapping("/findAll")
     public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
-        @RequestBody EventAdminQuery query) {
+        @RequestBody EventQuery query) {
 
         // call service
         ServiceResponse<List<Event>> res = eventService.findEventByCriteria(query);
@@ -239,6 +254,7 @@ public class EventAdminController {
             mp.put("endTime", event.getEndTime());
             mp.put("announceTime", event.getAnnounceTime());
             mp.put("eventPrizeList", event.getEventPrize());
+            mp.put("eventMedia", event.getEventMedia());
             return mp;
         }).collect(Collectors.toList());
         Map<String, Object> data = new HashMap<>();
