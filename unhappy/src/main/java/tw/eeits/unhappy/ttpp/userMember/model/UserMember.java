@@ -1,3 +1,4 @@
+package tw.eeits.unhappy.ttpp.userMember.model;
 // package tw.eeits.unhappy.ttpp._fake;
 
 // import java.time.LocalDate;
@@ -27,15 +28,6 @@
 //     @Column(name = "id")
 //     private Integer id;
 
-//     @Column(name = "level_id")
-//     private Integer levelId = 1;
-
-//     @Column(name = "line_id", unique = true, length = 255)
-//     private String lineId;
-
-//     @Column(name = "google_id", unique = true, length = 255)
-//     private String googleId;
-
 //     @Column(name = "email", unique = true, length = 100)
 //     private String email;
 
@@ -57,29 +49,28 @@
 //     @Column(name = "status", length = 10)
 //     private String status = "active";
 
-//     @Column(name = "carrier", length = 8)
-//     private String carrier;
-
-//     @Column(name = "bonus_point")
-//     private Integer bonusPoint = 0;
-
-//     @Column(name = "good_count")
-//     private Integer goodCount = 0;
-
-//     @Column(name = "bad_count")
-//     private Integer badCount = 0;
-
 //     @Column(name = "created_at")
 //     private LocalDateTime createdAt = LocalDateTime.now();
 
 //     @Column(name = "updated_at")
 //     private LocalDateTime updatedAt = LocalDateTime.now();
 
-//     @Column(name = "refresh_token", length = Integer.MAX_VALUE)
-//     private String refreshToken;
 
-//     @Column(name = "token_expires_at")
-//     private LocalDateTime tokenExpiresAt;
+//     @Column(name = "created_at", nullable = false, updatable = false)
+//     private LocalDateTime createdAt;
+    
+//     @Column(name = "updated_at")
+//     private LocalDateTime updatedAt;
+    
+//     @PrePersist
+//     protected void onCreate() {
+//         createdAt = LocalDateTime.now();
+//     }
+    
+//     @PreUpdate
+//     protected void onUpdate() {
+//         updatedAt = LocalDateTime.now();
+//     }
 
 
 // }

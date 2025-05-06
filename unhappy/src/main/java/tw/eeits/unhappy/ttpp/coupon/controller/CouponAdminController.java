@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -178,46 +179,37 @@ public class CouponAdminController {
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
-
-
-
-    // @PostMapping("/uploadImage")
-    // public ResponseEntity<?> addMediaToTemplate(MediaRequest request) {
-
-    //     ErrorCollector ec = new ErrorCollector();
-
-    //     if(request == null) {
-    //         ec.add("請輸入請求資料");
-    //     } else {
-    //         ec.validate(request, validator);
-    //     }
-
-    //     if(ec.hasErrors()) {
-    //         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //             .body(ResponseFactory.fail(ec.getErrorMessage()));
-    //     }
-
-    //     // call service
-    //     try {
-    //         ServiceResponse<CouponMedia> res = couponService.addMediaToTemplate(request);
-
-    //         if (!res.isSuccess()) {
-    //             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //                 .body(ResponseFactory.fail(res.getMessage()));
-    //         } 
-            
-    //         return ResponseEntity.ok(res);
-    //     } catch (IOException e) {
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-    //                 .body(ServiceResponse.fail("圖片處理失敗: " + e.getMessage()));
-    //     }
-    // }
-
-
-
     // =================================================================
     // 建立優惠相關======================================================
     // =================================================================
+
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+    @DeleteMapping("/templates/{id}")
+    public ResponseEntity<ApiRes<Boolean>> deleteCouponTemplate(
+        @PathVariable Integer id
+    ) {
+
+        ServiceResponse<Boolean> res = couponService.deleteTemplateById(id);
+
+        if (!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(true));
+    }
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+
 
 
     // =================================================================
