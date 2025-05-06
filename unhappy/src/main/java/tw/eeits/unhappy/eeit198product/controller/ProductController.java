@@ -30,30 +30,32 @@ public class ProductController {
         return productService.searchProducts(category, brand, search);
     }
 
-@GetMapping("/{id}")
-public ResponseEntity<ApiRes<ProductDTO>> getProductById(@PathVariable Integer id) {
-    System.out.println("Received GET request for product ID: " + id); // 添加日誌
-    try {
-        ProductDTO productDTO = productService.getProductDetailsWithImages(id);
-        if (productDTO == null) { // 檢查 service 是否返回 null 而不是拋異常
-            System.out.println("Product with ID " + id + " not found by service."); // 添加日誌
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiRes<ProductDTO>> getProductById(@PathVariable Integer id) {
+        System.out.println("Received GET request for product ID: " + id);
+        try {
+            ProductDTO productDTO = productService.getProductDetailsWithImages(id);
+            if (productDTO == null) {
+                System.out.println("Product with ID " + id + " not found by service.");
+                return ResponseEntity.notFound().build();
+            }
+            System.out.println("Successfully retrieved product ID: " + id);
+            return ResponseEntity.ok(ResponseFactory.success(productDTO));
+        } catch (RuntimeException e) {
+            System.err.println("Error fetching product ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        System.out.println("Successfully retrieved product ID: " + id); // 添加日誌
-        return ResponseEntity.ok(ResponseFactory.success(productDTO));
-    } catch (RuntimeException e) {
-        System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
-        e.printStackTrace(); // 打印堆棧跟踪
-        return ResponseEntity.notFound().build();
-    } catch (Exception e) { // 捕獲其他可能的異常
-         System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
-         e.printStackTrace(); // 打印堆棧跟踪
-         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 返回 500
     }
-}
 
     @GetMapping("/{id}/recommended")
     public List<Product> getRecommendedProducts(@PathVariable Integer id) {
         return productService.getRecommendedProducts(id);
     }
+
+    
 }
