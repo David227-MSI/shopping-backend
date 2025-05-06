@@ -24,8 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> VISITOR_WHITELIST = List.of(
             
             "/api/contact/public",
-            "/api/admin/login"
+            "/api/admin/login",
             // "/api/sales-report"
+            "/api/admin/coupons/getValidCoupon"
             );
 
     // 只需要有Token（不限角色）即可使用的API (例如: 改自己密碼)
