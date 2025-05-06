@@ -23,7 +23,6 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
-import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
@@ -150,6 +149,7 @@ public class CouponServiceImpl implements CouponService {
 
         CouponPublished foundCoupon = null;
         UserMember foundRecipient = null;
+        UserMember foundOwner = null;
 
         // service logic
         // check coupon is valid 
@@ -163,6 +163,8 @@ public class CouponServiceImpl implements CouponService {
                 ec.add("優惠券已被使用過");
             }
         }
+        foundOwner = userMemberRepository.findById(foundCoupon.getUserMember().getId()).orElse(null);
+    
         // check recipient
         if(recipientMail == null || recipientMail.trim() == "") {
             ec.add("受贈者信箱為必要欄位");
@@ -170,6 +172,9 @@ public class CouponServiceImpl implements CouponService {
             foundRecipient = userMemberRepository.findByEmail(recipientMail).orElse(null);
             if(foundRecipient == null) {ec.add("找不到受贈用戶");}
         }
+        if(foundOwner.getEmail().equals(recipientMail)) {
+            ec.add("優惠券無法轉贈給自己");
+        } 
 
         if(ec.hasErrors()) {
             return ServiceResponse.fail(ec.getErrorMessage());

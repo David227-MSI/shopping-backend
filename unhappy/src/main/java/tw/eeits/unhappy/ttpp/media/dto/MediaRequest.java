@@ -12,7 +12,7 @@ public class MediaRequest {
     @NotNull(message = "關聯ID 為必要資訊")
     private Integer id;
 
-    @NotNull(message = "媒體種類 為必要資訊")
+    // @NotNull(message = "媒體種類 為必要資訊")
     private MediaType mediaType;
 
     @NotNull(message = "媒體數據 為必要資訊")

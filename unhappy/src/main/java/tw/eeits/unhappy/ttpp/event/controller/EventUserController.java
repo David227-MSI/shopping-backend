@@ -16,15 +16,13 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
-import tw.eeits.unhappy.eeit198product.service.ProductService;
-import tw.eeits.unhappy.ttpp._itf.CouponService;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
-import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
 import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
+import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
@@ -36,9 +34,7 @@ import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 @RequiredArgsConstructor
 public class EventUserController {
     private final EventService eventService;
-    private final CouponService couponService;
     private final UserMemberService userMemberService;
-    private final ProductService productService;
     private final Validator validator;
 
 
@@ -103,7 +99,7 @@ public class EventUserController {
 
 @PostMapping("/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
-        @RequestBody EventAdminQuery query) {
+        @RequestBody EventQuery query) {
 
         // call service
         ServiceResponse<List<Event>> res = eventService.findEventByCriteria(query);
@@ -124,6 +120,7 @@ public class EventUserController {
             mp.put("maxEntries", event.getMaxEntries());
             mp.put("minSpend", event.getMinSpend());
             mp.put("eventPrizeList", event.getEventPrize());
+            mp.put("eventMedia", event.getEventMedia());
             return mp;
         }).collect(Collectors.toList());
         Map<String, Object> data = new HashMap<>();

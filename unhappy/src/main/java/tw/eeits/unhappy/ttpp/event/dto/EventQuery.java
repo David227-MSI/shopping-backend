@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class EventAdminQuery {
+public class EventQuery {
     private String eventName;
     private LocalDateTime announceTime;
     private LocalDateTime startTime;
