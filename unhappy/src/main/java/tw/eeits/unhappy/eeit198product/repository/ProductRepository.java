@@ -28,5 +28,19 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByIdIn(Set<Integer> ids);
 
 
+    // SubscriptionList
+    @Query("SELECT p FROM Product p " +
+       "WHERE (:categoryId IS NULL OR p.category.id = :categoryId) " +
+       "  AND (:keyword IS NULL OR p.name LIKE %:keyword%) " +
+       "  AND p.id IN :productIds")
+    List<Product> findSubscribedProductsByCondition(
+            @Param("categoryId") Integer categoryId,
+            @Param("keyword") String keyword,
+            @Param("productIds") List<Integer> productIds // 接收已追蹤的 Product IDs
+    );
+
+
+
+
 
 }

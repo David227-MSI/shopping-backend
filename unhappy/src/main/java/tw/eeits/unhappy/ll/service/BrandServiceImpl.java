@@ -93,4 +93,11 @@ public class BrandServiceImpl implements BrandService {
         response.setUpdatedAt(brand.getUpdatedAt());
         return response;
     }
+
+
+    @Override
+    public Brand findBrandById(Integer id) {
+        return brandRepository.findById(id).orElse(null);
+    }
+
 }

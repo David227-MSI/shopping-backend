@@ -7,12 +7,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
-import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -144,9 +145,68 @@ public class NotificationServiceImpl implements NotificationService {
             return ServiceResponse.fail("修改通知訊息發生錯誤: " + e.getMessage());
         }
     }
+
+
+
+    @Override
+    @Transactional
+    public ServiceResponse<Integer> markAllAsReadByUserMember(UserMember userMember) {
+        
+        try {
+            Integer updatedCount = publishedRepository.markAllAsReadByUserMember(userMember);
+            return ServiceResponse.success(updatedCount);
+        } catch (Exception e) {
+            return ServiceResponse.fail("更新失敗: " + e.getMessage());
+        }
+    }
     // =================================================================
     // 修改相關==========================================================
     // =================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+    @Override
+    @Transactional
+    public ServiceResponse<Boolean> deleteNotificationById(Integer id) {
+        try {
+            publishedRepository.deleteById(id);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail(e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public ServiceResponse<Boolean> deleteNotificationByUserMember(UserMember userMember) {
+        try {
+            publishedRepository.deleteByUserMember(userMember);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail(e.getMessage());
+        }
+    }
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+
+
+
+
+
+
 
 
 

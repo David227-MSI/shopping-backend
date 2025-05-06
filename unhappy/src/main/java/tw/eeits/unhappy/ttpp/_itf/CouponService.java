@@ -1,11 +1,20 @@
 package tw.eeits.unhappy.ttpp._itf;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
+import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
+import tw.eeits.unhappy.ttpp.media.enums.MediaType;
+import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
 public interface CouponService {
 
@@ -23,6 +32,11 @@ public interface CouponService {
      * @return                ServiceResponse封包
      */
     ServiceResponse<CouponPublished> publishCoupon(CouponPublished couponPublished);
+
+
+
+
+    ServiceResponse<CouponMedia> addMediaToTemplate(CouponTemplate template, MultipartFile mediaData, MediaType mediaType) throws IOException;
     // 建立相關==========================================================
     
 
@@ -68,6 +82,15 @@ public interface CouponService {
      * @return 查詢成功: 用戶的優惠券List
      */
     List<CouponPublished> findCouponsByUserId();  
+
+
+
+    /**
+     * @brief            查詢用戶目前可使用的優惠券清單
+     * @param userMember 用戶
+     * @return           ServiceResponse封包
+     */
+    ServiceResponse<List<CouponPublished>> getValidCouponByUserMember(UserMember userMember, BigDecimal totalAmount, List<Product> orderItems);
     // 基本查詢相關======================================================
 
 

@@ -16,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -46,9 +47,9 @@ public class CouponTemplate {
     private List<CouponPublished> couponPublished = new ArrayList<>();
 
     // mapped: fk_coupon_media_coupon_template
-    @Builder.Default
-    @OneToMany(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CouponMedia> couponMedia = new ArrayList<>();
+    @JsonBackReference
+    @OneToOne(mappedBy = "couponTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CouponMedia couponMedia;
 
 
 
@@ -141,14 +142,6 @@ public class CouponTemplate {
         published.setCouponTemplate(null);
     }
 
-    // mapped: fk_coupon_media_coupon_template
-    public void addCouponMedia(CouponMedia media) {
-        couponMedia.add(media);
-        media.setCouponTemplate(this);
-    }
-    public void removeCouponMedia(CouponMedia media) {
-        couponMedia.remove(media);
-        media.setCouponTemplate(null);
-    }
+
 
 }

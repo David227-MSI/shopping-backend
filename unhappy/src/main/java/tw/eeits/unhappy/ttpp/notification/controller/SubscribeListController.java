@@ -14,25 +14,30 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
+import tw.eeits.unhappy.eeit198product.entity.Product;
+import tw.eeits.unhappy.eeit198product.service.ProductService;
+import tw.eeits.unhappy.ll.model.Brand;
+import tw.eeits.unhappy.ll.service.BrandService;
 import tw.eeits.unhappy.ttpp._itf.SubscribeListService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.notification.dto.SubscribeListRequest;
+import tw.eeits.unhappy.ttpp.notification.dto.SubscribeQuery;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 
 
 @RestController
-@RequestMapping("/api/subscribes")
+@RequestMapping("/api/user/subscribes")
 @RequiredArgsConstructor
 public class SubscribeListController {
 
     private final SubscribeListService subscribeService;
     private final UserMemberService userMemberService;
-    // private final ProductService productService;
-    // private final BrandService brandService;
+    private final ProductService productService;
+    private final BrandService brandService;
     private final Validator validator;
 
     @PostMapping("/switch")
@@ -46,17 +51,17 @@ public class SubscribeListController {
 
         // check foreign key
         UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        // Product foundProduct = null;
-        // Brand foundBrand = null;
+        Product foundProduct = null;
+        Brand foundBrand = null;
 
         if(foundUser == null) {ec.add("找不到用戶資訊");}
         if(request.getItemType() == ItemType.PRODUCT) {
-            // foundProduct = productService.findProductById(request.getItemId());
-            // if(foundProduct == null) {ec.add("找不到追蹤商品");}
+            foundProduct = productService.getProductById(request.getItemId()).orElse(null);
+            if(foundProduct == null) {ec.add("找不到追蹤商品");}
         }
         if(request.getItemType() == ItemType.BRAND) {
-            // foundBrand = brandService.findBrandById(request.getItemId());
-            // if(foundBrand == null) {ec.add("找不到追蹤廠商");}
+            foundBrand = brandService.findBrandById(request.getItemId());
+            if(foundBrand == null) {ec.add("找不到追蹤廠商");}
         }
 
 
@@ -90,6 +95,57 @@ public class SubscribeListController {
     }
 
     
+    @PostMapping("/query/12")
+    public ResponseEntity<ApiRes<Map<String, Object>>> findSubscribeProducts(
+        @RequestBody SubscribeQuery query) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        // verify request data
+        ec.validate(query, validator);
+
+        if (ec.hasErrors()) {
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Map<String, Object>> resProducts = subscribeService.findSubscribedProducts(query);
+        ServiceResponse<Map<String, Object>> resBrands = subscribeService.findSubscribedBrands(query);
+
+        if (!resProducts.isSuccess() || !resBrands.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(resProducts.getMessage() + "; " + resBrands.getMessage()));
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("products", resProducts.getData().get(data));
+        data.put("brands", resBrands.getData());
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+
+    @PostMapping("/query")
+    public ResponseEntity<ApiRes<Map<String, Object>>> findSubscribedItems(
+        @RequestBody SubscribeQuery query) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        ec.validate(query, validator);
+
+        if (ec.hasErrors()) {
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Map<String, Object>> res = subscribeService.findSubscribedItems(query);
+
+        if (!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+
+
 
 
     

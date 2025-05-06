@@ -3,6 +3,7 @@ package tw.eeits.unhappy.ttpp.event.service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.event.dto.EventAdminQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
@@ -50,7 +52,6 @@ public class EventServiceImpl implements EventService {
         }
 
         // service logic
-
         if(event.getStartTime().isBefore(LocalDateTime.now())) {
             ec.add("活動開始時間不能早於現在時間");
         } 
@@ -60,10 +61,6 @@ public class EventServiceImpl implements EventService {
         if(event.getAnnounceTime().isAfter(event.getStartTime())) {
             ec.add("活動宣告時間不能晚於活動開始時間");
         }
-
-
-
-
 
         if(ec.hasErrors()) {
             return ServiceResponse.fail(ec.getErrorMessage());
@@ -164,6 +161,45 @@ public class EventServiceImpl implements EventService {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    // =================================================================
+    // 條件查詢相關======================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<List<Event>> findEventByCriteria(EventAdminQuery query) {
+        
+        // service operation
+        try {
+            List<Event> res = eventRepository.findAll(EventRepository.byEventCriteria(query));
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
+        }
+    }
+    // =================================================================
+    // 條件查詢相關======================================================
+    // =================================================================
+
+
+
+
+
+
+
+
+
+
+
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
@@ -211,8 +247,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-
-
     @Override
     public ServiceResponse<EventParticipant> attendEvent(EventParticipant participant) {
         
@@ -242,13 +276,8 @@ public class EventServiceImpl implements EventService {
             return ServiceResponse.fail("建立活動參加者錯誤: " + e.getMessage());
         }
     }
-
-
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
-
-
-
 
 }
