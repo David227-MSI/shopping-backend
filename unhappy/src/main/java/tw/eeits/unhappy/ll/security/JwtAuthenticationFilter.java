@@ -23,7 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 不需要登入的路徑 (白名單)
     private static final List<String> VISITOR_WHITELIST = List.of(
             
-            "/api/contact/public",
             "/api/admin/login"
             // "/api/sales-report"
             );
@@ -39,10 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
 
+
     // 允許 MANAGER 和 STAFF 都能操作的API (例如: 品牌管理、客服處理)
     private static final List<String> MANAGER_AND_STAFF_API = List.of(
             "/api/admin/brands",
-            "/api/contact/messages",
+            "/api/admin/contact",
             "/api/admin/sales-report"
             );
 
