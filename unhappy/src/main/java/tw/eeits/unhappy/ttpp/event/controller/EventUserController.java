@@ -97,7 +97,7 @@ public class EventUserController {
     // =================================================================
 
 
-@PostMapping("/query")
+    @PostMapping("/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
         @RequestBody EventQuery query) {
 
