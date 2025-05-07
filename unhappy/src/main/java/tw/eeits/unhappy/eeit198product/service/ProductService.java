@@ -20,8 +20,8 @@ public interface ProductService {
     /** 取得單一商品（包含圖片資訊，返回 DTO） */
     ProductDTO getProductDetailsWithImages(Integer id);
 
-    /** 建立商品 */
-    Product createProduct(Product product);
+    /** 建立商品 - 接收 DTO 並返回 Entity */
+    Product createProduct(ProductDTO productDto); // 接收 ProductDTO
 
     /** 刪除商品 */
     void deleteProduct(Integer id);
@@ -29,6 +29,8 @@ public interface ProductService {
     /** 推薦商品（排除自己，取最新前5筆） */
     List<Product> getRecommendedProducts(Integer excludeProductId);
 
+    /** 更新商品 - 接收 ID 和 DTO 並返回 Entity */
+    Product updateProduct(Integer id, ProductDTO productDto); // 接收 ID 和 ProductDTO
 
     // ttpp
     public List<Product> findByIds(List<Integer> ids);

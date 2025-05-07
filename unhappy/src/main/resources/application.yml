@@ -71,3 +71,7 @@ ecpay:
   return-url: https://xxx.ngrok-free.app/api/ecpay/payment-callback
   order-result-url: http://localhost:5173/order-result.html
 
+
+logging:
+  level:
+    tw.eeits.unhappy: INFO

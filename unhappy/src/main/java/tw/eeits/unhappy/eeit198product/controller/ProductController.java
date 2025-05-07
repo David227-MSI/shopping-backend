@@ -22,12 +22,13 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public List<Product> getProducts(
+    public ResponseEntity<ApiRes<List<Product>>> getProducts(
             @RequestParam(required = false) Integer category,
             @RequestParam(required = false) Integer brand,
             @RequestParam(required = false) String search
     ) {
-        return productService.searchProducts(category, brand, search);
+        List<Product> products = productService.searchProducts(category, brand, search);
+        return ResponseEntity.ok(ResponseFactory.success(products));
     }
 
     @GetMapping("/{id}")
@@ -37,25 +38,83 @@ public class ProductController {
             ProductDTO productDTO = productService.getProductDetailsWithImages(id);
             if (productDTO == null) {
                 System.out.println("Product with ID " + id + " not found by service.");
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail("商品不存在"));
             }
             System.out.println("Successfully retrieved product ID: " + id);
             return ResponseEntity.ok(ResponseFactory.success(productDTO));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             System.err.println("Error fetching product ID " + id + ": " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("載入商品失敗，請稍後再試"));
         }
     }
 
     @GetMapping("/{id}/recommended")
-    public List<Product> getRecommendedProducts(@PathVariable Integer id) {
-        return productService.getRecommendedProducts(id);
+    public ResponseEntity<ApiRes<List<Product>>> getRecommendedProducts(@PathVariable Integer id) {
+        List<Product> recommended = productService.getRecommendedProducts(id);
+        return ResponseEntity.ok(ResponseFactory.success(recommended));
     }
 
-    
+    /* ---------- 【新增】商品建立 Endpoint ---------- */
+    @PostMapping
+    public ResponseEntity<ApiRes<ProductDTO>> createProduct(@RequestBody ProductDTO productDto) {
+        try {
+            Product createdProductEntity = productService.createProduct(productDto);
+            ProductDTO createdProductDTO = productService.getProductDetailsWithImages(createdProductEntity.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.success(createdProductDTO));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Error creating product: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("商品建立失敗，請稍後再試"));
+        }
+    }
+
+    /* ---------- 【新增】商品修改 Endpoint ---------- */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiRes<ProductDTO>> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDto) {
+        try {
+            Product updatedProductEntity = productService.updateProduct(id, productDto);
+            ProductDTO updatedProductDTO = productService.getProductDetailsWithImages(updatedProductEntity.getId());
+            return ResponseEntity.ok(ResponseFactory.success(updatedProductDTO));
+        
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ResponseFactory.fail(e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Error updating product: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("商品更新失敗，請稍後再試"));
+        }
+    }
+
+    /* ---------- 【新增】商品刪除 Endpoint ---------- */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiRes<Void>> deleteProduct(@PathVariable Integer id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok(ResponseFactory.success(null));
+        
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Error deleting product ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("商品刪除失敗，請稍後再試"));
+        }
+    }
+
+    @GetMapping("/byIds")
+    public ResponseEntity<ApiRes<List<Product>>> getProductsByIds(@RequestParam List<Integer> ids) {
+        try {
+            List<Product> products = productService.findByIds(ids);
+            return ResponseEntity.ok(ResponseFactory.success(products));
+        
+        } catch (Exception e) {
+            System.err.println("Error fetching products by IDs: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("依 ID 載入商品失敗，請稍後再試"));
+        }
+    }
 }
