@@ -18,10 +18,10 @@ public class FrontJwtService {
 
     @Value("${jwt.front.secret}") // 和後台不同的 secret key
     private String jwtFrontSecret;
-
+    
     @Value("${jwt.front.expiration}") // 和後台不同的過期時間
     private long jwtFrontExpiration;
-
+    
     private SecretKey secretKey;
 
     @PostConstruct
@@ -29,7 +29,7 @@ public class FrontJwtService {
         this.secretKey = Keys.hmacShaKeyFor(jwtFrontSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username, Integer memberId) { // 只需要 username 和 memberId
+    public String generateToken(String username, Integer userId) { // 只需要 username 和 userId
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtFrontExpiration);
 
@@ -37,7 +37,8 @@ public class FrontJwtService {
                 .subject(username)
                 .issuedAt(now)
                 .expiration(expiry)
-                .claim("memberId", memberId) // 使用不同的 claim
+                .claim("uid", userId)
+                .claim("role", "USER")
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
@@ -53,8 +54,8 @@ public class FrontJwtService {
         return validateAndParseToken(token).getPayload().getSubject();
     }
 
-    public Integer extractMemberId(String token) {
-        return (Integer) validateAndParseToken(token).getPayload().get("memberId");
+    public Integer extractUserId(String token) {
+        return (Integer) validateAndParseToken(token).getPayload().get("uid");
     }
 }
 

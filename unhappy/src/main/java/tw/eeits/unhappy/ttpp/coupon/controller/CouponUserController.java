@@ -38,7 +38,7 @@ public class CouponUserController {
     // =================================================================
     // 用戶操作相關======================================================
     // =================================================================
-    @PostMapping("/user/query")
+    @PostMapping("/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findUserCoupons(
         @RequestBody CouponQuery query) {
         

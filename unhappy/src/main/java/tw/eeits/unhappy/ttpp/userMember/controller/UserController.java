@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.service.UserMemberService;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/user/")
 @RequiredArgsConstructor
 public class UserController {
     private final UserMemberService userMemberService;
