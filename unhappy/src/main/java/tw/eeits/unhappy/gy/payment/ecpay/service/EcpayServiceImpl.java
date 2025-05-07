@@ -37,10 +37,14 @@ public class EcpayServiceImpl implements EcpayService {
     private String orderResultUrl;
 
 
-    // 綠界參數
-    private final String HASH_KEY = "pwFHCqoQZGmho4w6";
-    private final String HASH_IV = "EkRm7iFT261dpevs";
-    private final String MERCHANT_ID = "3002607";
+//    綠界參數 ( 下方可收簡訊 / 上方為無法接收簡訊 )
+
+//    private final String HASH_KEY = "pwFHCqoQZGmho4w6";
+//    private final String HASH_IV = "EkRm7iFT261dpevs";
+//    private final String MERCHANT_ID = "3002607";
+    private final String HASH_KEY = "5294y06JbISpM5x9";
+    private final String HASH_IV = "v77hoKGq4KWxNNIS";
+    private final String MERCHANT_ID = "2000132";
 
     @Override
     public Map<String, String> generateEcpayForm(PaymentRequestDTO dto) {
