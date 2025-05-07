@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import tw.eeits.unhappy.eeit198product.dto.ProductDTO;
 import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.eeit198product.service.ProductService;
+import tw.eeits.unhappy.ttpp._response.ApiRes;
+import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 
 @RestController
 @RequestMapping("/api/products")
@@ -50,4 +52,14 @@ public class ProductController {
     public List<Product> getRecommendedProducts(@PathVariable Integer id) {
         return productService.getRecommendedProducts(id);
     }
+
+
+    // ttpp
+    @GetMapping("/productSelector")
+    public ResponseEntity<ApiRes<List<Product>>> productSelector() {
+        List<Product> foundProducts = productService.findAll();
+        return ResponseEntity.ok(ResponseFactory.success(foundProducts));
+    }
+
+
 }

@@ -54,6 +54,10 @@ jwt:
     expire: 3600000
   # admin jwt
   secret: CyeBp5lDC8M2Gr9C+LpL0xkgoWDOhGkDjJeaV6Tf7eA=
+  # front jwt service
+  front:
+    secret: CyeBp5lDC8M2Gr9C+LpL0xkgoWDOhGkDjJeaV6Tf7eA=
+    expiration: 86400000 # 例如 1 天的毫秒數
 
 # user email
 email:

@@ -5,10 +5,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import tw.eeits.unhappy.ll.security.JwtAuthenticationFilter;
+// import tw.eeits.unhappy.ttpp.userMember.jwt.UserJwtFilter;
 
 @Configuration
 public class FilterConfig {
 
+    // 註冊後台Admin JWT filter
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilter(JwtAuthenticationFilter filter) {
         FilterRegistrationBean<JwtAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();
@@ -23,6 +25,20 @@ public class FilterConfig {
 
         return registrationBean;
     }
+
+    // 註冊前台User JWT filter
+    // @Bean
+    // public FilterRegistrationBean<UserJwtFilter> userFilterRegistration(UserJwtFilter userJwtFilter) {
+    //     FilterRegistrationBean<UserJwtFilter> registration = new FilterRegistrationBean<>();
+    //     registration.setFilter(userJwtFilter);
+    //     registration.addUrlPatterns("/api/user/*"); // 只攔截前台用戶API
+    //     registration.setOrder(2); // 記得設定與 admin filter 不同的順序
+    //     return registration;
+    // }
+
+
+
+
 }
 
 

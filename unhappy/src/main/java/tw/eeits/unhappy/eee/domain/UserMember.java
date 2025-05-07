@@ -1,102 +1,60 @@
 package tw.eeits.unhappy.eee.domain;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDate;
+import java.util.Date;
 
+@Data
 @Entity
 @Table(name = "user_member")
-@Getter
-@Setter
-@ToString
 public class UserMember {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Integer id;
 
-	@ManyToOne
-	@JoinColumn(name = "level_id")
-	private UserLevelBean userLevel;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
 
-	@Column(name = "line_id")
-	private String lineId;
+    @Email(message = "請提供有效的電子郵件")
+    @NotBlank(message = "電子郵件不能為空")
+    @Size(max = 100, message = "電子郵件長度不能超過100個字元")
+    @Column(name = "email", unique = true)
+    private String email;
 
-	@Column(name = "google_id")
-	private String googleId;
+    @NotBlank(message = "密碼不能為空")
+    @Size(min = 8, max = 256, message = "密碼長度需為8~256字元")
+    @Column(name = "password")
+    private String password;
 
-	@Column(name = "email")
-	private String email;
+    @NotBlank(message = "使用者名稱不能為空")
+    @Size(max = 50, message = "使用者名稱不能超過50個字元")
+    @Column(name = "user_name")
+    private String username;
 
-	@Column(name = "password")
-	private byte[] password;
+    @NotNull(message = "生日不能為空")
+    @Past(message = "生日必須是過去的日期")
+    @Column(name = "birthday")
+    private LocalDate birth;
 
-	@Column(name = "user_name")
-	private String username;
+    @Pattern(regexp = "^09\\d{8}$", message = "手機號碼格式不正確")
+    @Column(name = "phone", unique = true)
+    private String phone;
 
-	@Column(name = "birthday")
-	private java.time.LocalDate birth;
+    @Size(max = 255, message = "地址不能超過255個字元")
+    @Column(name = "address")
+    private String address;
 
-	@Column(name = "phone")
-	private String phone;
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
-	@Column(name = "address")
-	private String address;
-
-	@Column(name = "carrier")
-	private String carrier;
-
-	@Column(name = "bonus_point")
-	private Integer bonusPoint = 0;
-
-	@Column(name = "good_count")
-	private Integer goodCount = 0;
-
-	@Column(name = "bad_count")
-	private Integer badCount = 0;
-
-	@Column(name = "created_at")
-	@CreationTimestamp
-	private java.util.Date createdAt;
-
-	@Column(name = "updated_at")
-	@UpdateTimestamp
-	private java.util.Date updatedAt;
-
-	@Column(name = "access_token")
-	private String accessToken;
-
-	@Column(name = "access_token_expires_at")
-	private java.util.Date accessTokenExpiresAt;
-
-	@Column(name = "last_login")
-	private java.util.Date lastLogin;
-
-	@Column(name = "token_version")
-	private Integer tokenVersion = 1;
-
-	@Column(name = "token_updated_at")
-	@UpdateTimestamp
-	private java.util.Date tokenUpdatedAt;
-
-	@Column(name = "email_verification_code")
-	private String emailVerificationCode;
-
-	@Column(name = "verification_code_expires_at")
-	private java.util.Date verificationCodeExpiresAt;
-
-	@Column(name = "email_verified")
-	private Boolean emailVerified = false;
-
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private Date updatedAt;
 }

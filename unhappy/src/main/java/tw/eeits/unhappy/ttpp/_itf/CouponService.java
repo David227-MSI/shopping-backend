@@ -12,7 +12,6 @@ import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
-import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 
@@ -58,6 +57,20 @@ public interface CouponService {
      */
     ServiceResponse<CouponPublished> markCouponAsUsed(String id); 
     // 修改相關==========================================================
+
+
+
+    // 刪除相關==========================================================
+    /**
+     * @brief    將指定ID優惠券模板刪除
+     * @param id 優惠券模板ID
+     * @return   ServiceResponse封包
+     */
+    ServiceResponse<Boolean> deleteTemplateById(Integer id);
+    // 刪除相關==========================================================
+
+
+
 
 
 
