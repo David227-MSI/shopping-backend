@@ -2,7 +2,6 @@ package tw.eeits.unhappy.eeit198product.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.time.LocalDateTime; // 如果你需要傳遞時間相關的屬性
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,25 +18,18 @@ public class ProductDTO {
     private String name;
     private BigDecimal unitPrice;
     private String description;
-
-    // 【新增】用於接收前端傳來的品牌 ID 和分類 ID
     private Integer brandId;
-    private Integer categoryId;
-
-    // 這裡保留 brandName 和 categoryName，用於返回給前端顯示
     private String brandName;
+    private Integer categoryId;
     private String categoryName;
 
-    // 【新增】用於接收前端傳來的上架狀態
-    private Boolean isActive;
+    private String mainImageUrl; // 主圖 URL 欄位，用於列表顯示
 
-    // TODO: 如果你的商品還有其他屬性需要在 DTO 中傳遞，例如庫存、上下架時間等，也需要在這裡添加
-    private Integer stock;
-    // private LocalDateTime startTime;
-    // private LocalDateTime endTime;
+    private Boolean isActive; // isActive 欄位
 
+    private Integer stock; // stock 欄位
 
-    private List<ProductMediaDto> images;
+    private List<ProductMediaDto> images; // 這個通常只在詳細頁或編輯頁需要
 
-    // Lombok 的 @Data 會自動生成 Getter 和 Setter，所以你不需要手動寫 getBrandId(), getCategoryId(), getIsActive() 等方法。
+    // Getter 和 Setter 會由 Lombok 的 @Data 自動生成，無需手動編寫
 }
