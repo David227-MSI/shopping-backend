@@ -1,7 +1,6 @@
 package tw.eeits.unhappy.eeit198product.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +26,7 @@ public class ProductController {
     public ResponseEntity<ApiRes<List<ProductDTO>>> getProducts(
             @RequestParam(required = false) Integer category,
             @RequestParam(required = false) Integer brand,
-            @RequestParam(required = false) String search
-    ) {
+            @RequestParam(required = false) String search) {
         // 呼叫 service 獲取 ProductDTO 列表
         List<ProductDTO> productDTOs = productService.searchProducts(category, brand, search);
         // 將 DTO 列表包裝在 ApiRes 中並返回
@@ -46,21 +44,21 @@ public class ProductController {
             System.out.println("Successfully retrieved product ID: " + id); // 添加日誌
             return ResponseEntity.ok(ResponseFactory.success(productDTO));
         } catch (IllegalArgumentException e) {
-             // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在)
-             System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
-             // 返回 404 Not Found
-             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
-        }
-        catch (RuntimeException e) {
+            // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在)
+            System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            // 返回 404 Not Found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
+        } catch (RuntimeException e) {
             System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
             e.printStackTrace(); // 打印堆棧跟踪
             // 返回 500 Internal Server Error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("獲取商品詳細資訊失敗"));
         } catch (Exception e) { // 捕獲其他可能的異常
-             System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
-             e.printStackTrace(); // 打印堆棧跟踪
-             // 返回 500 Internal Server Error
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("獲取商品詳細資訊時發生未知錯誤"));
+            System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            e.printStackTrace(); // 打印堆棧跟踪
+            // 返回 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseFactory.fail("獲取商品詳細資訊時發生未知錯誤"));
         }
     }
 
@@ -71,33 +69,32 @@ public class ProductController {
             Product createdProduct = productService.createProduct(productDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.success(createdProduct));
         } catch (IllegalArgumentException e) {
-             // 捕獲 service 拋出的 IllegalArgumentException (例如品牌或分類無效)
-             System.err.println("Error creating product: " + e.getMessage());
-             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseFactory.fail(e.getMessage()));
+            // 捕獲 service 拋出的 IllegalArgumentException (例如品牌或分類無效)
+            System.err.println("Error creating product: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseFactory.fail(e.getMessage()));
         } catch (RuntimeException e) {
-             System.err.println("Error creating product: " + e.getMessage());
-             e.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("建立商品失敗"));
+            System.err.println("Error creating product: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("建立商品失敗"));
         }
     }
 
     /** 更新商品 */
     @PutMapping("/{id}")
     public ResponseEntity<ApiRes<Product>> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDto) {
-         try {
+        try {
             Product updatedProduct = productService.updateProduct(id, productDto);
             return ResponseEntity.ok(ResponseFactory.success(updatedProduct));
-         } catch (IllegalArgumentException e) {
-             // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在、品牌或分類無效)
-             System.err.println("Error updating product ID " + id + ": " + e.getMessage());
-             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseFactory.fail(e.getMessage()));
-         } catch (RuntimeException e) {
-             System.err.println("Error updating product ID " + id + ": " + e.getMessage());
-             e.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("更新商品失敗"));
-         }
+        } catch (IllegalArgumentException e) {
+            // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在、品牌或分類無效)
+            System.err.println("Error updating product ID " + id + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseFactory.fail(e.getMessage()));
+        } catch (RuntimeException e) {
+            System.err.println("Error updating product ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("更新商品失敗"));
+        }
     }
-
 
     /** 刪除商品 */
     @DeleteMapping("/{id}")
@@ -106,14 +103,13 @@ public class ProductController {
             productService.deleteProduct(id);
             return ResponseEntity.ok(ResponseFactory.success(null)); // 刪除成功返回 success
         } catch (IllegalArgumentException e) {
-             // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在)
-             System.err.println("Error deleting product ID " + id + ": " + e.getMessage());
-             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
-        }
-        catch (RuntimeException e) {
-             System.err.println("Error deleting product ID " + id + ": " + e.getMessage());
-             e.printStackTrace();
-             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("刪除商品失敗"));
+            // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在)
+            System.err.println("Error deleting product ID " + id + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
+        } catch (RuntimeException e) {
+            System.err.println("Error deleting product ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("刪除商品失敗"));
         }
     }
 
@@ -122,6 +118,5 @@ public class ProductController {
     public List<Product> getRecommendedProducts(@PathVariable Integer id) {
         return productService.getRecommendedProducts(id);
     }
-
 
 }
