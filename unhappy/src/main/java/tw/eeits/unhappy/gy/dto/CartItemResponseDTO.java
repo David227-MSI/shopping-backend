@@ -16,6 +16,8 @@ public class CartItemResponseDTO {
     private Integer id;
     private Integer productId;
     private String productName;
+    private String brandName;
+    private String categoryName;
     private BigDecimal price;
     private Integer quantity;
     private BigDecimal subtotal;
