@@ -112,13 +112,20 @@ public class OrderServiceImpl implements OrderService {
             throw new InvalidCouponUsageException("未達最低消費金額");
         }
 
-        // 計算折扣金額
-        BigDecimal discountAmount = Optional.ofNullable(template.getDiscountValue()).orElse(BigDecimal.ZERO);
-        BigDecimal maxDiscount = Optional.ofNullable(template.getMaxDiscount()).orElse(discountAmount);
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        BigDecimal discountValue = Optional.ofNullable(template.getDiscountValue()).orElse(BigDecimal.ZERO);
+        BigDecimal maxDiscount = Optional.ofNullable(template.getMaxDiscount()).orElse(BigDecimal.ZERO);
 
-        // 如果折扣金額大於最大折扣金額，則使用最大折扣金額
-        if (discountAmount.compareTo(maxDiscount) > 0) {
-            discountAmount = maxDiscount;
+        switch (template.getDiscountType()) {
+            case VALUE -> discountAmount = discountValue;
+            case PERCENTAGE -> {
+                discountAmount = totalAmount.multiply(BigDecimal.valueOf(1).subtract(discountValue.divide(BigDecimal.valueOf(100))));
+                // 若有最大折扣限制
+                if (maxDiscount.compareTo(BigDecimal.ZERO) > 0 && discountAmount.compareTo(maxDiscount) > 0) {
+                    discountAmount = maxDiscount;
+                }
+            }
+            default -> discountAmount = BigDecimal.ZERO;
         }
 
         coupon.setIsUsed(true);
@@ -177,6 +184,18 @@ public class OrderServiceImpl implements OrderService {
                 .paymentStatusText(order.getPaymentStatus().getDisplayText())
                 .paymentMethod(order.getPaymentMethod())
                 .transactionNumber(order.getTransactionNumber())
+                .couponDiscountType(
+                        order.getCouponPublished() != null &&
+                                order.getCouponPublished().getCouponTemplate() != null
+                                ? String.valueOf(order.getCouponPublished().getCouponTemplate().getDiscountType())
+                                : null
+                )
+                .couponDiscountValue(
+                        order.getCouponPublished() != null &&
+                                order.getCouponPublished().getCouponTemplate() != null
+                                ? order.getCouponPublished().getCouponTemplate().getDiscountValue()
+                                : null
+                )
                 .paidAt(order.getPaidAt())
                 .createdAt(order.getCreatedAt())
                 .recipientName(order.getRecipientName())
