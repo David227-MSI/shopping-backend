@@ -23,6 +23,8 @@ public class OrderResponseDTO {
     private String paymentStatusText;
     private String paymentMethod;
     private String transactionNumber;
+    private String couponDiscountType;
+    private BigDecimal couponDiscountValue;
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;
     private String recipientName;
