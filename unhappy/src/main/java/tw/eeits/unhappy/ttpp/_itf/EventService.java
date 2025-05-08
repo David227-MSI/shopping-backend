@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
@@ -75,6 +76,13 @@ public interface EventService {
      * @return      ServiceResponse封包
      */
     ServiceResponse<List<Event>> findEventByCriteria(EventQuery query);
+
+
+
+
+
+
+    ServiceResponse<Map<String, Object>> checkEligibility(EventParticipantRequest request);
     // 條件查詢相關======================================================
 
 
@@ -114,7 +122,7 @@ public interface EventService {
      * @param participant 登記的活動參加者
      * @return            ServiceResponse封包
      */
-    ServiceResponse<EventParticipant> attendEvent(EventParticipant participant);
+    ServiceResponse<Map<String, Object>> attendEvent(EventParticipantRequest request);
     // 用戶操作相關======================================================
 
 }
