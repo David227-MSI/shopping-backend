@@ -23,6 +23,8 @@ import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponPublishedRepository;
 import tw.eeits.unhappy.ttpp.coupon.repository.CouponTemplateRepository;
+import tw.eeits.unhappy.ttpp.event.model.Event;
+import tw.eeits.unhappy.ttpp.event.repository.EventRepository;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.CouponMedia;
 import tw.eeits.unhappy.ttpp.media.repository.CouponMediaRepository;
@@ -36,6 +38,7 @@ public class CouponServiceImpl implements CouponService {
     private final CouponTemplateRepository templateRepository;
     private final CouponPublishedRepository publishedRepository;
     private final CouponMediaRepository mediaRepository;
+    private final EventRepository eventRepository;
     private final Validator validator;
 
     // =================================================================
@@ -344,6 +347,19 @@ public class CouponServiceImpl implements CouponService {
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
+    @Override
+    public List<CouponTemplate> findValidCouponTemplatesForEvent(Integer eventId) {
+
+        Event foundEvent = eventRepository.findById(eventId).orElse(null);
+
+        return templateRepository.findValidCouponTemplates(
+            foundEvent.getStartTime(),
+            foundEvent.getEndTime()
+        );
+    }
+    
+    
+    
     @Override
     public CouponTemplate findTemplateById(Integer id) {
         return templateRepository.findById(id).orElse(null);

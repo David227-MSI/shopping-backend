@@ -215,7 +215,15 @@ public class CouponAdminController {
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
-    
+    @GetMapping("/templateSelector/{eventId}")
+    public ResponseEntity<ApiRes<List<CouponTemplate>>> productSelector(
+        @PathVariable Integer eventId
+    ) {
+        List<CouponTemplate> foundTemplates = couponService.findValidCouponTemplatesForEvent(eventId);
+        return ResponseEntity.ok(ResponseFactory.success(foundTemplates));
+    }
+
+
     @GetMapping("/templates/{id}")
     public ResponseEntity<ApiRes<CouponTemplate>> findTemplateById(@PathVariable Integer id) {
         CouponTemplate foundEntry = couponService.findTemplateById(id);
@@ -235,18 +243,8 @@ public class CouponAdminController {
         }
 
         // pick up response data
-        List<CouponTemplate> foundData = res.getData();
-        List<Map<String, Object>> templateList = foundData.stream().map(template -> {
-            Map<String, Object> mp = new HashMap<>();
-            mp.put("id", template.getId());
-            mp.put("applicableId", template.getApplicableId());
-            mp.put("applicableType", template.getApplicableType());
-            mp.put("discountValue", template.getDiscountValue());
-            mp.put("startTime", template.getStartTime());
-            mp.put("endTime", template.getEndTime());
-            mp.put("couponMedia", template.getCouponMedia());
-            return mp;
-        }).collect(Collectors.toList());
+        List<CouponTemplate> templateList = res.getData();
+        
 
         Map<String, Object> data = new HashMap<>();
         data.put("templateList", templateList);
