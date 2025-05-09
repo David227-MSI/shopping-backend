@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import tw.eeits.unhappy.eeit198product.entity.Product;
+
 import tw.eeits.unhappy.ll.model.Brand;
 
 @Repository

@@ -20,14 +20,14 @@ import tw.eeits.unhappy.ll.model.ContactMessage;
 import tw.eeits.unhappy.ll.service.ContactMessageService;
 
 @RestController
-@RequestMapping("/api/contact")
+@RequestMapping("")
 public class ContactMessageController {
 
     @Autowired
     private ContactMessageService contactMessageService;
 
     // 新增一筆訊息(未登入的使用者可以用)
-    @PostMapping("/public")
+    @PostMapping("/api/public/contact")
     public ResponseEntity<?> createContactMessage(@Validated @RequestBody ContactMessage contactMessage) {
         ContactMessage saved = contactMessageService.createContactMessage(contactMessage);
         return ResponseEntity.ok(saved);
@@ -35,7 +35,7 @@ public class ContactMessageController {
 
     // 後台處理訊息
 
-    @PutMapping("/messages/{id}")
+    @PutMapping("/api/admin/contact/{id}")
     public ResponseEntity<?> handleContactMessage(
             @PathVariable Integer id,
             @RequestBody @Validated HandleContactMessageRequest requestBody,
@@ -67,14 +67,14 @@ public class ContactMessageController {
     }
 
     // 取得未解決的訊息
-    @GetMapping("/messages/unhandled")
+    @GetMapping("/api/admin/contact/unhandled")
     public ResponseEntity<?> getAllUnhandledMessages() {
         List<ContactMessage> messages = contactMessageService.findAllUnhandledMessages();
         return ResponseEntity.ok(messages);
     }
 
     // 取得所有訊息
-    @GetMapping("/messages")
+    @GetMapping("/api/admin/contact")
     public ResponseEntity<?> getAllMessages() {
         List<ContactMessage> messages = contactMessageService.findAllMessages();
 
