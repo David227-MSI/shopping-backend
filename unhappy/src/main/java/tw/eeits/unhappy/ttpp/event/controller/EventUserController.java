@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
@@ -50,30 +51,13 @@ public class EventUserController {
         // verify data type
         ec.validate(request, validator);
         
-        // check foreign key
-        UserMember foundUser = userMemberService.findUserById(request.getUserId());
-        Event foundEvent = eventService.findEventById(request.getEventId());
-        EventPrize foundPrize = eventService.findPrizeById(request.getPrizeId());
-
-        if(foundUser == null) {ec.add("找不到參加用戶資訊");}
-        if(foundEvent == null) {ec.add("找不到參加的活動");}
-        if(foundPrize == null) {ec.add("找不到參加的活動獎品");}
-
         if(ec.hasErrors()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ResponseFactory.fail(ec.getErrorMessage()));
         }
 
-        // transfer data from DTO to Entity
-        EventParticipant newEntry = EventParticipant.builder()
-                .userMember(foundUser)
-                .event(foundEvent)
-                .eventPrize(foundPrize)
-                .participateStatus(ParticipateStatus.REGISTERED)
-                .build();
-
         // call service
-        ServiceResponse<EventParticipant> res = eventService.attendEvent(newEntry);
+        ServiceResponse<Map<String, Object>> res = eventService.attendEvent(request);
 
         if(!res.isSuccess()) {
             ec.add(res.getMessage());
@@ -81,15 +65,7 @@ public class EventUserController {
                 .body(ResponseFactory.fail(ec.getErrorMessage()));
         }
 
-        // pick up response data
-        EventParticipant savedEntry = res.getData();
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", savedEntry.getId());
-        data.put("userId", savedEntry.getUserMember().getId());
-        data.put("eventName", savedEntry.getEvent().getEventName());
-        data.put("eventPrize", savedEntry.getEventPrize());
-
-        return ResponseEntity.ok(ResponseFactory.success(data));
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
     }
     
     // =================================================================
@@ -97,7 +73,7 @@ public class EventUserController {
     // =================================================================
 
 
-@PostMapping("/query")
+    @PostMapping("/query")
     public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
         @RequestBody EventQuery query) {
 
@@ -130,6 +106,32 @@ public class EventUserController {
     }
 
 
+    @PostMapping("/checkEligibility")
+    public ResponseEntity<ApiRes<Map<String, Object>>> checkEligibility(
+        @RequestBody EventParticipantRequest request
+    ) {
+        ErrorCollector ec = new ErrorCollector();
+
+        // verify data type
+        if (request == null) {ec.add("請求不能為空");} 
+        else {ec.validate(request, validator);}
+
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+
+        // call service
+        ServiceResponse<Map<String, Object>> res = eventService.checkEligibility(request);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
 
 
 

@@ -8,6 +8,7 @@ import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.userMember.dto.UserModifyRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,49 @@ public class UserMemberService {
     }
 
 
+    public ServiceResponse<UserMember> userModify(UserModifyRequest request) {
+    
+        if (request == null) {
+            return ServiceResponse.fail("請求不能為空");
+        }
+    
+        UserMember foundUser = userMemberRepository.findById(request.getId()).orElse(null);
+        if (foundUser == null) {
+            return ServiceResponse.fail("找不到目標用戶");
+        }
+    
+        if (request.getEmail() != null) {
+            foundUser.setEmail(request.getEmail());
+        }
+        if (request.getUsername() != null) {
+            foundUser.setUsername(request.getUsername());
+        }
+        if (request.getPhone() != null) {
+            foundUser.setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            foundUser.setAddress(request.getAddress());
+        }
+
+        // check password
+        if (request.getNewPassword() != null) {
+            // verify oldPassword 
+            if (request.getOldPassword() == null || !passwordEncoder.matches(request.getOldPassword(), foundUser.getPassword())) {
+                return ServiceResponse.fail("輸入的舊密碼不正確");
+            }
+
+            System.out.println("old pwd: " + request.getOldPassword());
+            System.out.println("new pwd: " + request.getNewPassword());
+            foundUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+    
+        try {
+            UserMember updatedUser = userMemberRepository.save(foundUser);
+            return ServiceResponse.success(updatedUser);
+        } catch (Exception e) {
+            return ServiceResponse.fail("更新用戶資料失敗: " + e.getMessage());
+        }
+    }
 
 
 

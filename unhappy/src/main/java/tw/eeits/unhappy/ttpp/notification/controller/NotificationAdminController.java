@@ -1,6 +1,7 @@
 package tw.eeits.unhappy.ttpp.notification.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,10 @@ import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.coupon.dto.CouponQuery;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponTemplate;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationPublishRequest;
+import tw.eeits.unhappy.ttpp.notification.dto.NotificationQuery;
 import tw.eeits.unhappy.ttpp.notification.dto.NotificationTemplateRequest;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
@@ -122,5 +126,39 @@ public class NotificationAdminController {
     // =================================================================
     // 建立通知相關======================================================
     // =================================================================
+
+
+
+
+
+
+
+
+    @PostMapping("/templates/findAll")
+    public ResponseEntity<ApiRes<Map<String, Object>>> findAllTemplates(
+        @RequestBody NotificationQuery query) {
+
+        // call service
+        ServiceResponse<List<NotificationTemplate>> res = notificationService.findTemplatesByCriteria(query);
+        
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        // pick up response data
+        List<NotificationTemplate> templateList = res.getData();
+        
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("templateList", templateList);
+        
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+
+
+
+
+
 
 }

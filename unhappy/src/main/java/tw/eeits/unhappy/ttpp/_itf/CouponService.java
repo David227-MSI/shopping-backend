@@ -78,6 +78,14 @@ public interface CouponService {
 
     // 基本查詢相關======================================================
     /**
+     * @brief         查詢所有符合活動時間的優惠券模板
+     * @param eventId 活動ID
+     * @return        操作成功: 優惠券模板List / 操作失敗: null
+     */
+    List<CouponTemplate> findValidCouponTemplatesForEvent(Integer eventId);
+
+
+    /**
      * @brief    以ID查詢優惠券的模板
      * @param id 模板 ID
      * @return   查詢成功: 模板 / 查詢失敗: Null

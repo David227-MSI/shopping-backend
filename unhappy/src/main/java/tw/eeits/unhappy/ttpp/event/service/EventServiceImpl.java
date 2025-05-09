@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp.event.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +15,13 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.repository.UserMemberRepository;
+import tw.eeits.unhappy.gy.order.repository.OrderRepository;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
+import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
@@ -36,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final EventMediaRepository mediaRepository;
     private final EventParticipantRepository participantRepository;
     private final UserMemberRepository userMemberRepository;
+    private final OrderRepository orderRepository;
     private final Validator validator;
 
 
@@ -182,9 +187,83 @@ public class EventServiceImpl implements EventService {
             return ServiceResponse.fail("查詢發生異常: " + e.getMessage());
         }
     }
+
+
+
+    @Override
+    public ServiceResponse<Map<String, Object>> checkEligibility(
+        EventParticipantRequest request
+    ) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        // check event and prize
+        Event foundEvent = eventRepository.findById(request.getEventId()).orElse(null);
+        EventPrize foundPrize = prizeRepository.findById(request.getPrizeId()).orElse(null);
+        
+        if(foundEvent == null) {ec.add("找不到目標活動");}
+        if(foundPrize == null) {ec.add("找不到目標獎品");}
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+
+        // service operation
+        // check the total amount user paid
+        BigDecimal totalSpend = orderRepository.sumTotalAmountByUserIdAndPaidAtBetween(
+                request.getUserId(),
+                foundEvent.getStartTime(),
+                foundEvent.getEndTime()
+        );
+        if (totalSpend == null) totalSpend = BigDecimal.ZERO;
+
+        // compute max allow entries
+        BigDecimal minSpend = foundEvent.getMinSpend();
+        int maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+
+        // check participated times
+        int participatedTimes = participantRepository.countByUserMemberIdAndEventId(
+                request.getUserId(),
+                request.getEventId()
+        );
+
+        int remainingEntries = Math.max(0, maxAllowedEntries - participatedTimes);
+
+        // compute how much more amount is needed to get next entry
+        BigDecimal spentInCurrentEntry = totalSpend.remainder(minSpend);
+        BigDecimal amountToNextEntry = (spentInCurrentEntry.compareTo(BigDecimal.ZERO) == 0 && remainingEntries > 0)
+                ? BigDecimal.ZERO
+                : minSpend.subtract(spentInCurrentEntry);
+
+        // check eligible
+        boolean eligible = remainingEntries > 0;
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("eligible", eligible);
+        data.put("maxAllowedEntries", maxAllowedEntries);
+        data.put("participatedTimes", participatedTimes);
+        data.put("remainingEntries", remainingEntries);
+        data.put("totalSpend", totalSpend);
+        data.put("amountToNextEntry", amountToNextEntry);
+
+        return ServiceResponse.success(data);
+
+    }
     // =================================================================
     // 條件查詢相關======================================================
     // =================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -244,33 +323,69 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ServiceResponse<EventParticipant> attendEvent(EventParticipant participant) {
+    public ServiceResponse<Map<String, Object>> attendEvent(EventParticipantRequest request) {
         
         ErrorCollector ec = new ErrorCollector();
 
-        // check input and verify datatype
-        if(participant == null) {
-            ec.add("輸入參加者為null");
-        } else {
-            if(participant.getEvent() == null) {ec.add("輸入活動為 null");} 
-            if(participant.getEventPrize() == null) {ec.add("輸入獎品為 null");}
-            ec.validate(participant, validator);
+        Event foundEvent = eventRepository.findById(request.getEventId()).orElse(null);
+        EventPrize foundPrize = prizeRepository.findById(request.getPrizeId()).orElse(null);
+        UserMember foundUser = userMemberRepository.findById(request.getUserId()).orElse(null);
+
+        if (foundEvent == null) ec.add("找不到目標活動");
+        if (foundPrize == null) ec.add("找不到目標獎品");
+        if (foundUser == null) ec.add("找不到目標會員");
+
+        if (foundPrize != null && foundPrize.getRemainingSlots() <= 0) {
+            ec.add("獎品已無剩餘名額");
         }
-        
 
-        // check event maxEntries
-        // Integer maxEntries = participant.getEvent().getMaxEntries();
-
-
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
 
 
         // service operation
-        try {
-            EventParticipant savedEntry = participantRepository.save(participant);
-            return ServiceResponse.success(savedEntry);
-        } catch (Exception e) {
-            return ServiceResponse.fail("建立活動參加者錯誤: " + e.getMessage());
+        // compute participatedTimes and maxAllowedEntries
+        BigDecimal totalSpend = orderRepository.sumTotalAmountByUserIdAndPaidAtBetween(
+                request.getUserId(), foundEvent.getStartTime(), foundEvent.getEndTime());
+        if (totalSpend == null) totalSpend = BigDecimal.ZERO;
+
+        BigDecimal minSpend = foundEvent.getMinSpend();
+        int maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+
+        int participatedTimes = participantRepository.countByUserMemberIdAndEventId(
+                request.getUserId(), request.getEventId());
+
+        if (participatedTimes >= maxAllowedEntries) {
+            return ServiceResponse.fail("已達可參加次數上限");
         }
+
+        // lottery process
+        boolean isWinner = Math.random() < foundPrize.getWinRate().doubleValue();
+        ParticipateStatus finalStatus = isWinner ? ParticipateStatus.WINNER : ParticipateStatus.LOST;
+
+        // record
+        EventParticipant savedEntry = EventParticipant.builder()
+                .event(foundEvent)
+                .eventPrize(foundPrize)
+                .userMember(foundUser)
+                .participateStatus(finalStatus)
+                .build();
+
+        participantRepository.save(savedEntry);
+
+        // 更新剩餘名額（只有中獎才扣）
+        if (isWinner) {
+            foundPrize.setRemainingSlots(foundPrize.getRemainingSlots() - 1);
+            prizeRepository.save(foundPrize);
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("participantId", savedEntry.getId());
+        data.put("status", finalStatus);
+        data.put("prizeTitle", foundPrize.getTitle());
+
+        return ServiceResponse.success(data);
     }
     // =================================================================
     // 用戶操作相關======================================================
