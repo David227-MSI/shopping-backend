@@ -1,6 +1,7 @@
 package tw.eeits.unhappy.ll.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,4 +25,7 @@ public interface BrandService {
     List<BrandResponse> findAll();
 
     Brand findBrandById(Integer id);
+
+    // 【新增】根據名稱查找品牌的方法宣告
+    Optional<Brand> findBrandByName(String brandName);
 }

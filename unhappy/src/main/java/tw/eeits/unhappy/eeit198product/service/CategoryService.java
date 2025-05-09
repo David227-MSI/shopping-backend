@@ -59,8 +59,12 @@ public class CategoryService {
     }
 
     public List<Category> findAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
+        return categoryRepository.findAll();
+    }
+
+    // 【新增】根據名稱查找分類的 Service 方法
+    public Optional<Category> getCategoryByName(String name) {
+        return categoryRepository.findByName(name);
     }
     
 }
