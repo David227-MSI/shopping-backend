@@ -80,6 +80,8 @@ public class CartItemServiceImpl implements CartItemService {
                         .checkedOut(item.getCheckedOut())
                         .createdAt(item.getCreatedAt())
                         .updatedAt(item.getUpdatedAt())
+                        .brandName(item.getProduct().getBrand().getName())
+                        .categoryName(item.getProduct().getCategory().getName())
                         .build())
                 .collect(Collectors.toList());
     }

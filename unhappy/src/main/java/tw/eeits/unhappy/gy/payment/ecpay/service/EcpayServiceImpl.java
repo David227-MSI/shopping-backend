@@ -118,7 +118,7 @@ public class EcpayServiceImpl implements EcpayService {
             Order order = orderRepository.findByTransactionNumber(merchantTradeNo)
                     .orElseThrow(() -> new OrderNotFoundException("訂單不存在"));
 
-            order.setStatus(OrderStatus.PAID);
+            order.setStatus(OrderStatus.COMPLETED);
             order.setPaymentStatus(PaymentStatus.PAID);
             order.setPaidAt(LocalDateTime.now());
             orderRepository.save(order);
