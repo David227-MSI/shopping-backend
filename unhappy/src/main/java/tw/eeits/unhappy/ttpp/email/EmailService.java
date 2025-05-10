@@ -10,12 +10,14 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender javaMailSender;
+    private final Validator validator;
 
     // 讀取信件模板
     // 參數: 模板路徑, 標題, 收件人名稱, 內文
@@ -28,6 +30,15 @@ public class EmailService {
                            .replace("${message}", message);
         return template;
     }
+
+
+
+    // default send text mail
+    public boolean sendMail(String sendTo, String subject, String content) {
+        return sendMail(sendTo, subject, content, false);
+    }
+
+
 
     // 寄Email用這個
     // 參數: 收件信箱, 標題, 收件人名, 內文, (HTML/TEXT)
@@ -67,9 +78,17 @@ public class EmailService {
         }
         return true;
     }
-    // default send text mail
-    public boolean sendMail(String sendTo, String subject, String content) {
-        return sendMail(sendTo, subject, content, false);
+
+    public String loadVerifyEmailTemplate(String email, String username) throws IOException {
+        
+        // load template
+        String templatePath = "src/main/resources/static/email_templates/template1.html";
+        String template = new String(Files.readAllBytes(Paths.get(templatePath)));
+        
+        // variables
+        template = template.replace("${email}", email)
+                           .replace("${username}", username);
+        return template;
     }
 
 }

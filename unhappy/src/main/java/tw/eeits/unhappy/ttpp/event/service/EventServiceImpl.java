@@ -276,6 +276,16 @@ public class EventServiceImpl implements EventService {
             return ServiceResponse.fail("刪除活動發生異常: " + e);
         }
     }
+
+    @Override
+    public ServiceResponse<Boolean> deletePrizeById(Integer id) {
+        try {
+            prizeRepository.deleteById(id);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail("刪除活動獎品發生異常: " + e);
+        }
+    }
     // =================================================================
     // 刪除相關==========================================================
     // =================================================================
@@ -290,6 +300,18 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event findEventById(Integer id) {
         return eventRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public ServiceResponse<List<EventPrize>> findAllPrizeByEventId(
+        Integer eventId
+    ) {
+        try {
+            List<EventPrize> prizeList = prizeRepository.findByEventId(eventId);
+            return ServiceResponse.success(prizeList);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢活動獎品發生異常: " + e);
+        }
     }
 
     @Override

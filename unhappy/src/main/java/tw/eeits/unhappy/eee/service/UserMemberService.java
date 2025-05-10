@@ -1,20 +1,26 @@
 package tw.eeits.unhappy.eee.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.userMember.dto.UserModifyRequest;
+import tw.eeits.unhappy.ttpp.userMember.dto.UserRegisterRequest;
 
 @Service
 @RequiredArgsConstructor
 public class UserMemberService {
     private final UserMemberRepository userMemberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
 
     public UserMember findUserById(Integer id) {
         return userMemberRepository.findById(id).orElse(null);
@@ -99,6 +105,53 @@ public class UserMemberService {
         } catch (Exception e) {
             return ServiceResponse.fail("更新用戶資料失敗: " + e.getMessage());
         }
+    }
+
+
+
+
+    @Transactional
+    public ServiceResponse<UserMember> register(
+            UserRegisterRequest request
+    ) {
+        ErrorCollector ec = new ErrorCollector();
+
+        ec.validate(request, validator);
+
+        // check password
+        if (!request.getPassword().equals(request.getComfirmPassword())) {
+            ec.add("確認密碼與密碼不一致");
+        }
+
+        // check email
+        UserMember foundUser = userMemberRepository.findByEmail(request.getEmail()).orElse(null);
+        if (foundUser != null) {
+            ec.add("該電子郵件已被註冊");
+        }
+
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        UserMember newEntry = new UserMember();
+        newEntry.setEmail(request.getEmail());
+        newEntry.setUsername(request.getUsername());
+        newEntry.setBirth(request.getBirth());
+        newEntry.setPhone(request.getPhone());
+        newEntry.setAddress(request.getAddress());
+
+        // encode
+        String pwd = passwordEncoder.encode(request.getPassword());
+        newEntry.setPassword(pwd);
+
+        try {
+            UserMember savedEntry = userMemberRepository.save(newEntry);
+            return ServiceResponse.success(savedEntry);
+        } catch (Exception e) {
+            return ServiceResponse.fail("註冊帳號發生異常，請稍後再試");
+        }
+
     }
 
 

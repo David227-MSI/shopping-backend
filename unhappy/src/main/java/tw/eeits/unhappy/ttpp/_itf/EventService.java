@@ -12,7 +12,6 @@ import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
 import tw.eeits.unhappy.ttpp.event.dto.EventRequest;
 import tw.eeits.unhappy.ttpp.event.model.Event;
-import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 import tw.eeits.unhappy.ttpp.media.enums.MediaType;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
@@ -72,6 +71,13 @@ public interface EventService {
      * @return   ServicePesponse封包
      */
     ServiceResponse<Boolean> deleteEventById(Integer id);
+
+    /**
+     * @brief    以獎品ID刪除指定獎品
+     * @param id 獎品ID
+     * @return   ServicePesponse封包
+     */
+    ServiceResponse<Boolean> deletePrizeById(Integer id);
     // 刪除相關==========================================================
 
 
@@ -84,6 +90,16 @@ public interface EventService {
      * @return   查詢成功: 活動物件 / 查詢失敗: Null
      */
     Event findEventById(Integer id);
+
+    /**
+     * @brief         以活動ID查看獎品清單
+     * @param eventId 活動ID
+     * @return        ServiceResponse封包
+     */
+    ServiceResponse<List<EventPrize>> findAllPrizeByEventId(Integer eventId);
+
+
+
 
     /**
      * @brief    用獎品ID查詢活動獎品

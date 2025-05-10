@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 
+
 @RestController
 @RequestMapping("/api/admin/events")
 @RequiredArgsConstructor
@@ -333,6 +334,20 @@ public class EventAdminController {
 
         return ResponseEntity.ok(ResponseFactory.success(res.getData()));
     }
+
+    @DeleteMapping("/prize/{prizeId}")
+    public ResponseEntity<ApiRes<Boolean>> deletePrizeById(
+        @PathVariable Integer prizeId
+    ) {
+        ServiceResponse<Boolean> res = eventService.deletePrizeById(prizeId);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
     // =================================================================
     // 刪除相關==========================================================
     // =================================================================
@@ -357,7 +372,7 @@ public class EventAdminController {
 
 
     // =================================================================
-    // 查詢所有活動======================================================
+    // 查詢相關==========================================================
     // =================================================================
     @GetMapping("/{eventId}")
     public ResponseEntity<ApiRes<Map<String, Object>>> getEventById(
@@ -387,6 +402,24 @@ public class EventAdminController {
 
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
+
+    @GetMapping("/prize/{eventId}")
+    public ResponseEntity<ApiRes<List<EventPrize>>> getAllPrizeByEventId(
+        @PathVariable Integer eventId
+    ) {
+
+        // call service
+        ServiceResponse<List<EventPrize>> res = eventService.findAllPrizeByEventId(eventId);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+
+    }
+    
     
     
     
@@ -423,7 +456,7 @@ public class EventAdminController {
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
     // =================================================================
-    // 查詢所有活動======================================================
+    // 查詢相關==========================================================
     // =================================================================
 
 

@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp.userMember.dto;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,5 +34,8 @@ public class UserModifyRequest {
     private String newPassword;
 
     private String oldPassword;
+
+
+
 
 }
