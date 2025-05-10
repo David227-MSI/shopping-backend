@@ -24,11 +24,9 @@ public class UserRegisterRequest {
     @Size(min = 8, max = 256, message = "密碼長度需為8~256字元")
     private String password;
 
-
     @NotBlank(message = "請再次輸入密碼確認")
     @Size(min = 8, max = 256, message = "密碼長度需為8~256字元")
-    private String comfirmPassword;
-
+    private String confirmPassword;
 
     @NotBlank(message = "使用者名稱為必要資訊")
     @Size(max = 50, message = "使用者名稱不能超過50個字元")
@@ -45,17 +43,14 @@ public class UserRegisterRequest {
     @Size(max = 255, message = "地址不能超過255個字元")
     private String address;
 
+    @NotBlank(message = "驗證碼為必要資訊")
+    private String verificationCode;
+
     @AssertTrue(message = "請確認密碼輸入一致")
-    private boolean checkComfirmPwd() {
-        if (password != null && comfirmPassword != null) {
-            return password.equals(comfirmPassword);
+    private boolean checkConfirmPwd() {
+        if (password != null && confirmPassword != null) {
+            return password.equals(confirmPassword);
         }
         return false;
     }
-
 }
-
-
-
-
-

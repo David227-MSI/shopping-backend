@@ -69,4 +69,6 @@ public class UserEmailService {
     public boolean sendMail(String sendTo, String subject, String content) {
         return sendMail(sendTo, subject, content, false);
     }
+
+
 }

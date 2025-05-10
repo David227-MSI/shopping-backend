@@ -1,7 +1,5 @@
 package tw.eeits.unhappy.eee.service;
 
-import java.util.Optional;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +25,7 @@ public class UserMemberService {
     }
 
     // 驗證登入
+    @Transactional
     public ServiceResponse<UserMember> authenticate(String email, String rawPassword) {
 
         // PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -118,11 +117,6 @@ public class UserMemberService {
 
         ec.validate(request, validator);
 
-        // check password
-        if (!request.getPassword().equals(request.getComfirmPassword())) {
-            ec.add("確認密碼與密碼不一致");
-        }
-
         // check email
         UserMember foundUser = userMemberRepository.findByEmail(request.getEmail()).orElse(null);
         if (foundUser != null) {
@@ -152,6 +146,17 @@ public class UserMemberService {
             return ServiceResponse.fail("註冊帳號發生異常，請稍後再試");
         }
 
+    }
+
+
+    // ttpp
+    public UserMember findUserByEmail(String email) {
+        return userMemberRepository.findByEmail(email).orElse(null);
+    }
+
+    // @Transactional
+    public Integer deleteUserByEmail(String email) {
+        return userMemberRepository.deleteByEmail(email);
     }
 
 
