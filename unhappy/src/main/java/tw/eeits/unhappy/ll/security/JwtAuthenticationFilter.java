@@ -122,6 +122,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isManagerAndStaffPath(String path) {
         return MANAGER_AND_STAFF_API.stream().anyMatch(path::startsWith);
     }
+
+
+    // ttpp
+    // 決定哪些API可以繞過攔截器
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // 只攔截 /api/admin/* 開頭的 API
+        return !request.getRequestURI().startsWith("/api/admin/*");
+    }
+
+
+
+
+
 }
 
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eeit198product.entity.Product;
@@ -36,6 +37,12 @@ import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 import tw.eeits.unhappy.ttpp.media.dto.MediaRequest;
 import tw.eeits.unhappy.ttpp.media.model.EventMedia;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+
+
 
 @RestController
 @RequestMapping("/api/admin/events")
@@ -57,6 +64,10 @@ public class EventAdminController {
 
         // verify data type
         ec.validate(request, validator);
+
+        if(request.getMediaData() == null) {
+            ec.add("請上傳活動圖片");
+        }
         
         if(ec.hasErrors()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -230,9 +241,158 @@ public class EventAdminController {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+    @PutMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<ApiRes<Map<String, Object>>> modifyEvent(
+        @PathVariable Integer eventId, 
+        @ModelAttribute EventRequest request
+    ) {
+        ErrorCollector ec = new ErrorCollector();
+
+        // verify data type
+        ec.validate(request, validator);
+        
+        if(ec.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(ec.getErrorMessage()));
+        }
+
+        // call service
+        ServiceResponse<Event> resEvent = eventService.modifyEvent(eventId, request);
+
+        if (!resEvent.isSuccess()) {
+            ec.add(resEvent.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ResponseFactory.fail(resEvent.getMessage()));
+        }
+
+        Event savedEvent = resEvent.getData();
+
+        // pick up response data
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", savedEvent.getId());
+        data.put("eventName", savedEvent.getEventName());
+        data.put("announceTime", savedEvent.getAnnounceTime());
+        data.put("startTime", savedEvent.getStartTime());
+        data.put("EstablishedBy", savedEvent.getEstablishedBy());
+        data.put("mediaType", savedEvent.getEventMedia().getMediaType());
+        data.put("mediaData", savedEvent.getEventMedia().getMediaData());
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<ApiRes<Boolean>> deleteEventById(
+        @PathVariable Integer eventId
+    ) {
+        ServiceResponse<Boolean> res = eventService.deleteEventById(eventId);
+
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // =================================================================
     // 查詢所有活動======================================================
     // =================================================================
+    @GetMapping("/{eventId}")
+    public ResponseEntity<ApiRes<Map<String, Object>>> getEventById(
+        @PathVariable Integer eventId
+    ) {
+        
+        Event foundEvent = eventService.findEventById(eventId);
+        if(foundEvent == null) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail("找不到相關活動"));
+        }
+
+        EventMedia foundMedia = foundEvent.getEventMedia();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", foundEvent.getId());
+        data.put("eventName", foundEvent.getEventName());
+        data.put("minSpend", foundEvent.getMinSpend());
+        data.put("maxEntries", foundEvent.getMaxEntries());
+        data.put("announceTime", foundEvent.getAnnounceTime());
+        data.put("startTime", foundEvent.getStartTime());
+        data.put("endTime", foundEvent.getEndTime());
+        data.put("EstablishedBy", foundEvent.getEstablishedBy());
+        if(foundMedia != null) {
+            data.put("mediaType", foundMedia.getMediaType());
+            data.put("mediaData", foundMedia.getMediaData());
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(data));
+    }
+    
+    
+    
+    
+    
+    
     @PostMapping("/findAll")
     public ResponseEntity<ApiRes<Map<String, Object>>> findAllEvents(
         @RequestBody EventQuery query) {

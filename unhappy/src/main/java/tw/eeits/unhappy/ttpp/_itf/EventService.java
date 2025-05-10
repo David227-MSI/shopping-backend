@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
+import tw.eeits.unhappy.ttpp.event.dto.EventRequest;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
 import tw.eeits.unhappy.ttpp.event.model.EventPrize;
@@ -45,6 +46,33 @@ public interface EventService {
      */
     ServiceResponse<EventPrize> addEventPrize(EventPrize prize);
     // 建立活動相關======================================================
+    
+    
+    
+    
+    // 修改相關==========================================================
+    /**
+     * @brief         修改活動
+     * @param eventId 活動ID
+     * @param request 修改的欄位資訊
+     * @return        ServiceResponse封包
+     */
+    ServiceResponse<Event> modifyEvent(Integer eventId, EventRequest request);
+    // 修改相關==========================================================
+
+
+
+
+
+
+    // 刪除相關==========================================================
+    /**
+     * @brief    以活動ID刪除指定活動
+     * @param id 活動ID
+     * @return   ServicePesponse封包
+     */
+    ServiceResponse<Boolean> deleteEventById(Integer id);
+    // 刪除相關==========================================================
 
 
 

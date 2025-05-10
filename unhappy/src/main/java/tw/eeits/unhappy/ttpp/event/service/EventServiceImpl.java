@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
+import tw.eeits.unhappy.ttpp.event.dto.EventRequest;
 import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.model.Event;
 import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
@@ -141,6 +143,144 @@ public class EventServiceImpl implements EventService {
     // =================================================================
     // 建立活動相關======================================================
     // =================================================================
+
+
+
+
+
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<Event> modifyEvent(
+        Integer eventId, 
+        EventRequest request
+    ) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        Event foundEvent = eventRepository.findById(eventId).orElse(null);
+        if (foundEvent == null) {
+            ec.add("找不到相關活動");
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        if (request == null) {
+            ec.add("請輸入修改資訊");
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        LocalDateTime newStartTime = request.getStartTime() != null ? request.getStartTime() : foundEvent.getStartTime();
+        LocalDateTime newAnnounceTime = request.getAnnounceTime() != null ? request.getAnnounceTime() : foundEvent.getAnnounceTime();
+        LocalDateTime newEndTime = request.getEndTime() != null ? request.getEndTime() : foundEvent.getEndTime();
+
+        if (newStartTime.isBefore(LocalDateTime.now())) {
+            ec.add("活動開始時間不能早於現在時間");
+        }
+        if (newAnnounceTime.isBefore(LocalDateTime.now())) {
+            ec.add("活動宣告時間不能早於現在時間");
+        }
+        if (newAnnounceTime.isAfter(newStartTime)) {
+            ec.add("活動宣告時間不能晚於活動開始時間");
+        }
+        if (newEndTime.isBefore(newStartTime)) {
+            ec.add("活動結束時間不能早於開始時間");
+        }
+
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+
+        // service operation
+        // edit event
+        if (request.getEventName() != null) {
+            foundEvent.setEventName(request.getEventName());
+        }
+        if (request.getMinSpend() != null) {
+            foundEvent.setMinSpend(request.getMinSpend());
+        }
+        if (request.getMaxEntries() != null) {
+            foundEvent.setMaxEntries(request.getMaxEntries());
+        }
+        if (request.getStartTime() != null) {
+            foundEvent.setStartTime(request.getStartTime());
+        }
+        if (request.getEndTime() != null) {
+            foundEvent.setEndTime(request.getEndTime());
+        }
+        if (request.getAnnounceTime() != null) {
+            foundEvent.setAnnounceTime(request.getAnnounceTime());
+        }
+        if (request.getEstablishedBy() != null) {
+            foundEvent.setEstablishedBy(request.getEstablishedBy());
+        }
+
+        // edit media
+        EventMedia foundmedia = foundEvent.getEventMedia();
+        if (foundmedia == null) {
+            ec.add("活動缺少關聯的媒體資料");
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        if (request.getMediaType() != null) {
+            foundmedia.setMediaType(request.getMediaType());
+        }
+        if (request.getMediaData() != null) {
+            MultipartFile file = request.getMediaData();
+            if (file.isEmpty()) {
+                ec.add("上傳的檔案為空");
+            } else if (file.getSize() > 5 * 1024 * 1024) { // 限制 5MB
+                ec.add("媒體檔案大小超過限制（5MB）");
+            } else {
+                try {
+                    foundmedia.setMediaData(file.getBytes());
+                } catch (IOException e) {
+                    ec.add("處理媒體檔案時發生錯誤");
+                }
+            }
+        }
+
+        if (ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // save 
+        try {
+            Event savedEvent = eventRepository.save(foundEvent);
+            mediaRepository.save(foundmedia);
+            return ServiceResponse.success(savedEvent);
+        } catch (DataAccessException e) {
+            return ServiceResponse.fail("資料庫操作失敗");
+        } catch (Exception e) {
+            return ServiceResponse.fail("修改活動時發生未知錯誤");
+        }
+    }
+
+    // =================================================================
+    // 修改相關==========================================================
+    // =================================================================
+
+
+
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+    @Override
+    public ServiceResponse<Boolean> deleteEventById(Integer id) {
+        try {
+            eventRepository.deleteById(id);
+            return ServiceResponse.success(true);
+        } catch (Exception e) {
+            return ServiceResponse.fail("刪除活動發生異常: " + e);
+        }
+    }
+    // =================================================================
+    // 刪除相關==========================================================
+    // =================================================================
+
+
 
 
 

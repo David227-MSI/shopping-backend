@@ -290,6 +290,10 @@ public class ProductServiceImpl implements ProductService {
         return products;
     }
 
+    @Override
+    public List<Product> findAllForSelector() {
+        return productRepository.findAll();
+    }
 
     /**
      * 將 Product Entity 轉換為 ProductDTO

@@ -119,4 +119,14 @@ public class ProductController {
         return productService.getRecommendedProducts(id);
     }
 
+
+
+
+    // ttpp
+    @GetMapping("/productSelector")
+    public ResponseEntity<ApiRes<List<Product>>> productSelector() {
+         List<Product> foundProducts = productService.findAllForSelector();
+        return ResponseEntity.ok(ResponseFactory.success(foundProducts));
+    }
+
 }

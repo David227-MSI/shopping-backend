@@ -38,5 +38,6 @@ public interface ProductService {
 
     // ttpp
     public List<Product> findByIds(List<Integer> ids);
+    public List<Product> findAllForSelector();
 
 }
