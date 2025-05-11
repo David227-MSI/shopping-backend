@@ -370,7 +370,6 @@ public class EventServiceImpl implements EventService {
             return ServiceResponse.fail(ec.getErrorMessage());
         }
 
-
         // service operation
         // check the total amount user paid
         BigDecimal totalSpend = orderRepository.sumTotalAmountByUserIdAndPaidAtBetween(
