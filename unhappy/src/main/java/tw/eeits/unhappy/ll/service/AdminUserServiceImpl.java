@@ -25,7 +25,6 @@ import tw.eeits.unhappy.ll.repository.AdminUserRepository;
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
-    
     private final AdminUserRepository adminUserRepository;
     private final AdminLoginLogRepository adminLoginLogRepository;
     private final PasswordEncoder passwordEncoder;
@@ -137,6 +136,25 @@ public class AdminUserServiceImpl implements AdminUserService {
         return new LoginResult(user, isFirstLogin);
     }
 
+    // @Override
+    // public void changePassword(Integer userId, ChangePasswordRequest request) {
+    // AdminUser user = adminUserRepository.findById(userId)
+    // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+    // "使用者不存在"));
+
+    // // 若已登入過，驗證原密碼（第一次登入不檢查）
+    // if (user.getFirstLoginAt() != null && request.getOldPassword() != null) {
+    // if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+    // throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "原密碼錯誤");
+    // }
+    // }
+
+    // user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    // user.setUpdatedAt(LocalDateTime.now());
+
+    // adminUserRepository.save(user);
+    // }
+
     @Override
     public void changePassword(Integer userId, ChangePasswordRequest request) {
         AdminUser user = adminUserRepository.findById(userId)
@@ -151,6 +169,11 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setUpdatedAt(LocalDateTime.now());
+
+        // ✅ 若尚未登入過（首次登入）→ 設定首次登入時間
+        if (user.getFirstLoginAt() == null) {
+            user.setFirstLoginAt(LocalDateTime.now());
+        }
 
         adminUserRepository.save(user);
     }
