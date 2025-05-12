@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
+import tw.eeits.unhappy.eee.repository.UserMemberRepository;
 import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
@@ -25,6 +26,7 @@ import tw.eeits.unhappy.ttpp.notification.repository.NotificationTemplateReposit
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationTemplateRepository templateRepository;
     private final NotificationPublishedRepository publishedRepository;
+    private final UserMemberRepository userMemberRepository;
     private final Validator validator;
 
 
@@ -217,6 +219,32 @@ public class NotificationServiceImpl implements NotificationService {
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
+    @Override
+    public ServiceResponse<Integer> getUnreadNotificationCount(Integer userId) {
+        ErrorCollector ec = new ErrorCollector();
+
+        UserMember foundUser = null;
+        if(userId == null) {
+            ec.add("找不到用戶ID");
+        } else {
+            foundUser = userMemberRepository.findById(userId).orElse(null);
+            if(foundUser == null) {ec.add("找不到用戶資訊");}
+        }
+
+        if(ec.hasErrors()) {
+            return ServiceResponse.fail(ec.getErrorMessage());
+        }
+
+        // service operation
+        try {
+            Integer res = publishedRepository.countByUserMemberIdAndIsRead(userId, false);
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢通知次數發生異常: " + e);
+        }
+
+    }
+    
     @Override
     public NotificationTemplate findTemplateById(Integer id) {
         return templateRepository.findById(id).orElse(null);

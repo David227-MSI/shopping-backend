@@ -44,12 +44,6 @@ public class NotificationPublished {
     // @NotNull(message = "userId 不可為空值")
     // private Integer userId; // fk
 
-
-
-
-
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

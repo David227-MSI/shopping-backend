@@ -71,6 +71,13 @@ public interface NotificationService {
 
     // 基本查詢相關======================================================
     /**
+     * @brief        查詢用戶未讀通知數量
+     * @param userId 用戶ID
+     * @return       ServiceResponse封包
+     */
+    ServiceResponse<Integer> getUnreadNotificationCount(Integer userId);
+
+    /**
      * @brief    以ID查詢通知訊息的模板
      * @param id 模板 ID
      * @return   查詢成功: 模板 / 查詢失敗: Null

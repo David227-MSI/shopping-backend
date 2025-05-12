@@ -42,6 +42,24 @@ public class NotificationUserController {
     // =================================================================
     // 基本查詢相關======================================================
     // =================================================================
+
+    @GetMapping("/unread/{userId}")
+    public ResponseEntity<ApiRes<Integer>> getUnreadNotificationCount(
+        @PathVariable Integer userId
+    ) {
+
+        // call service
+        ServiceResponse<Integer> res = notificationService.getUnreadNotificationCount(userId);
+        
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+
+
     @GetMapping("/templates/{id}")
     public ResponseEntity<ApiRes<NotificationTemplate>> findTemplateById(@PathVariable Integer id) {
         NotificationTemplate foundEntry = notificationService.findTemplateById(id);

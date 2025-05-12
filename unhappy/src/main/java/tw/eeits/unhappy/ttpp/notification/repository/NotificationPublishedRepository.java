@@ -21,6 +21,7 @@ import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 @Repository
 public interface NotificationPublishedRepository extends JpaRepository<NotificationPublished, Integer>, JpaSpecificationExecutor<NotificationPublished> {
 
+    Integer countByUserMemberIdAndIsRead(Integer userMemberId, Boolean isRead);
 
     void deleteByUserMember(UserMember userMember);
 
