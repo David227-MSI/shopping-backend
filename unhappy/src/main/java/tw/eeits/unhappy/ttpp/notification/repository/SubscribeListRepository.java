@@ -17,5 +17,6 @@ public interface SubscribeListRepository extends JpaRepository<SubscribeList, In
 
     List<SubscribeList> findByUserMemberAndItemTypeAndIsSubscribing(UserMember userMember, ItemType itemType, Boolean isSubscribing);
 
+    Boolean existsByUserMemberIdAndItemTypeAndItemIdAndIsSubscribing(Integer userMemberId, ItemType itemType, Integer itemId, Boolean isSubscribing);
     
 }

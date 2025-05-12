@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.repository.UserMemberRepository;
@@ -20,6 +21,7 @@ import tw.eeits.unhappy.ll.repository.BrandRepository;
 import tw.eeits.unhappy.ttpp._itf.SubscribeListService;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
+import tw.eeits.unhappy.ttpp.notification.dto.SubscribeListRequest;
 import tw.eeits.unhappy.ttpp.notification.dto.SubscribeQuery;
 import tw.eeits.unhappy.ttpp.notification.enums.ItemType;
 import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
@@ -33,6 +35,7 @@ public class SubScribeServiceImpl implements SubscribeListService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
     private final UserMemberRepository userMemberRepository;
+    private final Validator validator;
 
     // =================================================================
     // 建立相關==========================================================
@@ -92,6 +95,26 @@ public class SubScribeServiceImpl implements SubscribeListService {
     // =================================================================
     // 建立相關==========================================================
     // =================================================================
+    
+    @Override
+    public ServiceResponse<Boolean> getSubscribeStatus(SubscribeListRequest request) {
+        ErrorCollector ec = new ErrorCollector();
+
+        ec.validate(request, validator);
+
+        // service operation
+        try {
+            Boolean res = subscribeListRepository.existsByUserMemberIdAndItemTypeAndItemIdAndIsSubscribing(
+                    request.getUserId(), 
+                    request.getItemType(), 
+                    request.getItemId(), 
+                    true
+            );
+            return ServiceResponse.success(res);
+        } catch (Exception e) {
+            return ServiceResponse.fail("查詢追蹤狀態發生異常: " + e);
+        }
+    }
 
 
 

@@ -94,6 +94,30 @@ public class SubscribeListController {
         return ResponseEntity.ok(ResponseFactory.success(data));
     }
 
+
+    @PostMapping("/getSubscribeStatus")
+    public ResponseEntity<ApiRes<Boolean>> postMethodName(
+        @RequestBody SubscribeListRequest request
+    ) {
+
+        ErrorCollector ec = new ErrorCollector();
+
+        ec.validate(request, validator);
+
+        // call service
+        ServiceResponse<Boolean> res = subscribeService.getSubscribeStatus(request);
+            
+        if(!res.isSuccess()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ResponseFactory.fail(res.getMessage()));
+        }
+
+        return ResponseEntity.ok(ResponseFactory.success(res.getData()));
+    }
+    
+
+
+
     
     @PostMapping("/query/12")
     public ResponseEntity<ApiRes<Map<String, Object>>> findSubscribeProducts(
