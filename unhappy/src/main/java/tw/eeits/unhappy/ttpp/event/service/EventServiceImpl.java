@@ -62,12 +62,12 @@ public class EventServiceImpl implements EventService {
         }
 
         // service logic
-        if(event.getStartTime().isBefore(LocalDateTime.now())) {
-            ec.add("活動開始時間不能早於現在時間");
-        } 
-        if(event.getAnnounceTime().isBefore(LocalDateTime.now())) {
-            ec.add("活動宣告時間不能早於現在時間");
-        }
+        // if(event.getStartTime().isBefore(LocalDateTime.now())) {
+        //     ec.add("活動開始時間不能早於現在時間");
+        // } 
+        // if(event.getAnnounceTime().isBefore(LocalDateTime.now())) {
+        //     ec.add("活動宣告時間不能早於現在時間");
+        // }
         if(event.getAnnounceTime().isAfter(event.getStartTime())) {
             ec.add("活動宣告時間不能晚於活動開始時間");
         }
@@ -175,12 +175,12 @@ public class EventServiceImpl implements EventService {
         LocalDateTime newAnnounceTime = request.getAnnounceTime() != null ? request.getAnnounceTime() : foundEvent.getAnnounceTime();
         LocalDateTime newEndTime = request.getEndTime() != null ? request.getEndTime() : foundEvent.getEndTime();
 
-        if (newStartTime.isBefore(LocalDateTime.now())) {
-            ec.add("活動開始時間不能早於現在時間");
-        }
-        if (newAnnounceTime.isBefore(LocalDateTime.now())) {
-            ec.add("活動宣告時間不能早於現在時間");
-        }
+        // if (newStartTime.isBefore(LocalDateTime.now())) {
+        //     ec.add("活動開始時間不能早於現在時間");
+        // }
+        // if (newAnnounceTime.isBefore(LocalDateTime.now())) {
+        //     ec.add("活動宣告時間不能早於現在時間");
+        // }
         if (newAnnounceTime.isAfter(newStartTime)) {
             ec.add("活動宣告時間不能晚於活動開始時間");
         }

@@ -294,7 +294,7 @@ public class EventAdminController {
         data.put("eventName", savedEvent.getEventName());
         data.put("announceTime", savedEvent.getAnnounceTime());
         data.put("startTime", savedEvent.getStartTime());
-        data.put("EstablishedBy", savedEvent.getEstablishedBy());
+        data.put("establishedBy", savedEvent.getEstablishedBy());
         data.put("mediaType", savedEvent.getEventMedia().getMediaType());
         data.put("mediaData", savedEvent.getEventMedia().getMediaData());
 
@@ -394,7 +394,7 @@ public class EventAdminController {
         data.put("announceTime", foundEvent.getAnnounceTime());
         data.put("startTime", foundEvent.getStartTime());
         data.put("endTime", foundEvent.getEndTime());
-        data.put("EstablishedBy", foundEvent.getEstablishedBy());
+        data.put("establishedBy", foundEvent.getEstablishedBy());
         if(foundMedia != null) {
             data.put("mediaType", foundMedia.getMediaType());
             data.put("mediaData", foundMedia.getMediaData());
@@ -445,6 +445,7 @@ public class EventAdminController {
             mp.put("eventName", event.getEventName());
             mp.put("startTime", event.getStartTime());
             mp.put("endTime", event.getEndTime());
+            mp.put("establishedBy", event.getEstablishedBy());
             mp.put("announceTime", event.getAnnounceTime());
             mp.put("eventPrizeList", event.getEventPrize());
             mp.put("eventMedia", event.getEventMedia());

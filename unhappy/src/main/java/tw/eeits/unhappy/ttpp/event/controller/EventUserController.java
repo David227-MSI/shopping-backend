@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
 import tw.eeits.unhappy.ttpp._itf.EventService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
@@ -24,10 +22,7 @@ import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.event.dto.EventParticipantRequest;
 import tw.eeits.unhappy.ttpp.event.dto.EventQuery;
-import tw.eeits.unhappy.ttpp.event.enums.ParticipateStatus;
 import tw.eeits.unhappy.ttpp.event.model.Event;
-import tw.eeits.unhappy.ttpp.event.model.EventParticipant;
-import tw.eeits.unhappy.ttpp.event.model.EventPrize;
 
 
 @RestController

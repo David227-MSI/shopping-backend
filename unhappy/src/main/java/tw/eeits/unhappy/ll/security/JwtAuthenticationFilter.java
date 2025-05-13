@@ -40,7 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/admin/brands",
             "/api/admin/contact",
             "/api/admin/sales-report",
-            "/api/admin/coupons");
+            "/api/admin/coupons",
+            "/api/admin/notifications",
+            "/api/admin/events");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
