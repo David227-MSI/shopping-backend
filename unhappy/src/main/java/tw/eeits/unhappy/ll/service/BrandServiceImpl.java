@@ -1,14 +1,9 @@
 package tw.eeits.unhappy.ll.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +25,9 @@ public class BrandServiceImpl implements BrandService {
     @Autowired
     private BrandRepository brandRepository;
 
+    @Autowired
+    private BrandMediaService brandMediaService;
+
     @Override
     public Brand create(Brand brand) {
         if (brand.getValidReportCount() == null) {
@@ -40,10 +38,34 @@ public class BrandServiceImpl implements BrandService {
                 .orElseThrow(() -> new RuntimeException("儲存後找不到品牌資料"));
     }
 
+    // @Override
+    // public void createBrandWithPhoto(BrandRequest dto, MultipartFile photo) {
+    // Brand brand = new Brand();
+
+    // brand.setName(dto.getName());
+    // brand.setType(dto.getType());
+    // brand.setTaxId(dto.getTaxId());
+    // brand.setAddress(dto.getAddress());
+    // brand.setEmail(dto.getEmail());
+    // brand.setPhone(dto.getPhone());
+    // brand.setFax(dto.getFax());
+    // brand.setContactName(dto.getContactName());
+    // brand.setContactEmail(dto.getContactEmail());
+    // brand.setContactPhone(dto.getContactPhone());
+    // brand.setStatus(BrandStatus.ACTIVE); // 預設為 ACTIVE
+    // brand.setValidReportCount(0);
+
+    // if (photo != null && !photo.isEmpty()) {
+    // String savedPath = savePhotoFile(photo);
+    // brand.setPhoto(savedPath);
+    // }
+
+    // brandRepository.save(brand);
+    // }
+
     @Override
     public void createBrandWithPhoto(BrandRequest dto, MultipartFile photo) {
         Brand brand = new Brand();
-
         brand.setName(dto.getName());
         brand.setType(dto.getType());
         brand.setTaxId(dto.getTaxId());
@@ -54,15 +76,20 @@ public class BrandServiceImpl implements BrandService {
         brand.setContactName(dto.getContactName());
         brand.setContactEmail(dto.getContactEmail());
         brand.setContactPhone(dto.getContactPhone());
-        brand.setStatus(BrandStatus.ACTIVE); // 預設為 ACTIVE
+        brand.setStatus(BrandStatus.ACTIVE);
         brand.setValidReportCount(0);
 
-        if (photo != null && !photo.isEmpty()) {
-            String savedPath = savePhotoFile(photo);
-            brand.setPhoto(savedPath);
-        }
+        Brand saved = brandRepository.save(brand); // 先存 brand，拿到 id
 
-        brandRepository.save(brand);
+        if (photo != null && !photo.isEmpty()) {
+            try {
+                String savedPath = brandMediaService.uploadLogo(saved.getId(), photo);
+                saved.setPhoto(savedPath);
+                brandRepository.save(saved); // 第二次儲存，更新 photo 路徑
+            } catch (IOException e) {
+                throw new RuntimeException("圖片上傳失敗", e);
+            }
+        }
     }
 
     @Override
@@ -86,6 +113,36 @@ public class BrandServiceImpl implements BrandService {
         brandRepository.save(existing);
     }
 
+    // @Override
+    // public void updateBrandWithPhoto(Integer id, BrandRequest dto, MultipartFile
+    // photo) {
+    // Brand brand = brandRepository.findById(id)
+    // .orElseThrow(() -> new RuntimeException("找不到品牌"));
+
+    // brand.setName(dto.getName());
+    // brand.setType(dto.getType());
+    // brand.setTaxId(dto.getTaxId());
+    // brand.setAddress(dto.getAddress());
+    // brand.setEmail(dto.getEmail());
+    // brand.setPhone(dto.getPhone());
+    // brand.setFax(dto.getFax());
+    // brand.setContactName(dto.getContactName());
+    // brand.setContactEmail(dto.getContactEmail());
+    // brand.setContactPhone(dto.getContactPhone());
+    // brand.setStatus(dto.getStatus()); // 狀態從 DTO 來
+
+    // if (brand.getStatus() == null) {
+    // brand.setStatus(BrandStatus.ACTIVE);
+    // }
+
+    // if (photo != null && !photo.isEmpty()) {
+    // String savedPath = savePhotoFile(photo);
+    // brand.setPhoto(savedPath);
+    // }
+
+    // brandRepository.save(brand);
+    // }
+
     @Override
     public void updateBrandWithPhoto(Integer id, BrandRequest dto, MultipartFile photo) {
         Brand brand = brandRepository.findById(id)
@@ -101,33 +158,34 @@ public class BrandServiceImpl implements BrandService {
         brand.setContactName(dto.getContactName());
         brand.setContactEmail(dto.getContactEmail());
         brand.setContactPhone(dto.getContactPhone());
-        brand.setStatus(dto.getStatus()); // 狀態從 DTO 來
-
-        if (brand.getStatus() == null) {
-            brand.setStatus(BrandStatus.ACTIVE);
-        }
+        brand.setStatus(dto.getStatus() != null ? dto.getStatus() : BrandStatus.ACTIVE);
 
         if (photo != null && !photo.isEmpty()) {
-            String savedPath = savePhotoFile(photo);
-            brand.setPhoto(savedPath);
+            try {
+                String savedPath = brandMediaService.uploadLogo(brand.getId(), photo);
+                brand.setPhoto(savedPath);
+            } catch (IOException e) {
+                throw new RuntimeException("圖片上傳失敗", e);
+            }
         }
 
         brandRepository.save(brand);
     }
 
-    private String savePhotoFile(MultipartFile photo) {
-        try {
-            String filename = UUID.randomUUID() + "_" + photo.getOriginalFilename();
-            Path path = Paths.get("uploads/brands");
-            Files.createDirectories(path);
-            Path filepath = path.resolve(filename);
-            Files.copy(photo.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+    // private String savePhotoFile(MultipartFile photo) {
+    // try {
+    // String filename = UUID.randomUUID() + "_" + photo.getOriginalFilename();
+    // Path path = Paths.get("uploads/brands");
+    // Files.createDirectories(path);
+    // Path filepath = path.resolve(filename);
+    // Files.copy(photo.getInputStream(), filepath,
+    // StandardCopyOption.REPLACE_EXISTING);
 
-            return "/uploads/brands/" + filename; // 儲存的是相對路徑
-        } catch (IOException e) {
-            throw new RuntimeException("圖片上傳失敗", e);
-        }
-    }
+    // return "/uploads/brands/" + filename; // 儲存的是相對路徑
+    // } catch (IOException e) {
+    // throw new RuntimeException("圖片上傳失敗", e);
+    // }
+    // }
 
     @Override
     public BrandResponse findById(Integer id) {
@@ -162,7 +220,6 @@ public class BrandServiceImpl implements BrandService {
         response.setUpdatedAt(brand.getUpdatedAt());
         return response;
     }
-
 
     @Override
     public Brand findBrandById(Integer id) {
