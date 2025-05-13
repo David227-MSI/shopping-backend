@@ -354,7 +354,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public ServiceResponse<Map<String, Object>> checkEligibility(
-        EventParticipantRequest request
+            EventParticipantRequest request
     ) {
 
         ErrorCollector ec = new ErrorCollector();
@@ -362,7 +362,7 @@ public class EventServiceImpl implements EventService {
         // check event and prize
         Event foundEvent = eventRepository.findById(request.getEventId()).orElse(null);
         EventPrize foundPrize = prizeRepository.findById(request.getPrizeId()).orElse(null);
-        
+
         if(foundEvent == null) {ec.add("找不到目標活動");}
         if(foundPrize == null) {ec.add("找不到目標獎品");}
 
@@ -381,7 +381,13 @@ public class EventServiceImpl implements EventService {
 
         // compute max allow entries
         BigDecimal minSpend = foundEvent.getMinSpend();
-        int maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+        int maxAllowedEntries = 0;
+
+        if(minSpend.compareTo(BigDecimal.ZERO) > 0 ) {
+            maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+        } else {
+            maxAllowedEntries = 150; // 如果沒有低消，預設可參加次數
+        }
 
         // check participated times
         int participatedTimes = participantRepository.countByUserMemberIdAndEventId(
@@ -391,11 +397,13 @@ public class EventServiceImpl implements EventService {
 
         int remainingEntries = Math.max(0, maxAllowedEntries - participatedTimes);
 
-        // compute how much more amount is needed to get next entry
-        BigDecimal spentInCurrentEntry = totalSpend.remainder(minSpend);
-        BigDecimal amountToNextEntry = (spentInCurrentEntry.compareTo(BigDecimal.ZERO) == 0 && remainingEntries > 0)
-                ? BigDecimal.ZERO
-                : minSpend.subtract(spentInCurrentEntry);
+        BigDecimal amountToNextEntry = BigDecimal.ZERO; // 初始化為 0
+
+        // compute how much more amount is needed to get next entry (只有在有低消時才計算)
+        if (minSpend.compareTo(BigDecimal.ZERO) > 0 && remainingEntries <= 0) {
+            BigDecimal spentInCurrentEntry = totalSpend.remainder(minSpend);
+            amountToNextEntry = minSpend.subtract(spentInCurrentEntry);
+        }
 
         // check eligible
         boolean eligible = remainingEntries > 0;
@@ -406,6 +414,7 @@ public class EventServiceImpl implements EventService {
         data.put("participatedTimes", participatedTimes);
         data.put("remainingEntries", remainingEntries);
         data.put("totalSpend", totalSpend);
+        data.put("remainingSlots", foundPrize.getRemainingSlots());
         data.put("amountToNextEntry", amountToNextEntry);
 
         return ServiceResponse.success(data);
@@ -485,7 +494,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public ServiceResponse<Map<String, Object>> attendEvent(EventParticipantRequest request) {
-        
+
         ErrorCollector ec = new ErrorCollector();
 
         Event foundEvent = eventRepository.findById(request.getEventId()).orElse(null);
@@ -504,7 +513,6 @@ public class EventServiceImpl implements EventService {
             return ServiceResponse.fail(ec.getErrorMessage());
         }
 
-
         // service operation
         // compute participatedTimes and maxAllowedEntries
         BigDecimal totalSpend = orderRepository.sumTotalAmountByUserIdAndPaidAtBetween(
@@ -512,7 +520,13 @@ public class EventServiceImpl implements EventService {
         if (totalSpend == null) totalSpend = BigDecimal.ZERO;
 
         BigDecimal minSpend = foundEvent.getMinSpend();
-        int maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+        int maxAllowedEntries = 0;
+
+        if (minSpend.compareTo(BigDecimal.ZERO) > 0) {
+            maxAllowedEntries = totalSpend.divide(minSpend, 0, RoundingMode.FLOOR).intValue();
+        } else {
+            maxAllowedEntries = 150; // 與 checkEligibility 保持一致
+        }
 
         int participatedTimes = participantRepository.countByUserMemberIdAndEventId(
                 request.getUserId(), request.getEventId());
@@ -541,10 +555,17 @@ public class EventServiceImpl implements EventService {
             prizeRepository.save(foundPrize);
         }
 
+        // 重新計算剩餘抽獎次數
+        int currentParticipatedTimes = participantRepository.countByUserMemberIdAndEventId(
+                request.getUserId(), request.getEventId());
+        int remainingEntries = Math.max(0, maxAllowedEntries - currentParticipatedTimes);
+
         Map<String, Object> data = new HashMap<>();
         data.put("participantId", savedEntry.getId());
         data.put("status", finalStatus);
         data.put("prizeTitle", foundPrize.getTitle());
+        data.put("remainingSlots", foundPrize.getRemainingSlots());
+        data.put("remainingEntries", remainingEntries); // 回傳剩餘抽獎次數
 
         return ServiceResponse.success(data);
     }
