@@ -32,8 +32,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     // // 計算活動期間特定用戶總消費
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o " +
-        "WHERE o.userMember.id = :userId AND o.paidAt BETWEEN :start AND :end " +
-        "AND o.paymentStatus = 'PAID'")
+        "WHERE o.userMember.id = :userId AND o.createdAt BETWEEN :start AND :end " +
+        "AND o.status = 'PENDING'")
     BigDecimal sumTotalAmountByUserIdAndPaidAtBetween(
         @Param("userId") Integer userId,
         @Param("start") LocalDateTime start,
