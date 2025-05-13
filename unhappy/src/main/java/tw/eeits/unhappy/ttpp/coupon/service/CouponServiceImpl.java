@@ -296,7 +296,6 @@ public class CouponServiceImpl implements CouponService {
                 });
 
 
-
             return ServiceResponse.success(validCoupons);
         } catch (Exception e) {
             return ServiceResponse.fail("查詢優惠券清單發生異常: " + e);
