@@ -45,6 +45,10 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductMediaService productMediaService;
 
+      @Override
+    public List<Product> searchAllFields(String keyword) {
+        return productRepository.searchAllFields(keyword);
+    }
     /** 取得所有商品（無條件搜尋） */
     @Override
     @Transactional(readOnly = true)
@@ -68,7 +72,17 @@ public class ProductServiceImpl implements ProductService {
                         .map(this::convertToDTO)
                         .collect(Collectors.toList());
     }
-
+/** 全欄位關鍵字搜尋（名稱、品牌、分類、屬性） */
+@Override
+@Transactional(readOnly = true)
+public List<ProductDTO> searchByKeywordFullText(String keyword) {
+    log.info("Searching all fields with keyword: {}", keyword);
+    List<Product> products = productRepository.searchAllFields(keyword);
+    log.info("Found {} products by full-text search.", products.size());
+    return products.stream()
+                   .map(this::convertToDTO)
+                   .collect(Collectors.toList());
+}
     /** 取得單一商品（Optional 包裝，可避免 null） */
     @Override
     @Transactional(readOnly = true)

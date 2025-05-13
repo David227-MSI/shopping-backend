@@ -20,6 +20,12 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+      // 🔍 全欄位模糊搜尋（名稱、分類、品牌、屬性值）
+    @GetMapping("/search")
+    public List<Product> searchAllFields(@RequestParam("keyword") String keyword) {
+        return productService.searchAllFields(keyword);
+    }
+
     /** 取得所有商品或依條件搜尋商品（返回 DTO 列表） */
     @GetMapping
     // 【修正】返回類型改為 ResponseEntity<ApiRes<List<ProductDTO>>>
@@ -32,7 +38,12 @@ public class ProductController {
         // 將 DTO 列表包裝在 ApiRes 中並返回
         return ResponseEntity.ok(ResponseFactory.success(productDTOs));
     }
-
+/** 全欄位關鍵字搜尋（名稱、品牌、分類、父分類、屬性） */
+@GetMapping("/fullsearch")
+public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam String keyword) {
+    List<ProductDTO> results = productService.searchByKeywordFullText(keyword);
+    return ResponseEntity.ok(ResponseFactory.success(results));
+}
     /** 取得單一商品詳細資訊（包含圖片，返回 DTO） */
     @GetMapping("/{id}")
     public ResponseEntity<ApiRes<ProductDTO>> getProductById(@PathVariable Integer id) {
