@@ -79,9 +79,10 @@ public class ReviewController {
     }
 
     /* ---------- 前台：新增評論 ---------- */
-    @PostMapping(value = "/reviews/{orderItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+     @PostMapping(value = "/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 路徑改為 /reviews
     public ResponseEntity<ApiRes<Void>> addReview(
-            @PathVariable Integer orderItemId,
+            // 從請求參數中獲取 orderItemId
+            @RequestParam("orderItemId") Integer orderItemId,
             @RequestParam("userId") Integer userId,
             @RequestParam("reviewText") String reviewText,
             @RequestParam("scoreQuality") Integer scoreQuality,

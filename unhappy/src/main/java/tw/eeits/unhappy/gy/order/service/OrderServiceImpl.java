@@ -242,6 +242,7 @@ public class OrderServiceImpl implements OrderService {
         // 撈訂單明細
         List<OrderItemResponseDTO> itemDTOList = order.getOrderItems().stream()
                 .map(item -> OrderItemResponseDTO.builder()
+                        .orderItemId(item.getId())
                         .productId(item.getProduct().getId())
                         .productName(item.getProduct().getName())
                         .quantity(item.getQuantity())
