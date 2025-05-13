@@ -22,11 +22,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // 不需要登入的路徑 (白名單)
     private static final List<String> VISITOR_WHITELIST = List.of(
-            
-            "/api/admin/login",
-            // "/api/sales-report"
-            "/api/admin/coupons/getValidCoupon"
-            );
+
+            "/api/admin/login"
+    // "/api/admin/coupons"
+    );
 
     // 只需要有Token（不限角色）即可使用的API (例如: 改自己密碼)
     private static final List<String> AUTHENTICATED_API = List.of(
@@ -36,20 +35,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> MANAGER_ONLY_API = List.of(
             "/api/admin/users");
 
-
-
-
-
     // 允許 MANAGER 和 STAFF 都能操作的API (例如: 品牌管理、客服處理)
     private static final List<String> MANAGER_AND_STAFF_API = List.of(
             "/api/admin/brands",
             "/api/admin/contact",
-            "/api/admin/sales-report"
-            );
+            "/api/admin/sales-report",
+            "/api/admin/coupons");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        // System.out.println("JwtFilter 進來的方法：" + request.getMethod() + "，URI：" +
+        // request.getRequestURI());
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
         String path = request.getRequestURI();
         String method = request.getMethod();
@@ -107,8 +113,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isVisitorPath(String path, String method) {
-        // return "POST".equals(method) && VISITOR_WHITELIST.stream().anyMatch(path::startsWith);
-        return VISITOR_WHITELIST.stream().anyMatch(path::startsWith);   
+        // return "POST".equals(method) &&
+        // VISITOR_WHITELIST.stream().anyMatch(path::startsWith);
+        return VISITOR_WHITELIST.stream().anyMatch(path::startsWith);
     }
 
     private boolean isAuthenticatedPath(String path) {
@@ -123,22 +130,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return MANAGER_AND_STAFF_API.stream().anyMatch(path::startsWith);
     }
 
-
     // ttpp
     // 決定哪些API可以繞過攔截器
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        // 只攔截 /api/admin/* 開頭的 API
-        return !request.getRequestURI().startsWith("/api/admin/*");
-    }
-
-
-
-
+    // @Override
+    // protected boolean shouldNotFilter(HttpServletRequest request) {
+    // // 只攔截 /api/admin/* 開頭的 API
+    // return !request.getRequestURI().startsWith("/api/admin/*");
+    // }
 
 }
-
-
 
 // package tw.eeits.unhappy.ll.security;
 
