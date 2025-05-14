@@ -42,23 +42,44 @@ public class ProductMediaService {
                Integer order) throws IOException {
 
           log.info("Attempting to upload media for product ID: {}", productId);
-          // 0. 檔案大小驗證
+
+          // 0. 檔案大小和類型驗證
           if (file.getSize() > MAX_SIZE) {
                log.warn("File size exceeds limit for product ID {}. Size: {}", productId, file.getSize());
                throw new IllegalArgumentException("檔案大小不得超過 " + MAX_SIZE / 1024 / 1024 + " MB");
           }
 
+          // 【修正】根據檔案 Content Type 判斷媒體類型
+          String contentType = file.getContentType();
+          MediaType detectedMediaType;
+          if (contentType == null) {
+               log.warn("Uploaded file has no content type for product ID {}: {}", productId, file.getOriginalFilename());
+               throw new IllegalArgumentException("無法識別檔案類型");
+          } else if (contentType.startsWith("image/")) {
+               detectedMediaType = MediaType.IMAGE;
+               log.debug("Detected media type: IMAGE for file: {}", file.getOriginalFilename());
+          } else if (contentType.startsWith("video/")) {
+               detectedMediaType = MediaType.VIDEO;
+               log.debug("Detected media type: VIDEO for file: {}", file.getOriginalFilename());
+          } else {
+               log.warn("Unsupported file type uploaded for product ID {}: {}", productId, contentType);
+               throw new IllegalArgumentException("不支援的檔案類型: " + contentType);
+          }
+
+
           // 1. 儲存到雲端
           String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-          String path = "product-media/%d/%s.%s".formatted(productId, UUID.randomUUID(), ext);
+          // 使用原始副檔名，雲端儲存通常會根據 ContentType 正確處理
+          String path = "product-media/%d/%s%s".formatted(productId, UUID.randomUUID(), (ext != null && !ext.isEmpty() ? "." + ext : ""));
           String mediaUrl;
           try {
                log.info("Uploading file to storage: {}", path);
+               // 【修正】使用偵測到的 Content Type 進行上傳
                mediaUrl = storage.upload(
                          path,
                          file.getInputStream(),
                          file.getSize(),
-                         file.getContentType());
+                         contentType); // 使用實際的 Content Type
                log.info("File uploaded successfully: {}", mediaUrl);
           } catch (StorageException e) {
                log.error("Failed to upload file to storage: {}", path, e);
@@ -82,9 +103,10 @@ public class ProductMediaService {
           product.setId(productId);
           media.setProduct(product);
 
-          media.setMediaType(MediaType.IMAGE);
+          // 【修正】設定偵測到的媒體類型
+          media.setMediaType(detectedMediaType);
           media.setMediaUrl(mediaUrl);
-          media.setAltText("");
+          media.setAltText(FilenameUtils.getBaseName(file.getOriginalFilename())); // 使用檔名作為 Alt Text
           media.setMediaOrder(finalOrder);
           media.setIsMain(main);
 
@@ -105,20 +127,17 @@ public class ProductMediaService {
                ProductMedia savedMedia = repo.save(media);
                log.info("New media record saved successfully. ID: {}", savedMedia.getId());
 
-               // 【新增】如果設定為主圖，需要重新排序，將其移到第一位
+               // 如果設定為主圖，需要重新排序，將其移到第一位
                if (main) {
                     reorderMediaAfterMainSet(productId, savedMedia.getId());
-               } else {
-                    // 【新增】如果不是主圖，檢查是否需要重新排序（例如插入到指定位置）
-                    // 簡單起見，這裡只在設為主圖時觸發重新排序
-                    // 如果需要更精確的插入排序，需要在前端傳入更多信息並在這裡處理
                }
+               // 否則，如果不是主圖，則無需額外重新排序，其 order 在建立時已設定
 
                return savedMedia;
           } catch (DataAccessException e) {
                log.error("Failed to save media record to DB for product ID {}", productId, e);
                // 如果資料庫保存失敗，可能需要考慮刪除已經上傳到雲端的檔案
-               // storage.delete(path);
+               // storage.delete(path); // 這裡需要完整的 path
                throw new RuntimeException("保存媒體記錄失敗", e);
           } catch (Exception e) {
                log.error("Unexpected error during saving media record for product ID {}", productId, e);
@@ -126,7 +145,7 @@ public class ProductMediaService {
           }
      }
 
-     /** 【新增】批量上傳媒體 */
+     /** 批量上傳媒體 */
      @Transactional
      public List<ProductMedia> uploadBatch(Integer productId, List<MultipartFile> files) throws IOException {
           log.info("Attempting to upload batch media for product ID: {}. File count: {}", productId, files.size());
@@ -134,45 +153,69 @@ public class ProductMediaService {
 
           // 獲取當前媒體的最大 order，用於新上傳圖片的起始 order
           long currentMediaCount = repo.countByProductId(productId);
-          int startOrder = (int) currentMediaCount + 1;
+          int startOrder = (int) currentMediaCount; // 從當前數量開始編號 (0-based index)
           log.debug("Starting order for batch upload: {}", startOrder);
 
           List<ProductMedia> newlyUploadedMedia = new ArrayList<>(); // 儲存本次新上傳的媒體
 
           for (int i = 0; i < files.size(); i++) {
                MultipartFile file = files.get(i);
-               // 0. 檔案大小驗證
+
+               // 0. 檔案大小和類型驗證
                if (file.getSize() > MAX_SIZE) {
-                    log.warn("File size exceeds limit for product ID {} during batch upload. File: {}, Size: {}",
+                    log.warn("File size exceeds limit during batch upload for product ID {}. File: {}, Size: {}",
                               productId, file.getOriginalFilename(), file.getSize());
                     log.warn("Skipping file {} due to size limit.", file.getOriginalFilename());
-                    continue;
+                    continue; // 跳過此檔案
+               }
+
+               // 【修正】根據檔案 Content Type 判斷媒體類型
+               String contentType = file.getContentType();
+               MediaType detectedMediaType = null;
+               if (contentType == null) {
+                    log.warn("Batch uploaded file has no content type for product ID {}: {}. Skipping.",
+                             productId, file.getOriginalFilename());
+                    log.warn("Skipping file {} due to unidentified type.", file.getOriginalFilename());
+                    continue; // 跳過此檔案
+               } else if (contentType.startsWith("image/")) {
+                    detectedMediaType = MediaType.IMAGE;
+                    log.debug("Detected media type: IMAGE for batch file: {}", file.getOriginalFilename());
+               } else if (contentType.startsWith("video/")) {
+                    detectedMediaType = MediaType.VIDEO;
+                    log.debug("Detected media type: VIDEO for batch file: {}", file.getOriginalFilename());
+               } else {
+                    log.warn("Unsupported file type detected during batch upload for product ID {}: {}. Skipping.",
+                              productId, contentType);
+                    log.warn("Skipping file {} due to unsupported type.", file.getOriginalFilename());
+                    continue; // 跳過此檔案
                }
 
                // 1. 儲存到雲端
                String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-               String path = "product-media/%d/%s.%s".formatted(productId, UUID.randomUUID(), ext);
+               // 使用原始副檔名
+               String path = "product-media/%d/%s%s".formatted(productId, UUID.randomUUID(), (ext != null && !ext.isEmpty() ? "." + ext : ""));
                String mediaUrl;
                try {
                     log.info("Uploading batch file to storage: {}", path);
+                    // 【修正】使用偵測到的 Content Type 進行上傳
                     mediaUrl = storage.upload(
                               path,
                               file.getInputStream(),
                               file.getSize(),
-                              file.getContentType());
+                              contentType); // 使用實際的 Content Type
                     log.info("Batch file uploaded successfully: {}", mediaUrl);
                } catch (StorageException e) {
                     log.error("Failed to upload batch file to storage: {}", path, e);
                     log.error("Skipping file {} due to storage upload failure.", file.getOriginalFilename());
-                    continue;
+                    continue; // 跳過此檔案
                } catch (IOException e) {
                     log.error("Failed to read batch file input stream for upload: {}", path, e);
                     log.error("Skipping file {} due to read failure.", file.getOriginalFilename());
-                    continue;
+                    continue; // 跳過此檔案
                } catch (Exception e) {
                     log.error("Unexpected error during batch file upload: {}", path, e);
                     log.error("Skipping file {} due to unexpected error.", file.getOriginalFilename());
-                    continue;
+                    continue; // 跳過此檔案
                }
 
                // 2. 建立 ProductMedia 記錄
@@ -181,11 +224,12 @@ public class ProductMediaService {
                product.setId(productId);
                media.setProduct(product);
 
-               media.setMediaType(MediaType.IMAGE); // 假設批量上傳的都是圖片
+               // 【修正】設定偵測到的媒體類型
+               media.setMediaType(detectedMediaType);
                media.setMediaUrl(mediaUrl);
-               media.setAltText("");
+               media.setAltText(FilenameUtils.getBaseName(file.getOriginalFilename())); // 使用檔名作為 Alt Text
                media.setMediaOrder(startOrder + i); // 按照上傳順序設定 order
-               media.setIsMain(false); // 批量上傳的圖片預設不是主圖
+               media.setIsMain(false); // 批量上傳的媒體預設不是主圖
 
                // 3. 保存新的 ProductMedia 記錄
                try {
@@ -197,7 +241,7 @@ public class ProductMediaService {
                } catch (DataAccessException e) {
                     log.error("Failed to save media record to DB for product ID {} during batch upload.", productId, e);
                     // 如果資料庫保存失敗，可能需要考慮刪除已經上傳到雲端的檔案
-                    // storage.delete(path);
+                    // storage.delete(path); // 這裡需要完整的 path
                     log.error("Skipping file {} due to DB save failure.", file.getOriginalFilename());
                } catch (Exception e) {
                     log.error("Unexpected error during saving media record for product ID {} during batch upload.",
@@ -206,7 +250,7 @@ public class ProductMediaService {
                }
           }
 
-          // 【新增】批量上傳完成後，檢查並設定主圖
+          // 批量上傳完成後，檢查並設定主圖
           if (!newlyUploadedMedia.isEmpty()) {
                log.info("Batch upload finished, checking for main image for product ID {}", productId);
                // 檢查商品是否已經有主圖
@@ -215,7 +259,7 @@ public class ProductMediaService {
                if (existingMain.isEmpty()) {
                     log.info("No existing main image found for product ID {}. Setting the first newly uploaded media as main.",
                               productId);
-                    // 如果沒有主圖，將本次上傳的第一張圖片設為主圖
+                    // 如果沒有主圖，將本次上傳的第一個媒體設為主圖
                     ProductMedia firstUploaded = newlyUploadedMedia.get(0);
                     firstUploaded.setIsMain(true);
                     try {
@@ -232,14 +276,10 @@ public class ProductMediaService {
                                    firstUploaded.getId(), e);
                     }
                } else {
-                    log.info("Existing main image found for product ID {}. No new main image set automatically.",
+                    log.info("Existing main image found for product ID {}. No new main media set automatically.",
                               productId);
                     // 如果有主圖，不需要自動設定新的主圖
-                    // 但可能需要重新排序，確保新上傳的圖片有正確的 order
-                    // 由於 uploadBatch 已經按順序賦予 order，這裡通常不需要額外觸發 reorder，除非你需要將新上傳的圖片插入到特定位置
-                    // 如果需要確保所有圖片（包括舊的和新的）的 order 在批量上傳後是連續且主圖排第一，可以呼叫
-                    // reorderMediaAfterMainSet(productId, existingMain.get().getId());
-                    // 這裡我們選擇不自動重新排序，依賴前端 loadList 後的本地排序和保存
+                    // 由於 uploadBatch 已經按順序賦予 order，這裡通常不需要額外觸發 reorder
                }
           } else {
                log.warn("No media were successfully uploaded in the batch for product ID {}", productId);
@@ -267,29 +307,28 @@ public class ProductMediaService {
                }
           });
 
-          // 【新增】確保主圖的 order 是 1
+          // 確保主圖的 order 是 1
           Optional<ProductMedia> mainMedia = mediaList.stream().filter(ProductMedia::getIsMain).findFirst();
           if (mainMedia.isPresent()) {
                ProductMedia main = mainMedia.get();
+               // 如果主圖的 order 不是 1，則調整所有媒體的 order
                if (main.getMediaOrder() != 1) {
-                    log.info("Main media ID {} is not order 1, adjusting.", main.getId());
-                    // 將所有 order >= 1 的圖片 order + 1
-                    mediaList.stream()
-                              .filter(m -> m.getMediaOrder() >= 1 && !m.getId().equals(main.getId()))
-                              .forEach(m -> m.setMediaOrder(m.getMediaOrder() + 1));
-                    // 設定主圖 order 為 1
-                    main.setMediaOrder(1);
-                    log.info("Adjusted main media ID {} order to 1.", main.getId());
+                    log.info("Main media ID {} is not order 1, adjusting orders.", main.getId());
+                    // 將所有 order 大於等於 1 的圖片 order + 1
+                    // 注意：這裡應該根據新的排序結果來調整 order，而不是簡單地 +1
+                    // 更安全的做法是按照新的順序重新編號
+                    reorderMediaAfterMainSet(productId, main.getId()); // 呼叫已有的重新排序邏輯
+                    return; // 重新排序邏輯會保存，這裡直接返回
                }
           } else {
-               // 【新增】如果沒有主圖，將第一張圖片設為主圖（可選，根據業務需求）
+               log.warn("No main media found for product ID {} after reorder. Recommend setting one.", productId);
+               // 如果沒有主圖，可能需要考慮將第一張圖片設為主圖（可選）
                // 這裡我們選擇不自動設定主圖，讓使用者手動設定
-               log.warn("No main media found for product ID {} after reorder.", productId);
           }
 
-          // 保存所有變更
+          // 如果主圖已經是 order 1，或者沒有主圖，只需要保存更新了 order 的 media
           try {
-               log.info("Saving reordered media for product ID {}", productId);
+               log.info("Saving reordered media for product ID {} (after processing main). Count: {}", productId, mediaList.size());
                repo.saveAll(mediaList);
                log.info("Successfully saved reordered media for product ID {}", productId);
           } catch (DataAccessException e) {
@@ -302,6 +341,7 @@ public class ProductMediaService {
 
           log.info("Finished reordering media for product ID: {}", productId);
      }
+
 
      /** 刪除 media 並移除雲端檔案，再重新編號 */
      @Transactional
@@ -346,19 +386,19 @@ public class ProductMediaService {
                throw new RuntimeException("Unexpected error during media database deletion for ID " + id, e);
           }
 
-          // 【新增】刪除後重新排序剩餘 media，確保 mediaOrder 連續且主圖在第一位
+          // 刪除後重新排序剩餘 media，確保 mediaOrder 連續且主圖在第一位
           reorderMediaAfterDeletion(m.getProduct().getId());
 
           log.info("Finished deleting single media ID: {}", id);
      }
 
-     /** 【新增】刪除後重新排序剩餘 media */
+     /** 刪除後重新排序剩餘 media */
      @Transactional
      private void reorderMediaAfterDeletion(Integer productId) {
           log.info("Reordering remaining media for product ID {} after deletion.", productId);
           List<ProductMedia> remains = repo.findByProductId(productId);
 
-          // 【新增】將主圖移到列表最前面，然後按 mediaOrder 排序
+          // 將主圖移到列表最前面，然後按 mediaOrder 排序
           remains.sort((a, b) -> {
                if (a.getIsMain() && !b.getIsMain())
                     return -1;
@@ -413,7 +453,7 @@ public class ProductMediaService {
                log.info("Setting media ID {} as main and saving.", mediaId);
                repo.save(media);
 
-               // 【新增】設定主圖後，觸發重新排序，將其移到第一位
+               // 設定主圖後，觸發重新排序，將其移到第一位
                reorderMediaAfterMainSet(media.getProduct().getId(), mediaId);
 
                log.info("Successfully set media ID {} as main.", mediaId);
@@ -428,7 +468,7 @@ public class ProductMediaService {
           log.info("Finished setting media ID {} as main.", mediaId);
      }
 
-     /** 【新增】設定主圖後重新排序，將主圖移到第一位 */
+     /** 設定主圖後重新排序，將主圖移到第一位 */
      @Transactional
      private void reorderMediaAfterMainSet(Integer productId, Integer mainMediaId) {
           log.info("Reordering media for product ID {} after setting main media ID {}.", productId, mainMediaId);
