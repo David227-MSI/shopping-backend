@@ -35,9 +35,11 @@ public interface ProductService {
     /** 推薦商品（排除自己，取最新前5筆） */
     List<Product> getRecommendedProducts(Integer excludeProductId);
 
-
+List<Product> searchAllFields(String keyword);
     // ttpp
     public List<Product> findByIds(List<Integer> ids);
     public List<Product> findAllForSelector();
 
+    /** 依關鍵字搜尋（全欄位關聯搜尋：名稱、品牌、分類、屬性等） */
+List<ProductDTO> searchByKeywordFullText(String keyword);
 }
