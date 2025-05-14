@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.extern.slf4j.Slf4j;
 import tw.eeits.unhappy.eeit198product.dto.ProductDTO;
 import tw.eeits.unhappy.eeit198product.entity.Product;
 import tw.eeits.unhappy.eeit198product.service.ProductService;
 import tw.eeits.unhappy.ra._response.ApiRes;
 import tw.eeits.unhappy.ra._response.ResponseFactory;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -126,9 +128,12 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
 
     /** 推薦商品（排除自己，取最新前5筆） */
     @GetMapping("/{id}/recommended")
-    public List<Product> getRecommendedProducts(@PathVariable Integer id) {
-        return productService.getRecommendedProducts(id);
-    }
+    public ResponseEntity<ApiRes<List<ProductDTO>>> getRecommendedProducts(@PathVariable Integer id) {
+    log.info("Received GET request for recommended products excluding product ID: {}", id);
+    List<ProductDTO> recommendedDTOs = productService.getRecommendedProducts(id);
+    log.info("Returning {} recommended products DTOs excluding product ID: {}", recommendedDTOs.size(), id);
+    return ResponseEntity.ok(ResponseFactory.success(recommendedDTOs));
+}
 
 
 

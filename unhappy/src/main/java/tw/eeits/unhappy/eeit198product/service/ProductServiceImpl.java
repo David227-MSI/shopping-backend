@@ -281,11 +281,13 @@ public List<ProductDTO> searchByKeywordFullText(String keyword) {
     /** 推薦商品（排除自己，取最新前5筆） */
     @Override
     @Transactional(readOnly = true)
-    public List<Product> getRecommendedProducts(Integer excludeProductId) {
+    public List<ProductDTO> getRecommendedProducts(Integer excludeProductId) {
         log.info("Fetching recommended products excluding product ID: {}", excludeProductId);
         List<Product> recommended = productRepository.findTop5ByIdNotOrderByCreatedAtDesc(excludeProductId);
         log.info("Found {} recommended products.", recommended.size());
-        return recommended;
+        return recommended.stream()
+                        .map(this::convertToDTO)
+                        .collect(Collectors.toList());
     }
 
 
