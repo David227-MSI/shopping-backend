@@ -36,35 +36,39 @@ public class ContactMessageController {
     // 後台處理訊息
 
     @PutMapping("/api/admin/contact/{id}")
-    public ResponseEntity<?> handleContactMessage(
-            @PathVariable Integer id,
-            @RequestBody @Validated HandleContactMessageRequest requestBody,
-            HttpServletRequest request) {
+public ResponseEntity<?> handleContactMessage(
+        @PathVariable Integer id,
+        @RequestBody @Validated HandleContactMessageRequest requestBody,
+        HttpServletRequest request) {
 
-        String handlerUsername = (String) request.getAttribute("username");
+    String handlerUsername = (String) request.getAttribute("username");
 
-        ContactMessage updated = contactMessageService.handleContactMessage(
-                id,
-                handlerUsername,
-                requestBody.getIsHandled(),
-                requestBody.getNote());
+    // 傳入 note 和 replyMessage（後者不入庫）
+    ContactMessage updated = contactMessageService.handleContactMessage(
+            id,
+            handlerUsername,
+            requestBody.getIsHandled(),
+            requestBody.getNote(),
+            requestBody.getReplyMessage()
+    );
 
-        // 轉成DTO
-        ContactMessageResponse response = ContactMessageResponse.builder()
-                .id(updated.getId())
-                .name(updated.getName())
-                .email(updated.getEmail())
-                .subject(updated.getSubject())
-                .message(updated.getMessage())
-                .handled(updated.isHandled())
-                .handledByUsername(updated.getHandledBy() != null ? updated.getHandledBy().getUsername() : null)
-                .note(updated.getNote())
-                .createdAt(updated.getCreatedAt())
-                .handledAt(updated.getHandledAt())
-                .build();
+    // 轉成 DTO
+    ContactMessageResponse response = ContactMessageResponse.builder()
+            .id(updated.getId())
+            .name(updated.getName())
+            .email(updated.getEmail())
+            .subject(updated.getSubject())
+            .message(updated.getMessage())
+            .handled(updated.isHandled())
+            .handledByUsername(updated.getHandledBy() != null ? updated.getHandledBy().getUsername() : null)
+            .note(updated.getNote())
+            .createdAt(updated.getCreatedAt())
+            .handledAt(updated.getHandledAt())
+            .build();
 
-        return ResponseEntity.ok(response);
-    }
+    return ResponseEntity.ok(response);
+}
+
 
     // 取得未解決的訊息
     @GetMapping("/api/admin/contact/unhandled")
