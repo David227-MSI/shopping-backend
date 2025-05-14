@@ -40,8 +40,7 @@ public class Brand {
     @Column(name = "brand_type", nullable = false)
     private String type;
 
-    @NotBlank(message = "統一編號不可為空")
-    @Column(name = "tax_id", nullable = false, columnDefinition = "CHAR(8)")
+    @Column(name = "tax_id", columnDefinition = "CHAR(8)")
     private String taxId;
 
     @NotBlank(message = "地址不可為空")
