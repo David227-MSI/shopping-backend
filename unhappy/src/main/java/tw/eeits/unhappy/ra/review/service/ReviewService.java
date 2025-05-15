@@ -89,6 +89,7 @@ public class ReviewService {
         return new ReviewResp(
                 r.getId(),
                 r.getUserMember().getId(),
+                r.getUserMember().getUsername(),
                 r.getOrderItem().getId(),
                 r.getReviewText(),
                 r.getReviewImages() == null ? List.of() : r.getReviewImages(),
