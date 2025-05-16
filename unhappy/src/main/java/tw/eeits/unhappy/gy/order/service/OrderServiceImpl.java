@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO dto) {
         UserMember user = findUser(dto.getUserId());
-        List<CartItem> cartItems = getCartItems(user.getId());
+        List<CartItem> cartItems = fetchRealCartItemsFromDB(dto);
         BigDecimal totalAmount = calculateTotalAmount(cartItems);
         CouponUsageResult couponResult = applyCouponIfNeeded(dto, totalAmount);
         Order order = saveOrder(user, couponResult, totalAmount, dto);
@@ -202,6 +202,14 @@ public class OrderServiceImpl implements OrderService {
                 .recipientPhone(order.getRecipientPhone())
                 .recipientAddress(order.getRecipientAddress())
                 .build();
+    }
+
+    // 將 DTO 轉換為 CartItem
+    private List<CartItem> fetchRealCartItemsFromDB(OrderRequestDTO dto) {
+        return dto.getItems().stream().map(item ->
+                cartItemRepository.findByUserMember_IdAndProduct_IdAndCheckedOutFalse(dto.getUserId(), item.getProductId())
+                        .orElseThrow(() -> new RuntimeException("找不到購物車商品: userId=" + dto.getUserId() + ", productId=" + item.getProductId()))
+        ).toList();
     }
 
     // 內部使用 處理套用優惠券結果的小類別
