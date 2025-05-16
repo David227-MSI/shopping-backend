@@ -11,12 +11,7 @@ public class SpringBootConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         String[] allowedPaths = {
-            "/api/user/notifications/**",
-            "/api/user/coupons/**",
-            "/api/user/media/**",
-            "/api/user/reviews/**",
-            "/api/**"
-            // 允許路徑貼在這
+            "/**"
         };
 
         for (String path : allowedPaths) {

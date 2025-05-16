@@ -8,6 +8,10 @@ spring:
     ansi:
       enabled: always
 
+  # maven profile 變數
+  # profiles:
+  #   active: @xxx@
+
   # 資料庫連線資訊
   datasource:
     # SQL Server設定

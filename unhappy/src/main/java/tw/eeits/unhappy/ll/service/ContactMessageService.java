@@ -50,7 +50,7 @@ public class ContactMessageService {
             // ✅ 如果有輸入回應內容，就寄信給使用者
             if (replyMessage != null && !replyMessage.isBlank()) {
                 String name = message.getName() != null ? message.getName().trim() : "親愛的顧客";
-                String subject = String.format("【MyGaol買夠】親愛的 %s 您好，我們已處理您的聯絡訊息", name);
+                String subject = String.format("【MyGoal買夠】親愛的 %s 您好，我們已處理您的聯絡訊息", name);
             
                 emailService.sendMail(
                     message.getEmail(),

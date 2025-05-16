@@ -1,13 +1,18 @@
 package tw.eeits.unhappy.ttpp.email;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -25,15 +30,30 @@ import tw.eeits.unhappy.ttpp.userMember.repository.EmailTokenRepository;
 public class EmailService {
     private final JavaMailSender javaMailSender;
     private final EmailTokenRepository emailTokenRepository;
+    private final ResourceLoader resourceLoader;
     private final Validator validator;
 
     private static final int VERIFICATION_CODE_LENGTH = 6; // 驗證碼長度
 
+
+    public String loadResourceFile(String filePath) throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:" + filePath);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
+    }
+
+
+
+
+
+
+
     // 讀取信件模板
     // 參數: 模板路徑, 標題, 收件人名稱, 內文
-    public String loadEmailTemplate(String templatePath, String subject, String message) throws IOException {
+    public String loadEmailTemplate(String templatePath, String subject, String message) throws Exception {
         // load template
-        String template = new String(Files.readAllBytes(Paths.get(templatePath)));
+        String template = loadResourceFile(templatePath);
         
         // variables
         template = template.replace("${subject}", subject)
@@ -90,19 +110,19 @@ public class EmailService {
     }
 
     public String loadVerifyEmailTemplate(
-        String email, 
-        String username, 
+        String email,
+        String username,
         String verificationCode
-    ) throws IOException {
+    ) throws Exception {
 
         // load template
-        String templatePath = "src/main/resources/static/email_templates/verifyEmailToken.html";
-        String template = new String(Files.readAllBytes(Paths.get(templatePath)));
-     
+        String templatePath = "static/email_templates/verifyEmailToken.html";
+        String template = loadResourceFile(templatePath);
+
         // variables
         template = template.replace("${email}", email)
-                           .replace("${username}", username)
-                           .replace("${verificationCode}", verificationCode); // 添加驗證碼變數
+                        .replace("${username}", username)
+                        .replace("${verificationCode}", verificationCode); // 添加驗證碼變數
         return template;
     }
 

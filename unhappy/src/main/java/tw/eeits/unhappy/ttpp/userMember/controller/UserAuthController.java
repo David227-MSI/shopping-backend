@@ -17,12 +17,15 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import tw.eeits.unhappy.eee.domain.UserMember;
 import tw.eeits.unhappy.eee.service.UserMemberService;
+import tw.eeits.unhappy.ttpp._itf.NotificationService;
 import tw.eeits.unhappy.ttpp._response.ApiRes;
 import tw.eeits.unhappy.ttpp._response.ErrorCollector;
 import tw.eeits.unhappy.ttpp._response.ResponseFactory;
 import tw.eeits.unhappy.ttpp._response.ServiceResponse;
 import tw.eeits.unhappy.ttpp.email.EmailService;
 import tw.eeits.unhappy.ttpp.email.dto.VerifyEmailRequest;
+import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
+import tw.eeits.unhappy.ttpp.notification.model.NotificationTemplate;
 import tw.eeits.unhappy.ttpp.userMember.dto.ResendVerifyEmailRequest;
 import tw.eeits.unhappy.ttpp.userMember.dto.UserEmail;
 import tw.eeits.unhappy.ttpp.userMember.dto.UserLoginRequest;
@@ -41,6 +44,7 @@ public class UserAuthController {
     private final Validator validator;
     private final EmailService emailService;
     private final EmailTokenService tokenService;
+    private final NotificationService notificationService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiRes<Map<String, Object>>> login(
@@ -130,6 +134,13 @@ public class UserAuthController {
             }
 
             UserMember registeredUser = registerRes.getData();
+
+            NotificationTemplate welcomeTemplate = notificationService.findTemplateById(1);
+            NotificationPublished welcomeMsg = NotificationPublished.builder()
+                    .userMember(registeredUser)
+                    .notificationTemplate(welcomeTemplate)
+                    .build();
+            notificationService.publishNotification(welcomeMsg);
 
             // 自動登入並生成 JWT Token
             ServiceResponse<UserMember> authRes = userMemberService.authenticate(request.getEmail(), request.getPassword());

@@ -1,0 +1,4 @@
+spring:
+  # 正式資料庫連線資訊
+  datasource:
+    url: jdbc:sqlserver://192.168.36.195:2433;DatabaseName=ProjectDB;trustServerCertificate=true;

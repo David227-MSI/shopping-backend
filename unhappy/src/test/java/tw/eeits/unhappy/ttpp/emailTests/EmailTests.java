@@ -23,7 +23,7 @@ public class EmailTests {
 
     @Test
     public void testLoadEmailTemplate() {
-        String path = "src/main/resources/static/email_templates/template1.html";
+        String path = "/static/email_templates/template1.html";
         String subject = "Test loading email template";
         String text = "Hello, email template";
         try {
@@ -34,8 +34,8 @@ public class EmailTests {
     }
 
     @Test
-    public void testSendHtmlEmail() {
-        String path = "src/main/resources/static/email_templates/template1.html";
+    public void testSendHtmlEmail() throws Exception {
+        String path = "/static/email_templates/template1.html";
 
         String sendTo = "jfpoie13@gmail.com";
         String subject = "Test sending text mail";
