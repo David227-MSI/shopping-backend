@@ -17,33 +17,38 @@ import tw.eeits.unhappy.eeit198product.service.BrandService;
 import tw.eeits.unhappy.ll.model.Brand;
 
 @RestController
-@RequestMapping("/api/brands")
+@RequestMapping("/api")
 public class BrandController {
 
     @Autowired
     private BrandService brandService;
 
-    @GetMapping
+    @GetMapping("/user/brands")
     public List<Brand> getAllBrands() {
         return brandService.getAllBrands();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/brands")
+    public List<Brand> getAllBrandsAdmin() {
+        return brandService.getAllBrands();
+    }
+
+    @GetMapping("/user/brands/{id}")
     public Optional<Brand> getBrandById(@PathVariable Integer id) {
         return brandService.getBrandById(id);
     }
 
-    @PostMapping
+    @PostMapping("/admin/brands/{id}")
     public Brand createBrand(@RequestBody Brand brand) {
         return brandService.createBrand(brand);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/brands/{id}")
     public Brand updateBrand(@PathVariable Integer id, @RequestBody Brand brandDetails) {
         return brandService.updateBrand(id, brandDetails);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/brands/{id}")
     public boolean deleteBrand(@PathVariable Integer id) {
         return brandService.deleteBrand(id);
     }

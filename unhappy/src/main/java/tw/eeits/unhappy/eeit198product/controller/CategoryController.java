@@ -17,33 +17,38 @@ import tw.eeits.unhappy.eeit198product.entity.Category;
 import tw.eeits.unhappy.eeit198product.service.CategoryService;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api")
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping("/user/categories")
     public List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/categories")
+    public List<Category> getAllCategoriesAdmin() {
+        return categoryService.getAllCategories();
+    }
+
+    @GetMapping("/user/categories/{id}")
     public Optional<Category> getCategoryById(@PathVariable Integer id) {
         return categoryService.getCategoryById(id);
     }
 
-    @PostMapping
+    @PostMapping("/admin/categories")
     public Category createCategory(@RequestBody Category category) {
         return categoryService.createCategory(category);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/admin/categories/{id}")
     public Category updateCategory(@PathVariable Integer id, @RequestBody Category categoryDetails) {
         return categoryService.updateCategory(id, categoryDetails);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/categories/{id}")
     public boolean deleteCategory(@PathVariable Integer id) {
         return categoryService.deleteCategory(id);
     }

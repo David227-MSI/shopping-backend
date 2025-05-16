@@ -35,7 +35,7 @@ public class ReviewController {
     private final ObjectMapper objectMapper;
 
     /* ---------- 前台：商品評論列表 ---------- */
-    @GetMapping("/products/{pid}/reviews")
+    @GetMapping("/user/products/{pid}/reviews")
     public ApiRes<PageDto<ReviewResp>> listByProduct(
             @PathVariable Integer pid,
             @RequestParam(defaultValue = "LATEST") ReviewSortOption sort,
@@ -49,14 +49,14 @@ public class ReviewController {
     }
 
     /* ---------- 前台：商品評論平均分數 ---------- */
-    @GetMapping("/products/{pid}/avg")
+    @GetMapping("/user/products/{pid}/avg")
     public ApiRes<AverageScoresDto> getAverageScores(@PathVariable Integer pid) {
         AverageScoresDto dto = reviewService.getAverageScoresByProduct(pid);
         return ResponseFactory.success(dto);
     }
 
     /* ---------- 前台：檢查評論是否存在 ---------- */
-    @GetMapping("/reviews/{orderItemId}/exists")
+    @GetMapping("/user/reviews/{orderItemId}/exists")
     public ApiRes<ExistsResponse> checkReviewExists(
             @PathVariable Integer orderItemId,
             @RequestParam Integer userId) {
@@ -66,7 +66,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：獲取評論詳情 ---------- */
-    @GetMapping("/reviews/{id}")
+    @GetMapping("/user/reviews/{id}")
     public ApiRes<ReviewResp> getReview(@PathVariable Integer id) {
         log.info("獲取評論詳情: reviewId={}", id);
         try {
@@ -79,7 +79,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：新增評論 ---------- */
-     @PostMapping(value = "/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 路徑改為 /reviews
+     @PostMapping(value = "/user/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // 路徑改為 /reviews
     public ResponseEntity<ApiRes<Void>> addReview(
             // 從請求參數中獲取 orderItemId
             @RequestParam("orderItemId") Integer orderItemId,
@@ -131,7 +131,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：更新評論文字和標籤 ---------- */
-    @PutMapping("/reviews/{id}")
+    @PutMapping("/user/reviews/{id}")
     public ResponseEntity<ApiRes<Void>> updateReview(
             @PathVariable Integer id,
             @RequestParam("userId") Integer userId,
@@ -157,7 +157,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：更新評論文字（舊端點，保留相容性） ---------- */
-    @PutMapping("/reviews/{id}/text")
+    @PutMapping("/user/reviews/{id}/text")
     public ResponseEntity<ApiRes<Void>> updateReviewText(
             @PathVariable Integer id,
             @RequestBody UpdateReviewTextReq req) {
@@ -172,7 +172,7 @@ public class ReviewController {
     }
 
     /* ---------- 前台：按/收回讚 ---------- */
-    @PostMapping("/reviews/{id}/like")
+    @PostMapping("/user/reviews/{id}/like")
     public ResponseEntity<ApiRes<Integer>> toggleLike(
             @PathVariable Integer id,
             @RequestParam Integer userId) {
@@ -186,7 +186,7 @@ public class ReviewController {
     }
 
     /* ---------- 後台：審核／隱藏評論 ---------- */
-    @PutMapping("/reviews/{id}/visible")
+    @PutMapping("/admin/reviews/{id}/visible")
     public ResponseEntity<ApiRes<Void>> hideReview(@PathVariable Integer id) {
         try {
             reviewService.hideReview(id);

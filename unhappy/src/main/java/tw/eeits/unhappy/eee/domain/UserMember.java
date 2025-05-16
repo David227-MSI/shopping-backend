@@ -2,20 +2,38 @@ package tw.eeits.unhappy.eee.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "user_member")
 public class UserMember {
+
+
+    // mapped: fk_notification_published_userMember
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationPublished> notificationPublished = new ArrayList<>();
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

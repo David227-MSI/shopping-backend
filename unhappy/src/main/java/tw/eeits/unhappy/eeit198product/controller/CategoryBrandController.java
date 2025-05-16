@@ -13,7 +13,7 @@ import tw.eeits.unhappy.eeit198product.service.CategoryService;
 import tw.eeits.unhappy.ll.model.Brand;
 
 @RestController
-@RequestMapping("/api/category-brands")
+@RequestMapping("/api")
 public class CategoryBrandController {
 
     @Autowired
@@ -22,8 +22,14 @@ public class CategoryBrandController {
     @Autowired
     private CategoryBrandService categoryBrandService;
 
-    @GetMapping("/brands")
+    @GetMapping("/user/category-brands/brands")
     public List<Brand> getBrandsByCategoryId(@RequestParam Integer categoryId) {
+        List<Integer> ids = categoryService.getSubCategoryIdsIncludingSelf(categoryId);
+        return categoryBrandService.findBrandsByCategoryIds(ids);
+    }
+
+    @GetMapping("/admin/category-brands/brands")
+    public List<Brand> getBrandsByCategoryIdAdmin(@RequestParam Integer categoryId) {
         List<Integer> ids = categoryService.getSubCategoryIdsIncludingSelf(categoryId);
         return categoryBrandService.findBrandsByCategoryIds(ids);
     }

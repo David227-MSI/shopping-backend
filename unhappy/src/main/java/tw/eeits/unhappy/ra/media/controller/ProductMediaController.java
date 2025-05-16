@@ -22,7 +22,7 @@ import java.util.stream.Collectors; // 引入 Collectors
 
 @Slf4j // 添加 Slf4j 日誌註解
 @RestController
-@RequestMapping("/api/media")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ProductMediaController {
 
@@ -31,7 +31,7 @@ public class ProductMediaController {
 
      /* ---------- 1. 取某商品所有媒體 ---------- */
      @Transactional(readOnly = true)
-     @GetMapping("/product/{pid}")
+     @GetMapping("/user/media/{pid}")
      public ResponseEntity<ApiRes<List<ProductMediaDto>>> list(@PathVariable Integer pid) {
           log.info("Received GET request for media list for product ID: {}", pid);
           List<ProductMedia> mediaList = mediaRepo.findByProductId(pid);
@@ -44,8 +44,22 @@ public class ProductMediaController {
           return ResponseEntity.ok(ResponseFactory.success(list));
      }
 
+     @Transactional(readOnly = true)
+     @GetMapping("/admin/media/{pid}")
+     public ResponseEntity<ApiRes<List<ProductMediaDto>>> listAdmin(@PathVariable Integer pid) {
+          log.info("Received GET request for media list for product ID: {}", pid);
+          List<ProductMedia> mediaList = mediaRepo.findByProductId(pid);
+          // 將媒體 Entity 轉換為 DTO，並按 mediaOrder 排序
+          List<ProductMediaDto> list = mediaList.stream()
+                    .sorted(Comparator.comparing(ProductMedia::getMediaOrder))
+                    .map(ProductMediaDto::from)
+                    .collect(Collectors.toList());
+          log.info("Returning {} media items for product ID: {}", list.size(), pid);
+          return ResponseEntity.ok(ResponseFactory.success(list));
+     }
+
      /* ---------- 【新增】2.1 批量上傳媒體 ---------- */
-     @PostMapping(value = "/product/{pid}/upload-batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+     @PostMapping(value = "/admin/media/{pid}/upload-batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
      public ResponseEntity<ApiRes<List<ProductMediaDto>>> uploadBatch(
                @PathVariable Integer pid,
                @RequestPart("files") List<MultipartFile> files) { // 接收多個檔案
@@ -76,7 +90,7 @@ public class ProductMediaController {
      }
 
      /* ---------- 3. 拖曳後重新排序 ---------- */
-     @PutMapping("/product/{pid}/reorder")
+     @PutMapping("/admin/media/{pid}/reorder")
      public ResponseEntity<ApiRes<Void>> reorder(
                @PathVariable Integer pid,
                @RequestBody Map<Integer, Integer> newOrders) {
@@ -99,7 +113,7 @@ public class ProductMediaController {
      }
 
      /* ---------- 4. 刪除媒體 ---------- */
-     @DeleteMapping("/{id}")
+     @DeleteMapping("/admin/media/{id}")
      public ResponseEntity<ApiRes<Void>> delete(@PathVariable Integer id) {
           log.info("Received DELETE request for media ID: {}", id);
           try {
@@ -120,7 +134,7 @@ public class ProductMediaController {
 
      /* ---------- 5. 取主圖 (前台商品卡片可用) ---------- */
      @Transactional(readOnly = true)
-     @GetMapping("/product/{pid}/main")
+     @GetMapping("/user/media/{pid}/main")
      public ResponseEntity<ApiRes<ProductMediaDto>> getMain(@PathVariable Integer pid) {
           log.info("Received GET request for main media for product ID: {}", pid);
           ProductMedia main = mediaRepo.findFirstByProductIdAndIsMainTrue(pid).orElse(null);
@@ -131,8 +145,28 @@ public class ProductMediaController {
      }
 
      /* ---------- 6. 設定主圖 ---------- */
-     @PutMapping("/{id}/main")
+     @PutMapping("/admin/media/{id}/main")
      public ResponseEntity<ApiRes<Void>> setMain(@PathVariable Integer id) {
+          log.info("Received PUT request to set media ID {} as main.", id);
+          try {
+               mediaSvc.setMain(id);
+               log.info("Media ID {} set as main successfully.", id);
+               return ResponseEntity.ok(ResponseFactory.success((Void) null));
+          } catch (IllegalArgumentException e) {
+               log.error("Error during setting media as main for ID {}: {}", id, e.getMessage());
+               return ResponseEntity.badRequest().body(ResponseFactory.fail(e.getMessage()));
+          } catch (RuntimeException e) {
+               log.error("Runtime error during setting media as main for ID {}: {}", id, e.getMessage(), e);
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("設定主圖失敗"));
+          } catch (Exception e) {
+               log.error("Unexpected error during setting media as main for ID {}: {}", id, e.getMessage(), e);
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("設定主圖時發生未知錯誤"));
+          }
+     }
+
+          /* ---------- 6. 設定主圖 ---------- */
+     @PutMapping("/user/media/{id}/main")
+     public ResponseEntity<ApiRes<Void>> setUserMain(@PathVariable Integer id) {
           log.info("Received PUT request to set media ID {} as main.", id);
           try {
                mediaSvc.setMain(id);

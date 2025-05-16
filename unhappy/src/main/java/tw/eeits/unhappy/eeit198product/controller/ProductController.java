@@ -16,20 +16,20 @@ import tw.eeits.unhappy.ra._response.ResponseFactory;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
       // 🔍 全欄位模糊搜尋（名稱、分類、品牌、屬性值）
-    @GetMapping("/search")
+    @GetMapping("/user/products/search")
     public List<Product> searchAllFields(@RequestParam("keyword") String keyword) {
         return productService.searchAllFields(keyword);
     }
 
     /** 取得所有商品或依條件搜尋商品（返回 DTO 列表） */
-    @GetMapping
+    @GetMapping("/user/products")
     // 【修正】返回類型改為 ResponseEntity<ApiRes<List<ProductDTO>>>
     public ResponseEntity<ApiRes<List<ProductDTO>>> getProducts(
             @RequestParam(required = false) Integer category,
@@ -40,14 +40,27 @@ public class ProductController {
         // 將 DTO 列表包裝在 ApiRes 中並返回
         return ResponseEntity.ok(ResponseFactory.success(productDTOs));
     }
-/** 全欄位關鍵字搜尋（名稱、品牌、分類、父分類、屬性） */
-@GetMapping("/fullsearch")
-public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam String keyword) {
-    List<ProductDTO> results = productService.searchByKeywordFullText(keyword);
-    return ResponseEntity.ok(ResponseFactory.success(results));
-}
+
+    @GetMapping("/admin/products")
+    // 【修正】返回類型改為 ResponseEntity<ApiRes<List<ProductDTO>>>
+    public ResponseEntity<ApiRes<List<ProductDTO>>> getProductsAdmin(
+            @RequestParam(required = false) Integer category,
+            @RequestParam(required = false) Integer brand,
+            @RequestParam(required = false) String search) {
+        // 呼叫 service 獲取 ProductDTO 列表
+        List<ProductDTO> productDTOs = productService.searchProducts(category, brand, search);
+        // 將 DTO 列表包裝在 ApiRes 中並返回
+        return ResponseEntity.ok(ResponseFactory.success(productDTOs));
+    }
+
+    /** 全欄位關鍵字搜尋（名稱、品牌、分類、父分類、屬性） */
+    @GetMapping("/user/products/fullsearch")
+    public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam String keyword) {
+        List<ProductDTO> results = productService.searchByKeywordFullText(keyword);
+        return ResponseEntity.ok(ResponseFactory.success(results));
+    }
     /** 取得單一商品詳細資訊（包含圖片，返回 DTO） */
-    @GetMapping("/{id}")
+    @GetMapping("/user/products/{id}")
     public ResponseEntity<ApiRes<ProductDTO>> getProductById(@PathVariable Integer id) {
         System.out.println("Received GET request for product ID: " + id); // 添加日誌
         try {
@@ -75,8 +88,36 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
         }
     }
 
+    @GetMapping("/admin/products/{id}")
+    public ResponseEntity<ApiRes<ProductDTO>> getProductByIdAdmin(@PathVariable Integer id) {
+        System.out.println("Received GET request for product ID: " + id); // 添加日誌
+        try {
+            // 呼叫 service 獲取包含詳細資訊和圖片的 ProductDTO
+            ProductDTO productDTO = productService.getProductDetailsWithImages(id);
+            // service 已經處理找不到商品拋出異常的情況，這裡只需要處理 service 返回的 DTO
+            System.out.println("Successfully retrieved product ID: " + id); // 添加日誌
+            return ResponseEntity.ok(ResponseFactory.success(productDTO));
+        } catch (IllegalArgumentException e) {
+            // 捕獲 service 拋出的 IllegalArgumentException (例如商品不存在)
+            System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            // 返回 404 Not Found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.fail(e.getMessage()));
+        } catch (RuntimeException e) {
+            System.err.println("Error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            e.printStackTrace(); // 打印堆棧跟踪
+            // 返回 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseFactory.fail("獲取商品詳細資訊失敗"));
+        } catch (Exception e) { // 捕獲其他可能的異常
+            System.err.println("Unexpected error fetching product ID " + id + ": " + e.getMessage()); // 添加日誌
+            e.printStackTrace(); // 打印堆棧跟踪
+            // 返回 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseFactory.fail("獲取商品詳細資訊時發生未知錯誤"));
+        }
+    }
+
     /** 建立新商品 */
-    @PostMapping
+    @PostMapping("/admin/products")
     public ResponseEntity<ApiRes<Product>> createProduct(@RequestBody ProductDTO productDto) {
         try {
             Product createdProduct = productService.createProduct(productDto);
@@ -93,7 +134,7 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
     }
 
     /** 更新商品 */
-    @PutMapping("/{id}")
+    @PutMapping("/admin/products/{id}")
     public ResponseEntity<ApiRes<Product>> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDto) {
         try {
             Product updatedProduct = productService.updateProduct(id, productDto);
@@ -110,7 +151,7 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
     }
 
     /** 刪除商品 */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/products/{id}")
     public ResponseEntity<ApiRes<Void>> deleteProduct(@PathVariable Integer id) {
         try {
             productService.deleteProduct(id);
@@ -127,7 +168,7 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
     }
 
     /** 推薦商品（排除自己，取最新前5筆） */
-    @GetMapping("/{id}/recommended")
+    @GetMapping("/user/products/{id}/recommended")
     public ResponseEntity<ApiRes<List<ProductDTO>>> getRecommendedProducts(@PathVariable Integer id) {
     log.info("Received GET request for recommended products excluding product ID: {}", id);
     List<ProductDTO> recommendedDTOs = productService.getRecommendedProducts(id);
@@ -139,7 +180,7 @@ public ResponseEntity<ApiRes<List<ProductDTO>>> fullTextSearch(@RequestParam Str
 
 
     // ttpp
-    @GetMapping("/productSelector")
+    @GetMapping("/admin/products/productSelector")
     public ResponseEntity<ApiRes<List<Product>>> productSelector() {
          List<Product> foundProducts = productService.findAllForSelector();
         return ResponseEntity.ok(ResponseFactory.success(foundProducts));

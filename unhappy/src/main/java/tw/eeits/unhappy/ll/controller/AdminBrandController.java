@@ -26,7 +26,7 @@ import tw.eeits.unhappy.ll.model.Brand;
 import tw.eeits.unhappy.ll.service.BrandService;
 
 @RestController
-@RequestMapping("/api/admin/brands")
+@RequestMapping("/api/admin/adminbrands")
 @Validated
 @RequiredArgsConstructor
 public class AdminBrandController {

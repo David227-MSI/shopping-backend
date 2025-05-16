@@ -2,6 +2,7 @@ package tw.eeits.unhappy.ttpp.notification.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class NotificationPublished {
     private NotificationTemplate notificationTemplate;
 
     // fk_notification_published_user
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @NotNull(message = "userMember 不可為空值")
     @JoinColumn(name = "user_id", nullable = false)
     private UserMember userMember;

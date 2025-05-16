@@ -37,12 +37,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // 允許 MANAGER 和 STAFF 都能操作的API (例如: 品牌管理、客服處理)
     private static final List<String> MANAGER_AND_STAFF_API = List.of(
-            "/api/admin/brands",
+            "/api/admin/adminbrands",
             "/api/admin/contact",
             "/api/admin/sales-report",
             "/api/admin/coupons",
             "/api/admin/notifications",
-            "/api/admin/events");
+            "/api/admin/events",
+            "/api/admin/products",
+            "/api/admin/media",
+            "/api/admin/brands",
+            "/api/admin/categories",
+            "/api/admin/category-brands");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
