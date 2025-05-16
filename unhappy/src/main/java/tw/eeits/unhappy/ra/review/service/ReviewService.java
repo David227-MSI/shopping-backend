@@ -170,10 +170,15 @@ public class ReviewService {
     }
 
     @Transactional
-    public void updateReview(Integer reviewId, String reviewText, List<String> tags) {
+    public void updateReview(Integer reviewId, String reviewText, List<String> tags, Integer qualityScore, Integer descriptionScore, Integer shippingScore) {
         ProductReview review = reviewRepo.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
         review.setReviewText(reviewText);
+        review.setScoreQuality(qualityScore);
+        review.setScoreDescription(descriptionScore);
+        review.setScoreDelivery(shippingScore);
+        log.info("更新評論分數: reviewId={}, quality={}, description={}, delivery={}",
+                                    reviewId, qualityScore, descriptionScore, shippingScore);
         if (tags != null) {
             if (tags.size() > 3) {
                 log.warn("標籤數量超過限制: {}", tags.size());

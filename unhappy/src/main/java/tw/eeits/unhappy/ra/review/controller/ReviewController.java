@@ -136,14 +136,15 @@ public class ReviewController {
             @PathVariable Integer id,
             @RequestParam("userId") Integer userId,
             @RequestBody UpdateReviewReq req) {
-        log.info("更新評論: reviewId={}, userId={}, tags={}", id, userId, req.tags());
+        log.info("更新評論: reviewId={}, userId={}, tags={}, scores={}", id, userId, req.tags(), req);
         try {
             ReviewResp review = reviewService.findById(id);
             if (!review.userId().equals(userId)) {
                 log.warn("無權更新評論: reviewId={}, userId={}", id, userId);
                 return ResponseEntity.status(403).body(ResponseFactory.fail("無權更新此評論"));
             }
-            reviewService.updateReview(id, req.reviewText(), req.tags());
+            reviewService.updateReview(id, req.reviewText(), req.tags(),
+                                        req.qualityScore(), req.descriptionScore(), req.shippingScore());
             log.info("評論更新成功: reviewId={}", id);
             return ResponseEntity.ok(ResponseFactory.success((Void) null));
         } catch (IllegalArgumentException e) {
@@ -199,5 +200,11 @@ public class ReviewController {
     /* ----- 內部 DTO ----- */
     private record ExistsResponse(boolean exists, Integer reviewId) {}
     private record UpdateReviewTextReq(String reviewText) {}
-    private record UpdateReviewReq(String reviewText, List<String> tags) {}
+    private record UpdateReviewReq(
+    String reviewText,
+    List<String> tags,
+    Integer qualityScore,
+    Integer descriptionScore,
+    Integer shippingScore
+) {}
 }
