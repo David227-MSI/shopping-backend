@@ -1,0 +1,85 @@
+spring:
+  # 專案名
+  application:
+    name: unhappy
+
+  # 編碼格式
+  output:
+    ansi:
+      enabled: always
+
+  # maven profile 變數
+  # profiles:
+  #   active: @xxx@
+
+  # 資料庫連線資訊
+  datasource:
+    # SQL Server設定
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=ProjectDB;trustServerCertificate=true;
+    username: sa
+    password: P@ssw0rd
+
+    # 連接池設定
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  # JPA設定
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: validate
+
+  # SMTP郵件管理
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jfpoie13@gmail.com
+    password: tsoorupzgdgwesse
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # 媒體上傳檔案大小限制
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+# user jwt
+jwt:
+  token:
+    expire: 3600000
+  # admin jwt
+  secret: CyeBp5lDC8M2Gr9C+LpL0xkgoWDOhGkDjJeaV6Tf7eA=
+  # front jwt service
+  front:
+    secret: CyeBp5lDC8M2Gr9C+LpL0xkgoWDOhGkDjJeaV6Tf7eA=
+    expiration: 86400000 # 例如 1 天的毫秒數
+
+# user email
+email:
+  template:
+    path: classpath:static/email_templates/forget_password_template.html
+
+# Azure 儲存空間連線資訊
+azure:
+  storage:
+    connection-string: DefaultEndpointsProtocol=https;AccountName=unhappyproductmedia;AccountKey=SmVnSwDVTv4ihzV2PdozNsjg6WzTTZT4fawbW1Mx2hou1bByMZCqOGsOPUe73HyUxZ74es+qVrsc+ASt58xp/g==;EndpointSuffix=core.windows.net
+    container: product-media
+
+# ecpay 對外網域 & 成功付款回傳頁面
+ecpay:
+  return-url: https://xxx.ngrok-free.app/api/ecpay/payment-callback
+  order-result-url: http://localhost:5173/order-result.html
+
+
+logging:
+  level:
+    tw.eeits.unhappy: INFO
