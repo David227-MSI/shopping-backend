@@ -19,18 +19,18 @@ public class InsertMediaTests {
     public void insertCouponMedia() {
 
         List<String> paths = new ArrayList<>();
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_1_all.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_1_all.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_1_all.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_1_all.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_2_product.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_2_product.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_2_product.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_2_product.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_3_brand.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_3_brand.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_3_brand.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/coupon_3_brand.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_1_all.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_1_all.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_1_all.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_1_all.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_2_product.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_2_product.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_2_product.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_2_product.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_3_brand.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_3_brand.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_3_brand.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/coupon_3_brand.png");
 
         List<Integer> ids = new ArrayList<>();
         for(int i = 1; i < 13; i++) {ids.add(i);};
@@ -46,15 +46,15 @@ public class InsertMediaTests {
     public void insertEventMedia() {
 
         List<String> paths = new ArrayList<>();
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_1_spring_shopping.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_2_may_food.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_3_mothers_day.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_4_midsummer_concert.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_5_autumn_travel.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_6_new_year.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_7_1111.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_8_chrismas.png");
-        paths.add("c:/Users/user/Desktop/sql_tables_20250514/images/event_9_dragon_boat.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_1_spring_shopping.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_2_may_food.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_3_mothers_day.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_4_midsummer_concert.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_5_autumn_travel.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_6_new_year.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_7_1111.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_8_chrismas.png");
+        paths.add("c:/Users/user/Desktop/sql_tables_20250517/images/event_9_dragon_boat.png");
 
 
         List<Integer> ids = new ArrayList<>();

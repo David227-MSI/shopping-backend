@@ -6,7 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tw.eeits.unhappy.gy.domain.CartItem;
+import tw.eeits.unhappy.gy.domain.Order;
+import tw.eeits.unhappy.ra.review.model.ProductReview;
+import tw.eeits.unhappy.ttpp.coupon.model.CouponPublished;
 import tw.eeits.unhappy.ttpp.notification.model.NotificationPublished;
+import tw.eeits.unhappy.ttpp.notification.model.SubscribeList;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,12 +32,41 @@ import java.util.List;
 public class UserMember {
 
 
-    // mapped: fk_notification_published_userMember
+    // mapped: fk_notification_published_user
     @Builder.Default
     @JsonIgnore
     @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationPublished> notificationPublished = new ArrayList<>();
 
+    // mapped: fk_subscribe_list_user
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubscribeList> subscribeList = new ArrayList<>();
+
+    // mapped: fk_coupon_published_user
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CouponPublished> couponPublished = new ArrayList<>();
+
+    // mapped: fk_review_user
+    @Builder.Default
+    @JsonIgnore
+    @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductReview> productReviews = new ArrayList<>();
+
+    // // mapped: FK_cart_user
+    // @Builder.Default
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<CartItem> cartItems = new ArrayList<>();
+
+    // // mapped: FK_order_user
+    // @Builder.Default
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "userMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<Order> orders = new ArrayList<>();
 
 
     @Id

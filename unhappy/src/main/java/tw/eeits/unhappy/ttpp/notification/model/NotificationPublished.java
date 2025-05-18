@@ -31,11 +31,11 @@ public class NotificationPublished {
     // fk_notification_published_notification_template
     @ManyToOne
     @NotNull(message = "notificationTemplate 不可為空值")
-    @JoinColumn(name = "notification_id", nullable = false)
+    @JoinColumn(name = "notification_id")
     private NotificationTemplate notificationTemplate;
 
     // fk_notification_published_user
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @NotNull(message = "userMember 不可為空值")
     @JoinColumn(name = "user_id", nullable = false)
     private UserMember userMember;

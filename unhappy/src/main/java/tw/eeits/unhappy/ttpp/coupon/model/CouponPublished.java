@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -41,7 +42,7 @@ public class CouponPublished {
 
 
     // fk_coupon_published_user
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @NotNull(message = "userMember 不可為空值")
     @JoinColumn(name = "user_id", nullable = false)
     private UserMember userMember;
