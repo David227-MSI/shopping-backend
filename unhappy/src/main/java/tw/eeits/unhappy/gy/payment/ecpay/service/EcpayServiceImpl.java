@@ -33,8 +33,8 @@ public class EcpayServiceImpl implements EcpayService {
     @Value("${ecpay.return-url}")
     private String returnUrl;
 
-    @Value("${ecpay.order-result-url}")
-    private String orderResultUrl;
+    @Value("${ecpay.client-back-url}")
+    private String clientBackUrl;
 
 
 //    綠界參數 ( 下方可收簡訊 / 上方為無法接收簡訊 )
@@ -67,7 +67,7 @@ public class EcpayServiceImpl implements EcpayService {
         params.put("TradeDesc", URLEncoder.encode("Unhappy 購物網站付款", StandardCharsets.UTF_8));
         params.put("ItemName", "Unhappy 訂單");
         params.put("ReturnURL", returnUrl);
-        params.put("OrderResultURL", orderResultUrl + "?orderId=" + order.getId());
+        params.put("ClientBackURL", clientBackUrl + "/order/complete/" + order.getId());
         params.put("ChoosePayment", "Credit");
         params.put("NeedExtraPaidInfo", "N");
 
