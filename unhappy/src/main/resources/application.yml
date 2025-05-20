@@ -77,8 +77,7 @@ azure:
 # ecpay 對外網域 & 成功付款回傳頁面
 ecpay:
   return-url: https://xxx.ngrok-free.app/api/ecpay/payment-callback
-  order-result-url: http://localhost:5173/order-result.html
-
+  client-back-url: http://192.168.66.71:5173
 
 logging:
   level:
